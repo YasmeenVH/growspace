@@ -21,3 +21,5 @@ At each growing step the plant will
 - branch 
 
 ### Rewards 
+
+## Installation
