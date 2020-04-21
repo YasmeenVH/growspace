@@ -1,6 +1,7 @@
 import gym
 import turtle
 import numpy
+import matplotlib as plt
 from gym import spaces
 from turtle import *
 import tkinter as tk
@@ -163,7 +164,7 @@ class GrowSpaceEnv(gym.Env):
         self.screen.update()
 
 
-if __name__=='__main___':
+if __name__=='__main__':
     b = turtle.Screen()
     b.title('Paddle')
     b.setup(width=84, height=84)  # start position is at center of window
