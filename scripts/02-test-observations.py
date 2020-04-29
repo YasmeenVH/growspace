@@ -11,7 +11,7 @@ print(obs)
 
 random_action = env.action_space.sample()
 
-obs, rew, done, misc = env.step(random_action)b
+obs, rew, done, misc = env.step(random_action)
 
 print(obs.shape) # assuming what you return is a np.array()
 print(obs.min(), obs.max()) # to see if it's normalized
