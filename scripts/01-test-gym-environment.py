@@ -2,4 +2,4 @@
 
 import gym
 import growspace                            #load custom env
-env = gym.make("GrowSpaceEnv-States-v0")
+env = gym.make("GrowSpaceEnv-Images-v0")
