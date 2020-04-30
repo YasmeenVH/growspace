@@ -38,8 +38,6 @@ class branch():
         self.screen.update()
 
 def draw(x, y, mindist, maxdist, branches):
-
-
     for i in range(len(x) - 1, 0, -1):
         closest_branch = 0
         dist = 109
@@ -72,8 +70,8 @@ def draw(x, y, mindist, maxdist, branches):
 
 
 if __name__=='__main__':
-    x = np.random.randint(-41, 41, 500)
-    y = np.random.randint(-27, 41, 500)
+    x = np.random.uniform(-41, 41, 500)
+    y = np.random.uniform(-27, 41, 500)
 
     branches = [branch(0, 0, -42, -27)]
     #branch = branch()
