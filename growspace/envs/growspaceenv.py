@@ -22,7 +22,7 @@ class GrowSpaceEnv(gym.Env):
         self.y = 0
         self.x2 = self.x
         self.y2 = 20
-        #self.branch = self.branch()  # may need to add coords
+        self.branch = branch(x=0,x2 = 0,y=0, y2=0)  # may need to add coords
         #self.branches = [branch(self.x, self.x2, self.y, self.y2)]  # initialize first upward branch
 
         self.branches = [branch(x =self.x, x2 = self.x2, y = self.y, y2 = self.y2)]
