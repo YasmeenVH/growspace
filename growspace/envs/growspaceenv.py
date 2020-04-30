@@ -1,81 +1,76 @@
+import cv2
 import gym
-from gym.utils import seeding
 import numpy as np
-from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
-from matplotlib.figure import Figure
-from growspace.plants.tree import branch
+from numpy.linalg import norm
+
+from growspace.plants.tree import Branch
 from scipy.spatial import distance
-import matplotlib.pyplot as plt
+
+FIRST_BRANCH_HEIGHT = .2
+
+
+def to_int(v):
+    return int(round(v))
+
+
+ir = to_int  # shortcut for function call
+
 
 class GrowSpaceEnv(gym.Env):
 
-    def __init__(self, observe_images, width = 84, height = 84, light_dif = 600):
-        self.width = width         # do we keep?
-        self.height = height       # do we keep?
+    def __init__(self, width=84, height=84, light_dif=600):
+        self.width = width  # do we keep?
+        self.height = height  # do we keep?
         self.seed()
-        self.images = observe_images
         self.light_dif = light_dif
-        self.action_space = gym.spaces.Discrete(2)    # L, R of light paddle
-        self.observation_space = gym.spaces.Box(0, 255, shape=(84, 84, 3), dtype=np.uint8)
+        self.action_space = gym.spaces.Discrete(3)  # L, R, keep of light paddle
+        self.observation_space = gym.spaces.Box(
+            0, 255, shape=(84, 84, 3), dtype=np.uint8)
 
-        self.x = np.random.randint(0,100)
-        self.y = 0
-        self.x2 = self.x
-        self.y2 = 20
-        self.branch = branch(x=0,x2 = 0,y=0, y2=0)  # may need to add coords
-        #self.branches = [branch(self.x, self.x2, self.y, self.y2)]  # initialize first upward branch
-
-        self.branches = [branch(x =self.x, x2 = self.x2, y = self.y, y2 = self.y2)]
-        self.x_target = np.random.randint(0,100)   # upper quadrant
-        self.y_target = np.random.randint(80,100)
-        self.light_width = 20
-        self.x1_light = 40
-        self.x2_light = self.x1_light + self.light_width
-
-        self.x_scatter = np.random.randint(0,100, self.light_dif)
-        self.y_scatter = np.random.randint(0,100, self.light_dif)
-
+        # note: I moved the code for the first branch into the reset function,
+        # because when you start an environment for the first time,
+        # you're supposed to call "reset()" first before doing anything else
 
     def seed(self, seed=None):
         return [np.random.seed(seed)]
 
     def light_scatter(self):
         # select scattering with respect to position of the light
-        x = []
-        y = []
-        for i in range(len(self.x_scatter)):
-            if self.x1_light <= self.x_scatter[i] <= self.x2_light:
-                x.append(self.x_scatter[i])
-                y.append(self.y_scatter[i])
 
-        return x, y
+        # select the instances where the conditions is true (where the x coordinate is within the light)
+        filter = np.logical_and(self.x_scatter >= self.x1_light,
+                                self.x_scatter <= self.x2_light)
+
+        # apply filter to both y and x coordinates through the power of Numpy magic :D
+        self.y_scatter = self.y_scatter[filter]
+        self.x_scatter = self.x_scatter[filter]
 
     def light_move_R(self):
-        if self.x1_light >= 80:        # limit of coordinates
-            self.x1_light = 80         # stay put
+        if self.x1_light >= .8:  # limit of coordinates
+            self.x1_light = .8  # stay put
 
         else:
-            self.x1_light += 10        # move by 10
+            self.x1_light += .1  # move by .1 right
 
     def light_move_L(self):
-        if self.x1_light <= 10:        # limit of coordinates
+        if self.x1_light <= .1:  # limit of coordinates
             self.x1_light = 0
         else:
-            self.x1_light -= 10        # move by 10
+            self.x1_light -= .1  # move by .1 left
 
     def tree_grow(self, x, y, mindist, maxdist):
-
         # available scatter due to light position (look through xcoordinates
         for i in range(len(x) - 1, 0, -1):
-            closest_branch = 0
-            dist =  100
+            closest_branch = None
+            dist = 1
 
             # loop through branches and see which coordinate within available scatter is the closest
-            for j in range(len(self.branches)):
-                temp_dist = np.sqrt((x[i] - self.branches[j].x2) ** 2 + (y[i] - self.branches[j].y2) ** 2)  # could put in euclidean distance
+            for branch_idx, branch in enumerate(self.branches):
+                temp_dist = norm([x[i] - branch.x2,
+                                  y[i] - branch.y2])  #euclidean distance
                 if temp_dist < dist:
                     dist = temp_dist
-                    closest_branch = j
+                    closest_branch = branch_idx
 
             # removes scatter points if reached
             if dist < mindist:
@@ -85,14 +80,20 @@ class GrowSpaceEnv(gym.Env):
             # when distance is greater than max distance, branching occurs to find other points.
             elif dist < maxdist:
                 self.branches[closest_branch].grow_count += 1
-                self.branches[closest_branch].grow_x += (x[i] - self.branches[closest_branch].x2) / dist
-                self.branches[closest_branch].grow_y += (y[i] - self.branches[closest_branch].y2) / dist
+                self.branches[closest_branch].grow_x += (
+                    x[i] - self.branches[closest_branch].x2) / dist
+                self.branches[closest_branch].grow_y += (
+                    y[i] - self.branches[closest_branch].y2) / dist
 
         # generation of new branches (forking) in previous step will generate a new branch with grow count
         for i in range(len(self.branches)):
             if self.branches[i].grow_count > 0:
-                newBranch = self.branch(self.branches[i].x2, self.branches[i].x2 + self.branches[i].grow_x / self.branches[i].grow_count,
-                                   self.branches[i].y2, self.branches[i].y2 + self.branches[i].grow_y / self.branches[i].grow_count)
+                newBranch = Branch(
+                    self.branches[i].x2, self.branches[i].x2 +
+                    self.branches[i].grow_x / self.branches[i].grow_count,
+                    self.branches[i].y2, self.branches[i].y2 +
+                    self.branches[i].grow_y / self.branches[i].grow_count,
+                    self.width, self.height)
                 self.branches.append(newBranch)
                 self.branches[i].child.append(newBranch)
                 self.branches[i].grow_count = 0
@@ -104,67 +105,98 @@ class GrowSpaceEnv(gym.Env):
         branch_coords = []
 
         #sending coordinates out
-        for i in range(len(self.branches)):
-            branch_coords.append([self.branches[i].x2, self.branches[i].y2])  # x2 and y2 since they are the tips
+        for branch in self.branches:
+            # x2 and y2 since they are the tips
+            branch_coords.append([branch.x2, branch.y2])
 
         return branch_coords
 
     def distance_target(self, coords):
         # Calculate distance from each tip grown
-        target_coord = [[self.x_target, self.y_target]]
-        dist = distance.cdist(coords, target_coord, 'euclidean')
+        dist = distance.cdist(coords, [self.target],
+                              'euclidean')  #TODO replace with numpy
 
         # Get smallest distance to target
         min_dist = min(dist)
 
         return min_dist
 
-    def get_observation(self):
-        # only show the image/state
-        plt.xlim(0,100)             # set axis limit, same as in branch()
-        plt.ylim(0,100)
-        plt.scatter(self.x_target, self.y_target, color = 'r')       # place target
-        plt.axvspan(self.x1_light, self.x2_light, facecolor='y', alpha=0.5)   # place light
+    def get_observation(self, debug_show_scatter=False):
+        # new empty image
+        img = np.zeros((self.height, self.width, 3), dtype=np.uint8)
 
-        # Draw plant
-        for i in range(len(self.branches)):
-            self.branches[i].draw_branch()
+        # place goal as filled circle with center and radius
+        x = ir(self.target[0] * self.width)
+        y = ir(self.target[1] * self.height)
+        cv2.circle(
+            img,
+            center=(x, y),
+            radius=ir(.03 * self.width),
+            color=(0, 0, 255),
+            thickness=-1)
+        # print(f"drawing goal circle at {(x, y)} "
+        #       f"with radius {ir(.03*self.width)}")
 
-        # Make into image
-        fig = Figure()
-        canvas = FigureCanvas(fig)
-        ax = fig.gca()
-        ax.axis('off')
+        # place light as rectangle
+        yellow = (0, 128, 128)  # RGB color (dark yellow)
+        x1 = ir(self.x1_light * self.width)
+        x2 = ir(self.x2_light * self.width)
+        cv2.rectangle(
+            img, pt1=(x1, 0), pt2=(x2, self.height), color=yellow, thickness=-1)
+        # print(f"drawing light rectangle from {(x1, 0)} "
+        #       f"to {(x2, self.height)}")
 
-        # draw current state onto canvas
-        canvas.draw()
+        if debug_show_scatter:
+            self.light_scatter()
+            for k in range(len(self.x_scatter)):
+                x = ir(self.x_scatter[k] * self.width)
+                y = ir(self.y_scatter[k] * self.height)
+                cv2.circle(
+                    img,
+                    center=(x, y),
+                    radius=2,
+                    color=(255, 0, 0),
+                    thickness=-1)
 
-        # image of observation as np array
-        image = np.fromstring(canvas.tostring_rgb(), dtype = 'uint8')
-        #print(image.shape)
-        #print(image.shape[1])
-        #print(image.shape[2])
-        #image = np.reshape(image, se
-        #f.width * self.height * 3)
+        # Draw plant as series of lines (1 branch = 1 line)
+        for branch in self.branches:
+            pt1, pt2 = branch.get_pt1_pt2()
+            cv2.line(
+                img,
+                pt1=pt1,
+                pt2=pt2,
+                color=(0, 255, 0),
+                thickness=ir(branch.width / 50 * self.width))
+            # print(f"drawing branch from {pt1} to {pt2} "
+            #       f"with thiccness {branch.width/50 * self.width}")
 
-        return image
+        # flip image, because plant grows from the bottom, not the top
+        img = cv2.flip(img, 0)
+
+        return img
 
     def reset(self):
-        # Set env back to start
-        self.x = np.random.randint(0,100)
-        self.y = 0
-        self.x2 = self.x
-        self.y2 = 20
-        self.branches = [branch( x = self.x, x2 = self.x2, y = self.y, y2 = self.y2)]  # initialize first upward branch
+        # Set env back to start - also necessary on first start
+        random_start = np.random.rand()  # is in range [0,1
 
-        self.x_target = np.random.randint(0,100)   # upper quadrant
-        self.y_target = np.random.randint(80,100)
-        self.light_width = 20
-        self.x1_light = 40
+        self.branches = [
+            Branch(
+                x=random_start,
+                x2=random_start,
+                y=0,
+                y2=FIRST_BRANCH_HEIGHT,
+                img_width=self.width,
+                img_height=self.height)
+        ]
+        self.target = np.array(
+            [np.random.uniform(0, 1),
+             np.random.uniform(.8, 1)])
+        self.light_width = .2
+        self.x1_light = .4
         self.x2_light = self.x1_light + self.light_width
 
-        self.x_scatter = np.random.randint(0,100, self.light_dif)
-        self.y_scatter = np.random.randint(0 ,100, self.light_dif)
+        self.x_scatter = np.random.uniform(0, 1, self.light_dif)
+        self.y_scatter = np.random.uniform(0, 1, self.light_dif)
 
         return self.get_observation()
 
@@ -176,28 +208,47 @@ class GrowSpaceEnv(gym.Env):
         if action == 1:
             self.light_move_L()
 
-        # scattering that is available based on light's positions
-        xx, yy = self.light_scatter()
+        if action == 2:
+            # then we keep the light in place
+            pass
+
+        # filter scattering
+        self.light_scatter()
 
         # Branching step for light in this position
-        mindist = 1
-        maxdist = 10
-        tips = self.tree_grow(xx,yy,mindist,maxdist)
+        tips = self.tree_grow(self.x_scatter, self.y_scatter, .01, .1)
 
         # Calculate distance to target
-        reward = 1/self.distance_target(tips)
+        reward = 1 / self.distance_target(tips)
 
         # Render image of environment at current state
-        observation = self.get_observation() #image
+        observation = self.get_observation()  #image
 
         done = False  # because we don't have a terminal condition
-        misc = {}  # (optional) additional information about plant/episode/other stuff, leave empty for now
+        misc = {
+        }  # (optional) additional information about plant/episode/other stuff, leave empty for now
 
         return observation, reward, done, misc
 
-    def render(self, mode ='human'):
-        pass
+    def render(self, mode='human',
+               debug_show_scatter=False):  # or mode="rgb_array"
+        img = self.get_observation(debug_show_scatter)
+
+        if mode == "human":
+            cv2.imshow('plant', img)  # create opencv window to show plant
+            cv2.waitKey(1)  # this is necessary or the window closes immediately
+        else:
+            return img
 
 
-#if __name__=='__main__':
+if __name__ == '__main__':
+    import time
 
+    gse = GrowSpaceEnv()
+    gse.reset()
+
+    gse.render(debug_show_scatter=True)
+    for _ in range(10):
+        gse.step(2)
+        gse.render()
+        time.sleep(1)
