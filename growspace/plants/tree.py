@@ -1,7 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 
-class branch():
+class branch(object):
 
     def __init__(self, x, x2, y, y2):
         self.x = x
@@ -29,3 +29,5 @@ class branch():
         plt.xlim(0, 100)
         plt.plot([self.x,self.x2],[self.y,self.y2], linewidth=np.sqrt(self.width), color='green')
 
+if __name__=='__main__':
+    branches = branch()
