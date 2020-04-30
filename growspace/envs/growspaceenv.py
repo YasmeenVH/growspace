@@ -1,107 +1,84 @@
 import gym
-import turtle
-import random
 from random import randint
 from gym.utils import seeding
 import numpy as np
+from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
+from matplotlib.figure import Figure
 from growspace.plants.tree import branch
-
 
 class GrowSpaceEnv(gym.Env):
 
-    def __init__(self, observe_images, width = 84, height = 84, light_dif = 500):
-        self.width = width
-        self.height = height
+    def __init__(self, observe_images, width = 84, height = 84, light_dif = 600):
+        self.width = width         # do we keep?
+        self.height = height       # do we keep?
         self.seed()
         self.images = observe_images
         self.light_dif = light_dif
         self.action_space = gym.spaces.Discrete(2)    # L, R of light paddle
+        self.observation_space = gym.spaces.Box(0, 255, shape=(84, 84, 3), dtype=np.uint8)
 
-        if self.images:
-            self.observation_space = gym.spaces.Box(0, 255, shape=(84, 84, 3), dtype=np.uint8)
-        else:
-            self.observation_space = gym.spaces.Box(0, 1, shape=(4,), dtype=np.float32)
-
-        self.nodes = []
-        self.leafs = []
-        self.edges = []
-        self.last_node_id = -1
-
-        # BACKGROUND
-        self.screen = turtle.Screen()
-        self.screen.setup(width= width,height= height)                               # start position is at center of window
-        self.screen.bgcolor('black')
-        self.screen.tracer(0)
-
-        # LIGHT
-        self.light = turtle.Turtle()
-        self.light.speed(0)
-        self.light.shape('square')
-        self.light.color('yellow')
-        self.light.shapesize(stretch_wid=1/20, stretch_len=1)
-
-        # TARGET
-        self.target= turtle.Turtle()
-        self.target.speed(0)
-        self.target.shape('circle')
-        self.target.hideturtle()
-        self.target.shapesize(1/20)
-        self.target.color('red')
-
-        # TREEBOT
-        self.x = np.random.randint(-41,42)
-        self.y = -42
+        self.x = np.random.randint(0,100)
+        self.y = 0
         self.x2 = self.x
-        self.y2 = -27
-        self.plant = branch(self.x, self.x2, self.y, self.y2)
+        self.y2 = 20
+        self.branch = branch(self.x, self.x2, self.y, self.y2)   # initialize first upward branch
+
+        self.x_target = np.random.randint(0,100)   # upper quadrant
+        self.y_target = np.random.randint(80,100)
+        self.light_width = 20
+        self.x1_light = 40
+        self.x2_light = self.x1_light + self.light_width
+        self.fig = Figure
+        self.canvas = FigureCanvas(self.fig)
+        self.ax = self.fig.gca()
+
+        self.x_scatter = np.random.randint(0,100, self.light_dif)
+        self.y_scatter = np.random.randint(0 ,100, self.light_dif)
+
+        self.width_plant = 1   # width of plant
+
 
     def seed(self, seed=None):
-        self.np_random, seed = seeding.np_random(seed)
-        return [seed]
+        return [np.random.seed(seed)]
 
     def light_scatter(self):
         """ Input: x is the x-axis coordinate of the centroid position of the light source
             Output: 2D Scatter plot of the light (x,y) with density vector which increases with y"""
-        x_scatter = np.random.randint(-41,41, self.light_dif)
-        y_scatter = np.random.randint(-27 ,41, self.light_dif)
-        coords = []
-        for i in range(len(x_scatter)):
-            one_coord = [x_scatter[i],y_scatter[i]]
-            coords.append(one_coord)
+        d_coords = {k: v for v, k in enumerate(self.x_scatter)}
+        idx_light = [d_coords[k] for k in np.arange(self.x1_light,self.x2_light+1 , 1)]
+        x = [self.x_scatter[idx] for idx in idx_light]
+        y = [self.y_scatter[idx] for idx in idx_light]
 
-        return coords
+        return x, y
 
     def light_move_R(self):
-        """Move by 5 pixels in the right direction"""
-        x = self.light.xcor()
-        if x >= 42-5:
-            self.light.setx(x)
+        if self.x1_light >= 80:        # limit of coordinates
+            self.x1_light = 80         # stay put
+
         else:
-            self.light.setx(x+5)
+            self.x1_light += 10        # move by 10
 
     def light_move_L(self):
-        """Move by 5 pixels in the left direction"""
-        x = self.light.xcor()
-        if x <= -42-5:
-            self.light.setx(x)
+        if self.x1_light <= 10:        # limit of coordinates
+            self.x1_light = 0
         else:
-            self.light.setx(x-5)
+            self.x1_light -= 10        # move by 10
+
+    def update_width(self):
+        width = 0
+        for i in range(len(self.child)):
+            width += self.child[i].update_width()
+        if width > 0:
+            self.width_plant = width
+        return self.width_plant
+
+    def draw(self):
+        self.ax.plot([self.x,self.x2],[self.y,self.y2], linewidth=np.sqrt(self.width_plant), color='green')
+
+    def branch(self):
 
 
-    def scatter_with_light(self, coords, light_x):
-        #define light posiiton
-        #xx, yy = light_coord
-        possible_branch = []
-        x = self.light.xcor()
-        x1 = x-5 # left boundary of light
-        x2 = x+5 # right boundary of light
-        for x, y in coords:
-            if x1 <= x <= x2:
-                possible_branch.append(coords)
-            for xx, yy in light_coords:
-                if
-
-    def space_colonization(self, x, y, mindist, maxdist, branches):
+    def tree_grow(self, x, y, mindist, maxdist, branches):
 
         # available scatter due to light position (look through xcoordinates
         for i in range(len(x) - 1, 0, -1):
@@ -136,6 +113,9 @@ class GrowSpaceEnv(gym.Env):
                 branches[i].grow_count = 0
                 branches[i].grow_x = 0
                 branches[i].grow_y = 0
+
+        # increase thickness of first elements added to tree as they grow
+        branches[0].updateWidth()
 
     def get_observation(self):
         # do NOT make any new leafs
@@ -174,12 +154,9 @@ class GrowSpaceEnv(gym.Env):
 
     def reset(self):
         # TODO set the environment back to 0
-        self.light.penup()
-        self.light.goto(randint(-41, 41), 40)
-        self.target.penup()
-        self.target.goto(randint(-40, 40), randint(24, 40)) # upper quarter
-        #self.plant.clear()       # removes plant drawing
-        #self.plant.goto()
+        # TARGET
+
+        #self.plant = branch(self.x, self.x2, self.y, self.y2)
 
         light_x = self.light.xcor()
         light_y = self.light.ycor()
@@ -252,5 +229,3 @@ class GrowSpaceEnv(gym.Env):
 
 
 if __name__=='__main__':
-
-
