@@ -24,6 +24,8 @@ class branch():
 
         return self.width
 
-    def draw(self):
+    def draw_branch(self):
+        plt.ylim(0, 100)
+        plt.xlim(0, 100)
         plt.plot([self.x,self.x2],[self.y,self.y2], linewidth=np.sqrt(self.width), color='green')
 
