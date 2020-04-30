@@ -5,6 +5,7 @@ import numpy as np
 from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
 from matplotlib.figure import Figure
 from growspace.plants.tree import branch
+from scipy.spatial import distance
 
 class GrowSpaceEnv(gym.Env):
 
@@ -100,18 +101,23 @@ class GrowSpaceEnv(gym.Env):
 
         # increase thickness of first elements added to tree as they grow
         self.branches[0].update_width()
-        branch_x = []
-        branch_y = []
+        branch_coords = []
 
         #sending coordinates out
         for i in range(len(self.branches)):
-            branch_x.append(self.branches[i].x2)
-            branch_y.append(self.branches[i].y2)
+            branch_coords.append([self.branches[i].x2, self.branches[i].y2])  # x2 and y2 since they are the tips
 
-        return branch_x, branch_y
+        return branch_coords
 
-    def distance_target(self, x, y):
-        
+    def distance_target(self, coords):
+        # Calculate distance from each tip grown
+        target_coord =  [[self.x_target, self.y_target]]
+        dist = distance.cdist(coords, target_coord, 'euclidean')
+
+        # Get smallest distance to target
+        min_dist = min(dist)
+
+        return min_dist
 
     def get_observation(self):
         # do NOT make any new leafs
@@ -173,18 +179,12 @@ class GrowSpaceEnv(gym.Env):
         # Branching step for light in this position
         mindist = 1
         maxdist = 10
-        tip_x, tip_y = self.tree_grow(xx,yy,mindist,maxdist)
+        tips = self.tree_grow(xx,yy,mindist,maxdist)
 
         # Calculate distance to target
-
-
-        # TODO calculate reward:
-        # find leaf that's closest to goal
-        # calculate distance between goal and closest leaf
-        # reward = -distance or 1/distance
+        reward = 1/self.distance_target(tips)
 
         # TODO (optional) gather additional debugging infos and return the whole shebang
-
         observation = self.get_observation() #image
         reward = ...  # as calculated above
         done = False  # because we don't have a terminal condition
@@ -193,7 +193,7 @@ class GrowSpaceEnv(gym.Env):
         return observation, reward, done, misc
 
     def render(self, mode ='human'):
-        self.screen.update()
+
 
 
 if __name__=='__main__':
