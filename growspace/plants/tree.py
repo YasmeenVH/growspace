@@ -30,4 +30,6 @@ class branch(object):
         plt.plot([self.x,self.x2],[self.y,self.y2], linewidth=np.sqrt(self.width), color='green')
 
 if __name__=='__main__':
-    branches = branch()
+    branches = [branch(30, 30, -10, 0)]
+    print(len(branches))
+    branches[0].draw_branch()
