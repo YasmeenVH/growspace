@@ -10,7 +10,7 @@ register(
 )
 
 register(
-    id=f'GrowSpaceEnv-Image-v0',
+    id=f'GrowSpaceEnv-Images-v0',
     entry_point='growspace.envs:GrowSpaceEnv',
     kwargs={
         "observe_images": True
