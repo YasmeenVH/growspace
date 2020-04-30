@@ -42,8 +42,9 @@ class GrowSpaceEnv(gym.Env):
                                 self.x_scatter <= self.x2_light)
 
         # apply filter to both y and x coordinates through the power of Numpy magic :D
-        self.y_scatter = self.y_scatter[filter]
-        self.x_scatter = self.x_scatter[filter]
+        ys = self.y_scatter[filter]
+        xs = self.x_scatter[filter]
+        return xs, ys
 
     def light_move_R(self):
         if self.x1_light >= .8:  # limit of coordinates
@@ -125,18 +126,6 @@ class GrowSpaceEnv(gym.Env):
         # new empty image
         img = np.zeros((self.height, self.width, 3), dtype=np.uint8)
 
-        # place goal as filled circle with center and radius
-        x = ir(self.target[0] * self.width)
-        y = ir(self.target[1] * self.height)
-        cv2.circle(
-            img,
-            center=(x, y),
-            radius=ir(.03 * self.width),
-            color=(0, 0, 255),
-            thickness=-1)
-        # print(f"drawing goal circle at {(x, y)} "
-        #       f"with radius {ir(.03*self.width)}")
-
         # place light as rectangle
         yellow = (0, 128, 128)  # RGB color (dark yellow)
         x1 = ir(self.x1_light * self.width)
@@ -147,10 +136,10 @@ class GrowSpaceEnv(gym.Env):
         #       f"to {(x2, self.height)}")
 
         if debug_show_scatter:
-            self.light_scatter()
-            for k in range(len(self.x_scatter)):
-                x = ir(self.x_scatter[k] * self.width)
-                y = ir(self.y_scatter[k] * self.height)
+            xs, ys = self.light_scatter()
+            for k in range(len(xs)):
+                x = ir(xs[k] * self.width)
+                y = ir(ys[k] * self.height)
                 cv2.circle(
                     img,
                     center=(x, y),
@@ -169,6 +158,20 @@ class GrowSpaceEnv(gym.Env):
                 thickness=ir(branch.width / 50 * self.width))
             # print(f"drawing branch from {pt1} to {pt2} "
             #       f"with thiccness {branch.width/50 * self.width}")
+
+        # place goal as filled circle with center and radius
+        # also important - place goal last because must be always visible
+        x = ir(self.target[0] * self.width)
+        y = ir(self.target[1] * self.height)
+        cv2.circle(
+            img,
+            center=(x, y),
+            radius=ir(.03 * self.width),
+            color=(0, 0, 255),
+            thickness=-1)
+        # print(f"drawing goal circle at {(x, y)} "
+        #       f"with radius {ir(.03*self.width)}")
+
 
         # flip image, because plant grows from the bottom, not the top
         img = cv2.flip(img, 0)
@@ -203,20 +206,22 @@ class GrowSpaceEnv(gym.Env):
     def step(self, action):
         # Two possible actions, move light left or right
         if action == 0:
-            self.light_move_R()
+            self.light_move_L()
 
         if action == 1:
-            self.light_move_L()
+            self.light_move_R()
+
+        self.x2_light = self.x1_light + self.light_width
 
         if action == 2:
             # then we keep the light in place
             pass
 
         # filter scattering
-        self.light_scatter()
+        xs, ys = self.light_scatter()
 
         # Branching step for light in this position
-        tips = self.tree_grow(self.x_scatter, self.y_scatter, .01, .1)
+        tips = self.tree_grow(xs, ys, .01, .1)
 
         # Calculate distance to target
         reward = 1 / self.distance_target(tips)
@@ -245,10 +250,26 @@ if __name__ == '__main__':
     import time
 
     gse = GrowSpaceEnv()
-    gse.reset()
 
-    gse.render(debug_show_scatter=True)
-    for _ in range(10):
-        gse.step(2)
-        gse.render()
-        time.sleep(1)
+    def key2action(key):
+        if key == ord('a'):
+            return 0 # move left
+        elif key == ord('d'):
+            return 1 # move right
+        elif key == ord('s'):
+            return 2 # stay in place
+        else:
+            return None
+
+    while True:
+        gse.reset()
+        img = gse.get_observation(debug_show_scatter=True)
+        cv2.imshow("plant", img)
+
+        for _ in range(10):
+            action = key2action(cv2.waitKey(-1))
+            if action is None:
+                quit()
+
+            gse.step(action)
+            cv2.imshow("plant", gse.get_observation(debug_show_scatter=True))
