@@ -23,7 +23,7 @@ class GrowSpaceEnv(gym.Env):
         self.x2 = self.x
         self.y2 = 20
         #self.branch = self.branch()  # may need to add coords
-        self.branches = branch(self.x, self.x2, self.y, self.y2)   # initialize first upward branch
+        self.branches = [branch(self.x, self.x2, self.y, self.y2)]  # initialize first upward branch
 
         self.x_target = np.random.randint(0,100)   # upper quadrant
         self.y_target = np.random.randint(80,100)
@@ -32,7 +32,7 @@ class GrowSpaceEnv(gym.Env):
         self.x2_light = self.x1_light + self.light_width
 
         self.x_scatter = np.random.randint(0,100, self.light_dif)
-        self.y_scatter = np.random.randint(0 ,100, self.light_dif)
+        self.y_scatter = np.random.randint(0,100, self.light_dif)
 
 
     def seed(self, seed=None):
