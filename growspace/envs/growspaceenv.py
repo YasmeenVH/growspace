@@ -21,16 +21,14 @@ class GrowSpaceEnv(gym.Env):
         self.y = 0
         self.x2 = self.x
         self.y2 = 20
-        self.branch = branch(self.x, self.x2, self.y, self.y2)   # initialize first upward branch
+        self.branch = self.branch()  # may need to add coords
+        self.branches = branch(self.x, self.x2, self.y, self.y2)   # initialize first upward branch
 
         self.x_target = np.random.randint(0,100)   # upper quadrant
         self.y_target = np.random.randint(80,100)
         self.light_width = 20
         self.x1_light = 40
         self.x2_light = self.x1_light + self.light_width
-        self.fig = Figure
-        self.canvas = FigureCanvas(self.fig)
-        self.ax = self.fig.gca()
 
         self.x_scatter = np.random.randint(0,100, self.light_dif)
         self.y_scatter = np.random.randint(0 ,100, self.light_dif)
@@ -64,21 +62,7 @@ class GrowSpaceEnv(gym.Env):
         else:
             self.x1_light -= 10        # move by 10
 
-    def update_width(self):
-        width = 0
-        for i in range(len(self.child)):
-            width += self.child[i].update_width()
-        if width > 0:
-            self.width_plant = width
-        return self.width_plant
-
-    def draw(self):
-        self.ax.plot([self.x,self.x2],[self.y,self.y2], linewidth=np.sqrt(self.width_plant), color='green')
-
-    def branch(self):
-
-
-    def tree_grow(self, x, y, mindist, maxdist, branches):
+    def tree_grow(self, x, y, mindist, maxdist):
 
         # available scatter due to light position (look through xcoordinates
         for i in range(len(x) - 1, 0, -1):
@@ -86,8 +70,8 @@ class GrowSpaceEnv(gym.Env):
             dist =  100
 
             # loop through branches and see which coordinate within available scatter is the closest
-            for j in range(len(branches)):
-                temp_dist = np.sqrt((x[i] - branches[j].x2) ** 2 + (y[i] - branches[j].y2) ** 2)
+            for j in range(len(self.branches)):
+                temp_dist = np.sqrt((x[i] - self.branches[j].x2) ** 2 + (y[i] - self.branches[j].y2) ** 2)
                 if temp_dist < dist:
                     dist = temp_dist
                     closest_branch = j
@@ -99,23 +83,35 @@ class GrowSpaceEnv(gym.Env):
 
             # when distance is greater than max distance, branching occurs to find other points.
             elif dist < maxdist:
-                branches[closest_branch].grow_count += 1
-                branches[closest_branch].grow_x += (x[i] - branches[closest_branch].x2) / dist
-                branches[closest_branch].grow_y += (y[i] - branches[closest_branch].y2) / dist
+                self.branches[closest_branch].grow_count += 1
+                self.branches[closest_branch].grow_x += (x[i] - self.branches[closest_branch].x2) / dist
+                self.branches[closest_branch].grow_y += (y[i] - self.branches[closest_branch].y2) / dist
 
         # generation of new branches (forking) in previous step will generate a new branch with grow count
-        for i in range(len(branches)):
-            if branches[i].grow_count > 0:
-                newBranch = branch(branches[i].x2, branches[i].x2 + branches[i].grow_x / branches[i].grow_count,
-                                   branches[i].y2, branches[i].y2 + branches[i].grow_y / branches[i].grow_count)
-                branches.append(newBranch)
-                branches[i].child.append(newBranch)
-                branches[i].grow_count = 0
-                branches[i].grow_x = 0
-                branches[i].grow_y = 0
+        for i in range(len(self.branches)):
+            if self.branches[i].grow_count > 0:
+                newBranch = self.branch(self.branches[i].x2, self.branches[i].x2 + self.branches[i].grow_x / self.branches[i].grow_count,
+                                   self.branches[i].y2, self.branches[i].y2 + self.branches[i].grow_y / self.branches[i].grow_count)
+                self.branches.append(newBranch)
+                self.branches[i].child.append(newBranch)
+                self.branches[i].grow_count = 0
+                self.branches[i].grow_x = 0
+                self.branches[i].grow_y = 0
 
         # increase thickness of first elements added to tree as they grow
-        branches[0].updateWidth()
+        self.branches[0].update_width()
+        branch_x = []
+        branch_y = []
+
+        #sending coordinates out
+        for i in range(len(self.branches)):
+            branch_x.append(self.branches[i].x2)
+            branch_y.append(self.branches[i].y2)
+
+        return branch_x, branch_y
+
+    def distance_target(self, x, y):
+        
 
     def get_observation(self):
         # do NOT make any new leafs
@@ -158,57 +154,29 @@ class GrowSpaceEnv(gym.Env):
 
         #self.plant = branch(self.x, self.x2, self.y, self.y2)
 
-        light_x = self.light.xcor()
-        light_y = self.light.ycor()
-        target_x = self.target.xcor()
-        target_y = self.target.ycor()
 
            #return light_x, light_y, target_x, target_y
 
         return self.get_observation()
 
-    #def grow_branch(self, leaf):
-        # TODO apply splitting/growth formula
-        # based on growth formula, calculate new leaf coordinates
-        # calculate 1 or 2 sets of x-y coordinates
-
-        # this is where you use an invisible lil turtle
-        # (only to calculate coordinates of leafs)
-
-        # e.g. [(13,5),(15,6)]
-        #list_of_new_leafs = []
-        #for coord_x, coord_y in new_leafs:
-            #self.last_node_id += 1
-            #idx = self.last_node_id
-            #list_of_new_leafs.append(idx, coord_x, coord_y)
-
-        #return list_of_new_leafs
-
-    #def grow_plant(self):
-        #new_leafs = []
-
-        #for leaf in self.leafs:
-            #sprouts = self.grow_branch(leaf)
-            #new_leafs += sprouts
-
-            #for idx, coord_x, coord_y in sprouts:
-                #from_ = leaf[0]
-                #to = idx
-                #self.edges.append((from_, to))
-
-        #self.nodes += self.leafs
-        #self.leafs = new_leafs
-
     def step(self, action):
-        # TODO sanitize action, make sure it's one of the two possible values
+        # Two possible actions, move light left or right
         if action == 0:
             self.light_move_R()
 
-        if action
-        # TODO apply action to environment:
-        # move light based on action,
-        # then make plant grow by one step <-- main important bit
-        self.grow_plant()
+        if action == 1:
+            self.light_move_L()
+
+        # scattering that is available based on light's positions
+        xx, yy = self.light_scatter()
+
+        # Branching step for light in this position
+        mindist = 1
+        maxdist = 10
+        tip_x, tip_y = self.tree_grow(xx,yy,mindist,maxdist)
+
+        # Calculate distance to target
+
 
         # TODO calculate reward:
         # find leaf that's closest to goal
@@ -217,7 +185,7 @@ class GrowSpaceEnv(gym.Env):
 
         # TODO (optional) gather additional debugging infos and return the whole shebang
 
-        observation = self.get_observation()
+        observation = self.get_observation() #image
         reward = ...  # as calculated above
         done = False  # because we don't have a terminal condition
         misc = {}  # (optional) additional information about plant/episode/other stuff, leave empty for now
