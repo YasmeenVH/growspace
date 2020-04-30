@@ -7,7 +7,8 @@ from growspace.plants.tree import Branch
 from scipy.spatial import distance
 
 FIRST_BRANCH_HEIGHT = .2
-
+BRANCH_THICCNESS = 1/50
+BRANCH_LENGTH = 1/10
 
 def to_int(v):
     return int(round(v))
@@ -47,14 +48,14 @@ class GrowSpaceEnv(gym.Env):
         return xs, ys
 
     def light_move_R(self):
-        if self.x1_light >= .8:  # limit of coordinates
+        if np.around(self.x1_light,1) >= .8:  # limit of coordinates
             self.x1_light = .8  # stay put
 
         else:
             self.x1_light += .1  # move by .1 right
 
     def light_move_L(self):
-        if self.x1_light <= .1:  # limit of coordinates
+        if np.around(self.x1_light,1) <= .1:  # limit of coordinates
             self.x1_light = 0
         else:
             self.x1_light -= .1  # move by .1 left
@@ -80,11 +81,16 @@ class GrowSpaceEnv(gym.Env):
 
             # when distance is greater than max distance, branching occurs to find other points.
             elif dist < maxdist:
+
                 self.branches[closest_branch].grow_count += 1
                 self.branches[closest_branch].grow_x += (
-                    x[i] - self.branches[closest_branch].x2) / dist
+                    x[i] - self.branches[closest_branch].x2) / (dist/BRANCH_LENGTH)
                 self.branches[closest_branch].grow_y += (
-                    y[i] - self.branches[closest_branch].y2) / dist
+                    y[i] - self.branches[closest_branch].y2) / (dist/BRANCH_LENGTH)
+                # print(f"closest branch: {closest_branch}\n"
+                #       f"grow_count = {self.branches[closest_branch].grow_count}\n"
+                #       f"grow_x* = {(x[i] - self.branches[closest_branch].x2) * dist}\n"
+                #       f"grow_x/ = {(x[i] - self.branches[closest_branch].x2) / (dist*10)}")
 
         # generation of new branches (forking) in previous step will generate a new branch with grow count
         for i in range(len(self.branches)):
@@ -155,7 +161,7 @@ class GrowSpaceEnv(gym.Env):
                 pt1=pt1,
                 pt2=pt2,
                 color=(0, 255, 0),
-                thickness=ir(branch.width / 50 * self.width))
+                thickness=ir(branch.width * BRANCH_THICCNESS * self.width))
             # print(f"drawing branch from {pt1} to {pt2} "
             #       f"with thiccness {branch.width/50 * self.width}")
 

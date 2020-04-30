@@ -1,3 +1,4 @@
+GROWTH_MULTIPLIER = .1 # keep this below 1 to prevent exponential growth
 
 class Branch(object):
 
@@ -13,16 +14,15 @@ class Branch(object):
         self.grow_count = 0
         self.grow_x = 0
         self.grow_y = 0
-        self.width = 1
+        self.width = .5
         self.child = []
 
     def update_width(self):
         width = 0
         for i in range(len(self.child)):
-            width += self.child[i].update_width()
+            width += self.child[i].update_width() # because exponential growth
 
-        if width > 0:
-            self.width = width
+        self.width += width * GROWTH_MULTIPLIER
 
         return self.width
 
