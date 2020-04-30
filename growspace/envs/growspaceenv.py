@@ -40,12 +40,13 @@ class GrowSpaceEnv(gym.Env):
         return [np.random.seed(seed)]
 
     def light_scatter(self):
-        """ Input: x is the x-axis coordinate of the centroid position of the light source
-            Output: 2D Scatter plot of the light (x,y) with density vector which increases with y"""
-        d_coords = {k: v for v, k in enumerate(self.x_scatter)}
-        idx_light = [d_coords[k] for k in np.arange(self.x1_light,self.x2_light+1 , 1)]
-        x = [self.x_scatter[idx] for idx in idx_light]
-        y = [self.y_scatter[idx] for idx in idx_light]
+        # select scattering with respect to position of the light
+        x = []
+        y = []
+        for i in range(len(self.x_scatter)):
+            if self.x1_light <= self.x_scatter[i] <= self.x2_light:
+                x.append(self.x_scatter[i])
+                y.append(self.y_scatter[i])
 
         return x, y
 
