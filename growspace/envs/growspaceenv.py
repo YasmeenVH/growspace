@@ -1,11 +1,11 @@
 import gym
-from random import randint
 from gym.utils import seeding
 import numpy as np
 from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
 from matplotlib.figure import Figure
 from growspace.plants.tree import branch
 from scipy.spatial import distance
+import matplotlib.pyplot as plt
 
 class GrowSpaceEnv(gym.Env):
 
@@ -33,8 +33,6 @@ class GrowSpaceEnv(gym.Env):
 
         self.x_scatter = np.random.randint(0,100, self.light_dif)
         self.y_scatter = np.random.randint(0 ,100, self.light_dif)
-
-        self.width_plant = 1   # width of plant
 
 
     def seed(self, seed=None):
@@ -72,7 +70,7 @@ class GrowSpaceEnv(gym.Env):
 
             # loop through branches and see which coordinate within available scatter is the closest
             for j in range(len(self.branches)):
-                temp_dist = np.sqrt((x[i] - self.branches[j].x2) ** 2 + (y[i] - self.branches[j].y2) ** 2)
+                temp_dist = np.sqrt((x[i] - self.branches[j].x2) ** 2 + (y[i] - self.branches[j].y2) ** 2)  # could put in euclidean distance
                 if temp_dist < dist:
                     dist = temp_dist
                     closest_branch = j
@@ -120,49 +118,47 @@ class GrowSpaceEnv(gym.Env):
         return min_dist
 
     def get_observation(self):
-        # do NOT make any new leafs
         # only show the image/state
-        # if image, redraw from scratch
+        plt.xlim(0,100)             # set axis limit, same as in branch()
+        plt.ylim(0,100)
+        plt.scatter(self.x_target, self.y_target, color = 'r')       # place target
+        plt.axvspan(self.x1_light, self.x2_light, facecolor='y', alpha=0.5)   # place light
 
-        if self.images:
-            # TODO render an image of the current plant+light
-            # you wanna return this as numpy 84x84x3 np.uint8 [0,255]
+        # Draw plant
+        for i in range(len(self.branches)):
+            self.branches[i].draw_branch()
 
-            for from_, to in self.edges:
-                xx = self.edges
+        # Make into image
+        fig = Figure()
+        canvas = FigureCanvas(fig)
+        ax = fig.gca()
+        ax.axis('off')
 
-        # TODO get coordinates of "from" node
-        # TODO get coordinates of "to" node/leaf
-        # TODO give a fat pencil to a brand new turtle and have it run from coordinates A to coordinates B in a straight line, then remove that turtle
+        # draw current state onto canvas
+        canvas.draw()
 
-        # TODO draw light source
-        # TODO draw goal
+        # image of observation as np array
+        image = np.fromstring(canvas.tostring_rgb(), dtype = 'uint8')
 
-        else:
-
-        # TODO return goal coordinates and coordinates of closest leaf
-        # return this as np.array()
-
-        # example: np.array([a,b,c,d]), where
-        # a = goal_x
-        # b = goal_y, can be fixed
-        # c = closest_leaf_x # can be 0 when plant is freshly reset
-        # d = closest_leaf_y # can be 0 when plant is freshly reset
-
-        # TODO don't forget to normalize output (e.g. divide coordinates by 84 to move them into range [0,1])
-
-        #pass
-        return
+        return image
 
     def reset(self):
-        # TODO set the environment back to 0
-        # TARGET
+        # Set env back to start
+        self.x = np.random.randint(0,100)
+        self.y = 0
+        self.x2 = self.x
+        self.y2 = 20
+        self.branches = branch(self.x, self.x2, self.y, self.y2)   # initialize first upward branch
 
-        #self.plant = branch(self.x, self.x2, self.y, self.y2)
+        self.x_target = np.random.randint(0,100)   # upper quadrant
+        self.y_target = np.random.randint(80,100)
+        self.light_width = 20
+        self.x1_light = 40
+        self.x2_light = self.x1_light + self.light_width
 
-
-           #return light_x, light_y, target_x, target_y
-
+        self.x_scatter = np.random.randint(0,100, self.light_dif)
+        self.y_scatter = np.random.randint(0 ,100, self.light_dif)
+           
         return self.get_observation()
 
     def step(self, action):
@@ -193,7 +189,7 @@ class GrowSpaceEnv(gym.Env):
         return observation, reward, done, misc
 
     def render(self, mode ='human'):
-
+        pass
 
 
 if __name__=='__main__':
