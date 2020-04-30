@@ -22,7 +22,7 @@ class GrowSpaceEnv(gym.Env):
         self.y = 0
         self.x2 = self.x
         self.y2 = 20
-        self.branch = self.branch()  # may need to add coords
+        #self.branch = self.branch()  # may need to add coords
         self.branches = branch(self.x, self.x2, self.y, self.y2)   # initialize first upward branch
 
         self.x_target = np.random.randint(0,100)   # upper quadrant
@@ -158,7 +158,7 @@ class GrowSpaceEnv(gym.Env):
 
         self.x_scatter = np.random.randint(0,100, self.light_dif)
         self.y_scatter = np.random.randint(0 ,100, self.light_dif)
-           
+
         return self.get_observation()
 
     def step(self, action):
@@ -180,9 +180,9 @@ class GrowSpaceEnv(gym.Env):
         # Calculate distance to target
         reward = 1/self.distance_target(tips)
 
-        # TODO (optional) gather additional debugging infos and return the whole shebang
+        # Render image of environment at current state
         observation = self.get_observation() #image
-        reward = ...  # as calculated above
+
         done = False  # because we don't have a terminal condition
         misc = {}  # (optional) additional information about plant/episode/other stuff, leave empty for now
 
@@ -192,4 +192,5 @@ class GrowSpaceEnv(gym.Env):
         pass
 
 
-if __name__=='__main__':
+#if __name__=='__main__':
+
