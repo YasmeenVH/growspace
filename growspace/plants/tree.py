@@ -1,10 +1,9 @@
-import turtle
-
+import numpy as np
+import matplotlib.pyplot as plt
 
 class branch():
 
     def __init__(self, x, x2, y, y2):
-
         self.x = x
         self.y = y
         self.x2 = x2
@@ -15,21 +14,16 @@ class branch():
         self.width = 1
         self.child = []
 
-        #self.screen = turtle.Screen()
-        #self.screen.setup(width=84, height=84)
-        #elf.screen.bgcolor('black')
-        self.tree = turtle.Turtle()
-        self.tree.hideturtle()
-        self.tree.color('green')
-        self.tree.speed(0)
-        self.tree.pensize(2)
+    def update_width(self):
+        width = 0
+        for i in range(len(self.child)):
+            width += self.child[i].updateWidth()
 
+        if width > 0:
+            self.width = width
 
+        return self.width
 
-    def plot(self):
+    def draw(self):
+        plt.plot([self.x,self.x2],[self.y,self.y2], linewidth=np.sqrt(self.width), color='green')
 
-        self.tree.penup()
-        self.tree.goto(self.x, self.y)  # make the turtle go to the start position
-        self.tree.pendown()
-        self.tree.goto(self.x2, self.y2)
-        self.screen.update()
