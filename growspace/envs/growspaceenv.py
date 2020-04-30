@@ -141,6 +141,11 @@ class GrowSpaceEnv(gym.Env):
 
         # image of observation as np array
         image = np.fromstring(canvas.tostring_rgb(), dtype = 'uint8')
+        #print(image.shape)
+        #print(image.shape[1])
+        #print(image.shape[2])
+        #image = np.reshape(image, se
+        #f.width * self.height * 3)
 
         return image
 
