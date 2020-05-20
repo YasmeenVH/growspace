@@ -6,9 +6,9 @@ from numpy.linalg import norm
 from growspace.plants.tree import Branch
 from scipy.spatial import distance
 
-FIRST_BRANCH_HEIGHT = .2
-BRANCH_THICCNESS = 1/50
-BRANCH_LENGTH = 1/10
+FIRST_BRANCH_HEIGHT = .24
+BRANCH_THICCNESS = .013
+BRANCH_LENGTH = 1/9
 
 def to_int(v):
     return int(round(v))
@@ -19,7 +19,7 @@ ir = to_int  # shortcut for function call
 
 class GrowSpaceEnv(gym.Env):
 
-    def __init__(self, width=84, height=84, light_dif=600):
+    def __init__(self, width=84, height=84, light_dif=250):
         self.width = width  # do we keep?
         self.height = height  # do we keep?
         self.seed()
@@ -27,6 +27,7 @@ class GrowSpaceEnv(gym.Env):
         self.action_space = gym.spaces.Discrete(3)  # L, R, keep of light paddle
         self.observation_space = gym.spaces.Box(
             0, 255, shape=(84, 84, 3), dtype=np.uint8)
+        self.steps = 0
 
         # note: I moved the code for the first branch into the reset function,
         # because when you start an environment for the first time,
@@ -63,7 +64,7 @@ class GrowSpaceEnv(gym.Env):
     def tree_grow(self, x, y, mindist, maxdist):
         # available scatter due to light position (look through xcoordinates
         for i in range(len(x) - 1, 0, -1):
-            closest_branch = None
+            closest_branch = 0
             dist = 1
 
             # loop through branches and see which coordinate within available scatter is the closest
@@ -156,12 +157,14 @@ class GrowSpaceEnv(gym.Env):
         # Draw plant as series of lines (1 branch = 1 line)
         for branch in self.branches:
             pt1, pt2 = branch.get_pt1_pt2()
+            thiccness = ir(branch.width * BRANCH_THICCNESS * self.width)
+            print("branch width", branch.width, " BRANCH THICCNESS: ", BRANCH_THICCNESS, " width: ", self.width)
             cv2.line(
                 img,
                 pt1=pt1,
                 pt2=pt2,
                 color=(0, 255, 0),
-                thickness=ir(branch.width * BRANCH_THICCNESS * self.width))
+                thickness=thiccness)
             # print(f"drawing branch from {pt1} to {pt2} "
             #       f"with thiccness {branch.width/50 * self.width}")
 
@@ -200,12 +203,13 @@ class GrowSpaceEnv(gym.Env):
         self.target = np.array(
             [np.random.uniform(0, 1),
              np.random.uniform(.8, 1)])
-        self.light_width = .2
+        self.light_width = .25
         self.x1_light = .4
         self.x2_light = self.x1_light + self.light_width
 
         self.x_scatter = np.random.uniform(0, 1, self.light_dif)
-        self.y_scatter = np.random.uniform(0, 1, self.light_dif)
+        self.y_scatter = np.random.uniform(0.25, 1, self.light_dif)
+        self.steps = 0
 
         return self.get_observation()
 
@@ -227,7 +231,7 @@ class GrowSpaceEnv(gym.Env):
         xs, ys = self.light_scatter()
 
         # Branching step for light in this position
-        tips = self.tree_grow(xs, ys, .01, .1)
+        tips = self.tree_grow(xs, ys, .01, .15)
 
         # Calculate distance to target
         reward = 1 / self.distance_target(tips)
@@ -238,7 +242,8 @@ class GrowSpaceEnv(gym.Env):
         done = False  # because we don't have a terminal condition
         misc = {
         }  # (optional) additional information about plant/episode/other stuff, leave empty for now
-
+        print("steps:", self.steps)
+        self.steps += 1
         return observation, reward, done, misc
 
     def render(self, mode='human',
@@ -272,7 +277,7 @@ if __name__ == '__main__':
         img = gse.get_observation(debug_show_scatter=True)
         cv2.imshow("plant", img)
 
-        for _ in range(10):
+        for _ in range(20):
             action = key2action(cv2.waitKey(-1))
             if action is None:
                 quit()
