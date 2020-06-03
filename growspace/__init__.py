@@ -15,5 +15,5 @@ register(
     kwargs={
         # "observe_images": True
     },
-    max_episode_steps=200, # number of total steps in the environment
+    max_episode_steps=40, # number of total steps in the environment
 )
