@@ -7,7 +7,7 @@ from growspace.plants.tree import Branch
 from scipy.spatial import distance
 
 FIRST_BRANCH_HEIGHT = .24
-BRANCH_THICCNESS = .013
+BRANCH_THICCNESS = .015
 BRANCH_LENGTH = 1/9
 
 def to_int(v):
@@ -158,7 +158,7 @@ class GrowSpaceEnv(gym.Env):
         for branch in self.branches:
             pt1, pt2 = branch.get_pt1_pt2()
             thiccness = ir(branch.width * BRANCH_THICCNESS * self.width)
-            print("branch width", branch.width, " BRANCH THICCNESS: ", BRANCH_THICCNESS, " width: ", self.width)
+            #print("branch width", branch.width, " BRANCH THICCNESS: ", BRANCH_THICCNESS, " width: ", self.width)
             cv2.line(
                 img,
                 pt1=pt1,
@@ -204,7 +204,13 @@ class GrowSpaceEnv(gym.Env):
             [np.random.uniform(0, 1),
              np.random.uniform(.8, 1)])
         self.light_width = .25
-        self.x1_light = .4
+        if random_start > .87:
+            self.x1_light = .75
+        elif random_start < 0.13:
+            self.x1_light = 0
+        else:
+            self.x1_light = random_start - (self.light_width/2)
+
         self.x2_light = self.x1_light + self.light_width
 
         self.x_scatter = np.random.uniform(0, 1, self.light_dif)
@@ -242,7 +248,7 @@ class GrowSpaceEnv(gym.Env):
         done = False  # because we don't have a terminal condition
         misc = {
         }  # (optional) additional information about plant/episode/other stuff, leave empty for now
-        print("steps:", self.steps)
+        #print("steps:", self.steps)    # sanity check
         self.steps += 1
         return observation, reward, done, misc
 
