@@ -1,4 +1,4 @@
-GROWTH_MULTIPLIER = .1 # keep this below 1 to prevent exponential growth
+GROWTH_MULTIPLIER = .02 # keep this below 1 to prevent exponential growth
 
 class Branch(object):
 
