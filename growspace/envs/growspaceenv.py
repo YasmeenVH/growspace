@@ -2,9 +2,10 @@ import cv2
 import gym
 import numpy as np
 from numpy.linalg import norm
-
+import time
 from growspace.plants.tree import Branch
 from scipy.spatial import distance
+
 
 FIRST_BRANCH_HEIGHT = .24
 BRANCH_THICCNESS = .015
@@ -62,18 +63,28 @@ class GrowSpaceEnv(gym.Env):
             self.x1_light -= .1  # move by .1 left
 
     def tree_grow(self, x, y, mindist, maxdist):
-        # available scatter due to light position (look through xcoordinates
-        for i in range(len(x) - 1, 0, -1):
+        # location of branching available due to scattering
+
+        #branchfilter = np.logical_and(self.x_scatter >= self.x1_light,
+                                #self.x_scatter <= self.x2_light)
+
+        # apply filter to both y and x coordinates through the power of Numpy magic :D
+        #ys = self.y_scatter[filter]
+        #xs = self.x_scatter[filter]
+        #rint("this is branches: ", self.branches[0].get_pt1_pt2()[1][0])
+        ## TREEGROW STARTS HERE
+        for i in range(len(x) - 1, 0, -1):  # number of possible scatters, check if they allow for branching with min_dist
             closest_branch = 0
             dist = 1
 
             # loop through branches and see which coordinate within available scatter is the closest
             for branch_idx, branch in enumerate(self.branches):
-                temp_dist = norm([x[i] - branch.x2,
+                if self.x1_light <= branch.x2 <= self.x2_light:
+                    temp_dist = norm([x[i] - branch.x2,
                                   y[i] - branch.y2])  #euclidean distance
-                if temp_dist < dist:
-                    dist = temp_dist
-                    closest_branch = branch_idx
+                    if temp_dist < dist:
+                        dist = temp_dist
+                        closest_branch = branch_idx
 
             # removes scatter points if reached
             if dist < mindist:
@@ -110,20 +121,21 @@ class GrowSpaceEnv(gym.Env):
 
         # increase thickness of first elements added to tree as they grow
         self.branches[0].update_width()
+
         branch_coords = []
 
         #sending coordinates out
         for branch in self.branches:
             # x2 and y2 since they are the tips
             branch_coords.append([branch.x2, branch.y2])
-
+        #rint("print branch coord: ",branch_coords)
         return branch_coords
 
     def distance_target(self, coords):
         # Calculate distance from each tip grown
         dist = distance.cdist(coords, [self.target],
                               'euclidean')  #TODO replace with numpy
-
+        #dist = norm([coords, self.target])
         # Get smallest distance to target
         min_dist = min(dist)
 
@@ -221,6 +233,7 @@ class GrowSpaceEnv(gym.Env):
 
     def step(self, action):
         # Two possible actions, move light left or right
+
         if action == 0:
             self.light_move_L()
 
@@ -233,8 +246,13 @@ class GrowSpaceEnv(gym.Env):
             # then we keep the light in place
             pass
 
+
         # filter scattering
+
+        #tart = time.time()
         xs, ys = self.light_scatter()
+        #iff = time.time() - start
+        #rint(" filter scattering took: ", diff, "seconds")
 
         # Branching step for light in this position
         tips = self.tree_grow(xs, ys, .01, .15)
