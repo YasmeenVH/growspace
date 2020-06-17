@@ -63,16 +63,9 @@ class GrowSpaceEnv(gym.Env):
             self.x1_light -= .1  # move by .1 left
 
     def tree_grow(self, x, y, mindist, maxdist):
-        # location of branching available due to scattering
 
-        #branchfilter = np.logical_and(self.x_scatter >= self.x1_light,
-                                #self.x_scatter <= self.x2_light)
-
-        # apply filter to both y and x coordinates through the power of Numpy magic :D
-        #ys = self.y_scatter[filter]
-        #xs = self.x_scatter[filter]
-        #rint("this is branches: ", self.branches[0].get_pt1_pt2()[1][0])
         ## TREEGROW STARTS HERE
+        start = time.time()
         for i in range(len(x) - 1, 0, -1):  # number of possible scatters, check if they allow for branching with min_dist
             closest_branch = 0
             dist = 1
@@ -105,6 +98,20 @@ class GrowSpaceEnv(gym.Env):
                 #       f"grow_x/ = {(x[i] - self.branches[closest_branch].x2) / (dist*10)}")
 
         # generation of new branches (forking) in previous step will generate a new branch with grow count
+
+        # location of branching available due to scattering
+
+        # branchfilter = np.logical_and(self.x_scatter >= self.x1_light,
+        # self.x_scatter <= self.x2_light)
+
+        # apply filter to both y and x coordinates through the power of Numpy magic :D
+        # ys = self.y_scatter[filter]
+        # xs = self.x_scatter[filter]
+        # rint("this is branches: ", self.branches[0].get_pt1_pt2()[1][0])
+        diff = time.time() - start
+        print("find location of closest branch: ", diff)
+
+        start_2 = time.time()
         for i in range(len(self.branches)):
             if self.branches[i].grow_count > 0:
                 newBranch = Branch(
@@ -120,15 +127,24 @@ class GrowSpaceEnv(gym.Env):
                 self.branches[i].grow_y = 0
 
         # increase thickness of first elements added to tree as they grow
+        diff_2 = time.time() - start_2
+        print("draw new branch time : ", diff_2)
+
+        start_3 = time.time()
         self.branches[0].update_width()
+        diff_3 = time.time() - start_3
+        print("width update time: ", diff_3)
+
 
         branch_coords = []
-
+        start_4 = time.time()
         #sending coordinates out
         for branch in self.branches:
             # x2 and y2 since they are the tips
             branch_coords.append([branch.x2, branch.y2])
         #rint("print branch coord: ",branch_coords)
+        diff_4 = time.time() - start_4
+        print("coordinates of branches time: ", diff_4)
         return branch_coords
 
     def distance_target(self, coords):
