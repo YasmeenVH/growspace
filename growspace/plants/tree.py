@@ -41,6 +41,6 @@ class Branch(object):
     #     plt.plot([self.x,self.x2],[self.y,self.y2], linewidth=np.sqrt(self.width), color='green')
 
 if __name__=='__main__':
-    branches = [Branch(30, 30, -10, 0)]
+    branches = [Branch(30, 30, -10, 0,84,84)]
     print(len(branches))
-    branches[0].draw_branch()
+    print(type(branches[0].get_pt1_pt2()))
