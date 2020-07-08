@@ -21,10 +21,13 @@ def run_episode():
 def save_file_movie():
     png_dir = '/home/y/Documents/finalprojectcomp767/growspace/scripts/png/'
     images = []
+    step = 0
     for file_name in os.listdir(png_dir):
-        if file_name.endswith('.png'):
+        if file_name.endswith('.png') and file_name =='step{}.png'.format(step):
+
             file_path = os.path.join(png_dir, file_name)
             images.append(imageio.imread(file_path))
+            step+=1
     imageio.mimsave('../scripts/movie/movie.gif', images,fps=1)
 
 if __name__ == '__main__':
