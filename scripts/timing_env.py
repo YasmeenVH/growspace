@@ -48,7 +48,7 @@ def plot(timings):
     fig, ax = plt.subplots(1)
     ax.plot(x, av)
     ax.fill_between(x, av+err, av-err, alpha=0.5)
-    ax.set_title(r'over 10 episodes')
+    ax.set_title(r'over 100 episodes')
     ax.set_xlabel("steps")
     ax.set_ylabel("seconds")
     ax.grid()
@@ -56,5 +56,5 @@ def plot(timings):
 
 
 if __name__ == '__main__':
-  t = run_many_episodes(10)
+  t = run_many_episodes(100)
   plot(t)
