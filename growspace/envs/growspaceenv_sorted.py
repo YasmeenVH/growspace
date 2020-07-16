@@ -119,6 +119,11 @@ class GrowSpaceSortedEnv(gym.Env):
     def get_branches_in_range(self, start, end):
         return self.branches.irange(start, end)  # this is dark SortedDict magic
 
+    def branch_bisect_range(self, lower, upper):
+        start = self.branches.bisect(lower)
+        end = self.branches.bisect_right(upper)
+        return self.branches[start:end]
+
     def get_branch_start_end_thiccness(self, end_x):
         end_y, start_x, start_y, children = self.branches[end_x]
         thicc = ir((children + 1) * BRANCH_THICCNESS * self.width)
