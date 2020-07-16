@@ -20,3 +20,36 @@ Closest distance to the target
 
 ## Installation
 `pip install -e`
+
+
+## Growth Algorithm Pseudocode
+
+```python
+growth_len = val # max branch growth len
+branches = []
+min_dist = val # minimum distance under which a space colonization point is reached
+max_dist = val # maximum distance under which a branch can grow towards a space colonization point  
+
+def reset():
+    points = fill_arena_with_random_points()     
+    branch_start, branch_end = create_first_branch()
+    branches.append(Branch(start=branch_start,end=branch_stop))
+    light_left, light_right = position_light_source()
+
+def step():
+    points_filtered = point_range(points, light_left-growth_len, light_right+growth_len)
+    branches_filtered = branch_range(branches, light_left, light_right)
+    for point in points_filtered:
+        closest_branch, dist = find_closest_branch(point, branches_filtered)
+        if dist < min_dist:
+            remove_point(point) # if we reach the point, we don't branch
+        elif dist < max_dist:
+            closest_branch.add_growth_vector_towards(point)
+        
+    branches_to_grow_from = find_branches_with_growths(branches_filtered)
+    for branch in branches_to_grow_from:
+        branches.append(Branch(start=branch.end, end=branch.end+branch.growth_vector * growth_len))
+
+    update_all_branch_widths(branches)
+
+```

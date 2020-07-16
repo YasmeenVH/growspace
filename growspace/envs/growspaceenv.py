@@ -1,3 +1,5 @@
+from random import sample
+
 import cv2
 import gym
 import numpy as np
@@ -79,8 +81,12 @@ class GrowSpaceEnv(gym.Env):
 
             # loop through branches and see which coordinate within available scatter is the closest
 
-            branch_idx = [branch_idx for branch_idx, branch in enumerate(self.branches)if self.x1_light<=branch.x2 <= self.x2_light]
-            temp_dist = [norm([x[i] - self.branches[branch].x2, y[i] - self.branches[branch].y2]) for branch in range(0, len(branch_idx))]
+            if len(self.branches) > 20:
+                branches_trimmed = sample(self.branches, 20)
+            else:
+                branches_trimmed = self.branches
+            branch_idx = [branch_idx for branch_idx, branch in enumerate(branches_trimmed)if self.x1_light<=branch.x2 <= self.x2_light]
+            temp_dist = [norm([x[i] - branches_trimmed[branch].x2, y[i] - branches_trimmed[branch].y2]) for branch in range(0, len(branch_idx))]
 
             for j in range(0, len(temp_dist)):
                 if temp_dist[j]< dist:
