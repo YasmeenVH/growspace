@@ -1,7 +1,7 @@
 
 class Node(object):
-    def __init__(self, data = None):
-        self.data = data
+    def __init__(self, value=None):
+        self.value = value
         self.left = None
         self.right = None
 
@@ -9,25 +9,27 @@ class BST(object):
     def __init__(self):
         self.root = None
 
-    def insert(self,data):
+    def insert(self, data):
         if self.root is None:
             self.root = Node(data)
         else:
             self._insert(data, self.root)
 
     def _insert(self, data, cur_node):
-        if data < cur_node.data:
+        if data[0] < cur_node.value[0]:
             if cur_node.left is None:
                 cur_node.left = Node(data)
             else:
                 self._insert(data, cur_node.left)
-        elif data >= cur_node.data:       # allow for duplicates since we may have same X values
+        elif data[0] >= cur_node.value[0]:       # allow for duplicates since we may have same X values
             if cur_node.right is None:
                 cur_node.right = Node(data)
             else:
                 self._insert(data, cur_node.right)
         else:
             print('The X value does not fit in the tree')
+
+ # no need for this now
 
     def find(self, data):
         if self.root:
@@ -39,6 +41,8 @@ class BST(object):
         else:
             return None
 
+# no need for this now
+
     def _find(self, data, cur_node):
         if data > cur_node.data and cur_node.right:
             return self._find(data, cur_node.right)
@@ -47,22 +51,39 @@ class BST(object):
         if data == cur_node.data:
             return True
 
-    def key_range(self, data, r1, r2):
+    def key_range(self, cur_node, r1, r2):
         keys = []
-        if data is None:
+        if cur_node is None:
             return
 
-        if r1 < data.data:
-            self.key_range(data.left, r1, r2)
+        if r1 < cur_node.value[0]:
+            self.key_range(cur_node.left, r1, r2)
 
-        if r1 <= data.data and r2 >= data.data:
-            keys.append(data)
+        if r1 <= cur_node.value[0] <= r2:
+            keys.append(cur_node.value)
             return keys
 
-        if r2 > data.data:
-            self.key_range(data.right, r1, r2)
+        if r2 > cur_node.value[0]:
+            self.key_range(cur_node.right, r1, r2)
 
-    
+## no need for the recursive _keyrange function
+    def _key_range(self, cur_node, r1,r2):
+        keys = []
+
+        if cur_node is None:
+            return
+        if r1 < cur_node.value[0]:
+            self._key_range(cur_node.left, r1, r2)
+
+        if r1 <= cur_node.value[0] <= r2:
+            keys.append(cur_node.value)
+            return keys,
+
+        if r2 > cur_node.value[0]:
+            self._key_range(cur_node.right, r1, r2)
+
+
+
 
 
 
