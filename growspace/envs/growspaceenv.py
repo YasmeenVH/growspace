@@ -6,6 +6,9 @@ import time
 from growspace.plants.tree import Branch
 from scipy.spatial import distance
 import itertools
+import growspace.data_structure.search_tree as b_tree
+#from growspace.data_structure.search_tree import key_range
+
 
 
 FIRST_BRANCH_HEIGHT = .24
@@ -25,7 +28,7 @@ ir = to_int  # shortcut for function call
 
 class GrowSpaceEnv(gym.Env):
 
-    def __init__(self, width=84, height=84, light_dif=250):
+    def __init__(self, width=84, height=84, light_dif=250, obs_type = None):
         self.width = width  # do we keep?
         self.height = height  # do we keep?
         self.seed()
@@ -34,6 +37,7 @@ class GrowSpaceEnv(gym.Env):
         self.observation_space = gym.spaces.Box(
             0, 255, shape=(84, 84, 3), dtype=np.uint8)
         self.steps = 0
+        self.obs_type = obs_type
 
         # note: I moved the code for the first branch into the reset function,
         # because when you start an environment for the first time,
@@ -67,25 +71,51 @@ class GrowSpaceEnv(gym.Env):
         else:
             self.x1_light -= .1  # move by .1 left
 
+
     def tree_grow(self, x, y, mindist, maxdist):
 
         ## TREEGROW STARTS HERE
-        # input x are the filtered scatter points 
+        # input x are the filtered scatter points
+        #print("test: ",self.bst.root.value)
+        #tips = self.bst.key_range(self.bst.root, self.x1_light, self.x2_light)
+        #print("amount of tips in range :",tips)
+        #b_idx for b_idx, branch in enumerate(self.branches) if any():
+        #dprint(len(self.bst))
+        tips = self.bst.key_range(self.bst.root, self.x1_light, self.x2_light)
+        #@print("length of tips", tips)
 
         # apply filter to both idx and branches
         for i in range(len(x) - 1, 0, -1):  # number of possible scatters, check if they allow for branching with min_dist
             closest_branch = 0
             dist = 1
+            #tips = self.bst.key_range(self.bst.root, self.x1_light, self.x2_light)
+            print(tips)
+            #tips = self.bst.key_range(self.bst.root, self.x1_light, self.x2_light)
+            for j in range(len(tips)):    #xs,ys in tips:
+                temp_dist = norm([x[i] - tips[j][0], y[i] - tips[j][1]])
+                if temp_dist < dist:
+                    dist = temp_dist
+                    closest_branch = j
+
+            ## search binary search tree for x values in between light1, light2
+
+            #branches = [branch_idx for branch_idx, branch in enumerate(self.branches) if any(xs in x_values for branch.x2 in branch)
 
             # loop through branches and see which coordinate within available scatter is the closest
+            #for branch_idx, branch in enumerate(self.branches):
+                #if self.x1_light <= branch.x2 <= self.x2_light:
+                    #temp_dist = norm([x[i] - branch.x2,
+                                  #y[i] - branch.y2])  #euclidean distance
+                    #if temp_dist < dist:
+                        #dist = temp_dist
+                        #closest_branch = branch_idx
+            #branch_idx = [branch_idx for branch_idx, branch in enumerate(self.branches)if self.x1_light<=branch.x2 <= self.x2_light]
+            #temp_dist = [norm([x[i] - self.branches[branch].x2, y[i] - self.branches[branch].y2]) for branch in range(0, len(branch_idx))]
 
-            branch_idx = [branch_idx for branch_idx, branch in enumerate(self.branches)if self.x1_light<=branch.x2 <= self.x2_light]
-            temp_dist = [norm([x[i] - self.branches[branch].x2, y[i] - self.branches[branch].y2]) for branch in range(0, len(branch_idx))]
-
-            for j in range(0, len(temp_dist)):
-                if temp_dist[j]< dist:
-                    dist = temp_dist[j]
-                    closest_branch = branch_idx[j]
+            #for j in range(0, len(temp_dist)):
+                #if temp_dist[j] < dist:
+                    #dist = temp_dist[j]
+                    #closest_branch = branch_idx[j]
 
             # removes scatter points if reached
 
@@ -107,7 +137,9 @@ class GrowSpaceEnv(gym.Env):
                 #       f"grow_x/ = {(x[i] - self.branches[closest_branch].x2) / (dist*10)}")
 
 
-        # generation of new branches (forking) in previous step will generate a new branch with grow count
+        # generation of new branches (for
+        #
+        # ing) in previous step will generate a new branch with grow count
 
         # location of branching available due to scattering
 
@@ -128,6 +160,9 @@ class GrowSpaceEnv(gym.Env):
                     self.branches[i].y2, self.branches[i].y2 +
                     self.branches[i].grow_y / self.branches[i].grow_count,
                     self.width, self.height)
+                self.b_keys.add(i+2)
+                print("new branch coords", newBranch.x2, newBranch.y2)
+                self.bst.insert([newBranch.x2, newBranch.y2])
                 self.branches.append(newBranch)
                 self.branches[i].child.append(newBranch)
                 self.branches[i].grow_count = 0
@@ -145,6 +180,8 @@ class GrowSpaceEnv(gym.Env):
         for branch in self.branches:
             # x2 and y2 since they are the tips
             branch_coords.append([branch.x2, branch.y2])
+
+        print("branching has occured")
 
         return branch_coords
 
@@ -243,6 +280,11 @@ class GrowSpaceEnv(gym.Env):
         self.x_scatter = np.random.uniform(0, 1, self.light_dif)
         self.y_scatter = np.random.uniform(0.25, 1, self.light_dif)
         self.steps = 0
+        self.bst = b_tree.BST()
+        self.bst.insert([self.branches[0].x2,self.branches[0].y2])  # should be one branch at the moment and this is initalizing root of binary search tree
+        print(self.bst.root.value)
+        self.b_keys = set()  #branch key ids
+        self.b_keys.add(1)
 
         return self.get_observation()
 
@@ -313,7 +355,7 @@ if __name__ == '__main__':
 
     while True:
         gse.reset()
-        img = gse.get_observation(debug_show_scatter=False)
+        img = gse.get_observation(debug_show_scatter=True)
         cv2.imshow("plant", img)
 
         for _ in range(20):
@@ -322,4 +364,4 @@ if __name__ == '__main__':
                 quit()
 
             gse.step(action)
-            cv2.imshow("plant", gse.get_observation(debug_show_scatter=False))
+            cv2.imshow("plant", gse.get_observation(debug_show_scatter=True))
