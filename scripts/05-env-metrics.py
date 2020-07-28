@@ -7,10 +7,12 @@ import matplotlib.pyplot as plt
 env = gym.make("GrowSpaceEnv-Images-v0")
 
 
-def distance_to_original_tip():
+def dist_original_tip():
+    pass
 
+def branches_per_step():
+    pass
 
-def number_of_branches():
-
-
-def
+def symmetry_score():
+    #to define later
+    pass
