@@ -17,3 +17,11 @@ register(
     },
     max_episode_steps=25, # number of total steps in the environment
 )
+register(
+    id=f'GrowSpaceEnv-Images-v1',
+    entry_point='growspace.envs:GrowSpaceSortedEnv',
+    kwargs={
+        # "observe_images": True
+    },
+    max_episode_steps=25, # number of total steps in the environment
+)

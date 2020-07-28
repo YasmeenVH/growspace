@@ -1,3 +1,5 @@
+from random import sample
+
 import cv2
 import gym
 import numpy as np
@@ -6,8 +8,13 @@ import time
 from growspace.plants.tree import Branch
 from scipy.spatial import distance
 import itertools
-import growspace.data_structure.search_tree as b_tree
+
+#import growspace.data_structure.search_tree as b_tree
 #from growspace.data_structure.search_tree import key_range
+
+
+from numba import jit
+from functools import partial
 
 
 
@@ -72,7 +79,11 @@ class GrowSpaceEnv(gym.Env):
             self.x1_light -= .1  # move by .1 left
 
 
-    def tree_grow(self, x, y, mindist, maxdist):
+    #@staticmethod
+    #@jit(nopython=True)
+    #@partial(jit, static_argnums=(0,))
+    def tree_grow(self,x, y, mindist, maxdist):
+
 
         ## TREEGROW STARTS HERE
         # input x are the filtered scatter points
@@ -81,7 +92,7 @@ class GrowSpaceEnv(gym.Env):
         #print("amount of tips in range :",tips)
         #b_idx for b_idx, branch in enumerate(self.branches) if any():
         #dprint(len(self.bst))
-        tips = self.bst.key_range(self.bst.root, self.x1_light, self.x2_light)
+        #tips = self.bst.key_range(self.bst.root, self.x1_light, self.x2_light)
         #@print("length of tips", tips)
 
         # apply filter to both idx and branches
@@ -89,15 +100,11 @@ class GrowSpaceEnv(gym.Env):
             closest_branch = 0
             dist = 1
             #tips = self.bst.key_range(self.bst.root, self.x1_light, self.x2_light)
-            print(tips)
+            #print(tips)
             #tips = self.bst.key_range(self.bst.root, self.x1_light, self.x2_light)
-            for j in range(len(tips)):    #xs,ys in tips:
-                temp_dist = norm([x[i] - tips[j][0], y[i] - tips[j][1]])
-                if temp_dist < dist:
-                    dist = temp_dist
-                    closest_branch = j
 
             ## search binary search tree for x values in between light1, light2
+
 
             #branches = [branch_idx for branch_idx, branch in enumerate(self.branches) if any(xs in x_values for branch.x2 in branch)
 
@@ -117,6 +124,19 @@ class GrowSpaceEnv(gym.Env):
                     #dist = temp_dist[j]
                     #closest_branch = branch_idx[j]
 
+            if len(self.branches) > 10:
+                branches_trimmed = sample(self.branches, 10)
+            else:
+                branches_trimmed = self.branches
+            branch_idx = [branch_idx for branch_idx, branch in enumerate(branches_trimmed)if self.x1_light <= branch.x2 <= self.x2_light]
+            temp_dist = [norm([x[i] - branches_trimmed[branch].x2, y[i] - branches_trimmed[branch].y2]) for branch in branch_idx]
+
+            for j in range(0, len(temp_dist)):
+                if temp_dist[j] < dist:
+                    dist = temp_dist[j]
+                    closest_branch = branch_idx[j]
+
+
             # removes scatter points if reached
 
             if dist < mindist:
@@ -126,11 +146,17 @@ class GrowSpaceEnv(gym.Env):
             # when distance is greater than max distance, branching occurs to find other points.
             elif dist < maxdist:
 
-                self.branches[closest_branch].grow_count += 1
-                self.branches[closest_branch].grow_x += (
-                    x[i] - self.branches[closest_branch].x2) / (dist/BRANCH_LENGTH)
-                self.branches[closest_branch].grow_y += (
-                    y[i] - self.branches[closest_branch].y2) / (dist/BRANCH_LENGTH)
+                #self.branches[closest_branch].grow_count += 1
+                branches_trimmed[closest_branch].grow_count += 1
+                #self.branches[closest_branch].grow_x += (
+                    #x[i] - self.branches[closest_branch].x2) / (dist/BRANCH_LENGTH)
+                branches_trimmed[closest_branch].grow_x += (
+                    x[i] - branches_trimmed[closest_branch].x2) / (dist/BRANCH_LENGTH)
+                #self.branches[closest_branch].grow_y += (
+                    #y[i] - self.branches[closest_branch].y2) / (dist/BRANCH_LENGTH)
+                branches_trimmed[closest_branch].grow_y += (
+                    y[i] - branches_trimmed[closest_branch].y2) / (dist / BRANCH_LENGTH)
+
                 # print(f"closest branch: {closest_branch}\n"
                 #       f"grow_count = {self.branches[closest_branch].grow_count}\n"
                 #       f"grow_x* = {(x[i] - self.branches[closest_branch].x2) * dist}\n"
@@ -151,23 +177,37 @@ class GrowSpaceEnv(gym.Env):
         # xs = self.x_scatter[filter]
         # rint("this is branches: ", self.branches[0].get_pt1_pt2()[1][0])
 
+        #
+        # for i in range(len(self.branches)):
+        #     if self.branches[i].grow_count > 0:
+        #         newBranch = Branch(
+        #             self.branches[i].x2, self.branches[i].x2 +
+        #             self.branches[i].grow_x / self.branches[i].grow_count,
+        #             self.branches[i].y2, self.branches[i].y2 +
+        #             self.branches[i].grow_y / self.branches[i].grow_count,
+        #             self.width, self.height)
+        #         self.branches.append(newBranch)
+        #         self.branches[i].child.append(newBranch)
+        #         self.branches[i].grow_count = 0
+        #         self.branches[i].grow_x = 0
+        #         self.branches[i].grow_y = 0
 
-        for i in range(len(self.branches)):
-            if self.branches[i].grow_count > 0:
+        for i in range(len(branches_trimmed)):
+            if branches_trimmed[i].grow_count > 0:
                 newBranch = Branch(
-                    self.branches[i].x2, self.branches[i].x2 +
-                    self.branches[i].grow_x / self.branches[i].grow_count,
-                    self.branches[i].y2, self.branches[i].y2 +
-                    self.branches[i].grow_y / self.branches[i].grow_count,
+                    branches_trimmed[i].x2, branches_trimmed[i].x2 +
+                    branches_trimmed[i].grow_x / branches_trimmed[i].grow_count,
+                    branches_trimmed[i].y2, branches_trimmed[i].y2 +
+                    branches_trimmed[i].grow_y / branches_trimmed[i].grow_count,
                     self.width, self.height)
-                self.b_keys.add(i+2)
+                #self.b_keys.add(i+2)
                 print("new branch coords", newBranch.x2, newBranch.y2)
-                self.bst.insert([newBranch.x2, newBranch.y2])
+                #self.bst.insert([newBranch.x2, newBranch.y2])
                 self.branches.append(newBranch)
-                self.branches[i].child.append(newBranch)
-                self.branches[i].grow_count = 0
-                self.branches[i].grow_x = 0
-                self.branches[i].grow_y = 0
+                branches_trimmed[i].child.append(newBranch)
+                branches_trimmed[i].grow_count = 0
+                branches_trimmed[i].grow_x = 0
+                branches_trimmed[i].grow_y = 0
 
         # increase thickness of first elements added to tree as they grow
 
@@ -280,11 +320,11 @@ class GrowSpaceEnv(gym.Env):
         self.x_scatter = np.random.uniform(0, 1, self.light_dif)
         self.y_scatter = np.random.uniform(0.25, 1, self.light_dif)
         self.steps = 0
-        self.bst = b_tree.BST()
-        self.bst.insert([self.branches[0].x2,self.branches[0].y2])  # should be one branch at the moment and this is initalizing root of binary search tree
-        print(self.bst.root.value)
-        self.b_keys = set()  #branch key ids
-        self.b_keys.add(1)
+        #self.bst = b_tree.BST()
+        #self.bst.insert([self.branches[0].x2,self.branches[0].y2])  # should be one branch at the moment and this is initalizing root of binary search tree
+        #print(self.bst.root.value)
+        #self.b_keys = set()  #branch key ids
+        #self.b_keys.add(1)
 
         return self.get_observation()
 
