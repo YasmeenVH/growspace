@@ -21,6 +21,7 @@ from functools import partial
 FIRST_BRANCH_HEIGHT = .24
 BRANCH_THICCNESS = .015
 BRANCH_LENGTH = 1/9
+MAX_BRANCHING = 10
 
 def to_int(v):
     return int(round(v))
@@ -124,8 +125,8 @@ class GrowSpaceEnv(gym.Env):
                     #dist = temp_dist[j]
                     #closest_branch = branch_idx[j]
 
-            if len(self.branches) > 10:
-                branches_trimmed = sample(self.branches, 10)
+            if len(self.branches) > MAX_BRANCHING:
+                branches_trimmed = sample(self.branches, MAX_BRANCHING)
             else:
                 branches_trimmed = self.branches
             branch_idx = [branch_idx for branch_idx, branch in enumerate(branches_trimmed)if self.x1_light <= branch.x2 <= self.x2_light]
@@ -201,7 +202,7 @@ class GrowSpaceEnv(gym.Env):
                     branches_trimmed[i].grow_y / branches_trimmed[i].grow_count,
                     self.width, self.height)
                 #self.b_keys.add(i+2)
-                print("new branch coords", newBranch.x2, newBranch.y2)
+                #print("new branch coords", newBranch.x2, newBranch.y2)
                 #self.bst.insert([newBranch.x2, newBranch.y2])
                 self.branches.append(newBranch)
                 branches_trimmed[i].child.append(newBranch)
@@ -221,7 +222,7 @@ class GrowSpaceEnv(gym.Env):
             # x2 and y2 since they are the tips
             branch_coords.append([branch.x2, branch.y2])
 
-        print("branching has occured")
+        #print("branching has occured")
 
         return branch_coords
 
@@ -237,6 +238,7 @@ class GrowSpaceEnv(gym.Env):
 
     def get_observation(self, debug_show_scatter=False):
         # new empty image
+
         img = np.zeros((self.height, self.width, 3), dtype=np.uint8)
 
         # place light as rectangle
@@ -290,6 +292,9 @@ class GrowSpaceEnv(gym.Env):
 
         # flip image, because plant grows from the bottom, not the top
         img = cv2.flip(img, 0)
+
+        if self.obs_type == 'Binary':
+            light = np.zeros(3,3)
 
         return img
 
