@@ -294,7 +294,8 @@ class GrowSpaceEnv(gym.Env):
         img = cv2.flip(img, 0)
 
         if self.obs_type == 'Binary':
-            light = np.zeros(3,3)
+            #light = np.zeros(3,3)
+            pass
 
         return img
 
