@@ -36,7 +36,7 @@ ir = to_int  # shortcut for function call
 
 class GrowSpaceEnv(gym.Env):
 
-    def __init__(self, width=84, height=84, light_dif=250, obs_type = None):
+    def __init__(self, width=84, height=84, light_dif=250, obs_type = 'Binary'):
         self.width = width  # do we keep?
         self.height = height  # do we keep?
         self.seed()
@@ -241,63 +241,112 @@ class GrowSpaceEnv(gym.Env):
 
         img = np.zeros((self.height, self.width, 3), dtype=np.uint8)
 
-        # place light as rectangle
-        yellow = (0, 128, 128)  # RGB color (dark yellow)
-        x1 = ir(self.x1_light * self.width)
-        x2 = ir(self.x2_light * self.width)
-        cv2.rectangle(
-            img, pt1=(x1, 0), pt2=(x2, self.height), color=yellow, thickness=-1)
-        # print(f"drawing light rectangle from {(x1, 0)} "
-        #       f"to {(x2, self.height)}")
-
-        if debug_show_scatter:
-            xs, ys = self.light_scatter()
-            for k in range(len(xs)):
-                x = ir(xs[k] * self.width)
-                y = ir(ys[k] * self.height)
-                cv2.circle(
-                    img,
-                    center=(x, y),
-                    radius=2,
-                    color=(255, 0, 0),
-                    thickness=-1)
-
-        # Draw plant as series of lines (1 branch = 1 line)
-        for branch in self.branches:
-            pt1, pt2 = branch.get_pt1_pt2()
-            thiccness = ir(branch.width * BRANCH_THICCNESS * self.width)
-            #print("branch width", branch.width, " BRANCH THICCNESS: ", BRANCH_THICCNESS, " width: ", self.width)
-            cv2.line(
-                img,
-                pt1=pt1,
-                pt2=pt2,
-                color=(0, 255, 0),
-                thickness=thiccness)
-            # print(f"drawing branch from {pt1} to {pt2} "
-            #       f"with thiccness {branch.width/50 * self.width}")
-
-        # place goal as filled circle with center and radius
-        # also important - place goal last because must be always visible
-        x = ir(self.target[0] * self.width)
-        y = ir(self.target[1] * self.height)
-        cv2.circle(
-            img,
-            center=(x, y),
-            radius=ir(.03 * self.width),
-            color=(0, 0, 255),
-            thickness=-1)
-        # print(f"drawing goal circle at {(x, y)} "
-        #       f"with radius {ir(.03*self.width)}")
-
-
-        # flip image, because plant grows from the bottom, not the top
-        img = cv2.flip(img, 0)
-
         if self.obs_type == 'Binary':
-            #light = np.zeros(3,3)
-            pass
 
-        return img
+            # ---light beam --- #
+
+            yellow = (0, 128, 128)  # RGB color (dark yellow)
+            x1 = ir(self.x1_light * self.width)
+            x2 = ir(self.x2_light * self.width)
+            cv2.rectangle(
+                img, pt1=(x1, 0), pt2=(x2, self.height), color=yellow, thickness=-1)
+            # print(img.shape)
+            light_img = np.sum(img, axis=2)
+            light = np.where(light_img <=128, light_img, 1)
+
+            # ---tree--- #
+            img1 = np.zeros((self.height, self.width, 3), dtype=np.uint8)
+            for branch in self.branches:
+                pt1, pt2 = branch.get_pt1_pt2()
+                thiccness = ir(branch.width * BRANCH_THICCNESS * self.width)
+                # print("branch width", branch.width, " BRANCH THICCNESS: ", BRANCH_THICCNESS, " width: ", self.width)
+                cv2.line(
+                    img1,
+                    pt1=pt1,
+                    pt2=pt2,
+                    color=(0, 255, 0),
+                    thickness=thiccness)
+            tree_img = np.sum(img1, axis=2)
+            tree = np.where(tree_img <= 255, tree_img, 1)
+
+            # ---target--- #
+            img2 = np.zeros((self.height, self.width, 3), dtype=np.uint8)
+            x = ir(self.target[0] * self.width)
+            y = ir(self.target[1] * self.height)
+            cv2.circle(
+                img,
+                center=(x, y),
+                radius=ir(.03 * self.width),
+                color=(0, 0, 255),
+                thickness=-1)
+
+            target_img = np.sum(img2, axis=2)
+            target = np.where(target_img <= 255, target_img, 1)
+
+            final_img = np.dstack((light, tree, target))
+            print("dimensions of binary :",final_img.shape)
+
+            final_img = cv2.flip(final_img, 0)
+
+            return final_img
+
+
+        else:
+        # place light as rectangle
+            yellow = (0, 128, 128)  # RGB color (dark yellow)
+            x1 = ir(self.x1_light * self.width)
+            x2 = ir(self.x2_light * self.width)
+            cv2.rectangle(
+                img, pt1=(x1, 0), pt2=(x2, self.height), color=yellow, thickness=-1)
+            # print(f"drawing light rectangle from {(x1, 0)} "
+            #       f"to {(x2, self.height)}")
+            #print(img.shape)
+
+            if debug_show_scatter:
+                xs, ys = self.light_scatter()
+                for k in range(len(xs)):
+                    x = ir(xs[k] * self.width)
+                    y = ir(ys[k] * self.height)
+                    cv2.circle(
+                        img,
+                        center=(x, y),
+                        radius=2,
+                        color=(255, 0, 0),
+                        thickness=-1)
+
+            # Draw plant as series of lines (1 branch = 1 line)
+            for branch in self.branches:
+                pt1, pt2 = branch.get_pt1_pt2()
+                thiccness = ir(branch.width * BRANCH_THICCNESS * self.width)
+                #print("branch width", branch.width, " BRANCH THICCNESS: ", BRANCH_THICCNESS, " width: ", self.width)
+                cv2.line(
+                    img,
+                    pt1=pt1,
+                    pt2=pt2,
+                    color=(0, 255, 0),
+                    thickness=thiccness)
+                # print(f"drawing branch from {pt1} to {pt2} "
+                #       f"with thiccness {branch.width/50 * self.width}")
+
+
+            # place goal as filled circle with center and radius
+            # also important - place goal last because must be always visible
+            x = ir(self.target[0] * self.width)
+            y = ir(self.target[1] * self.height)
+            cv2.circle(
+                img,
+                center=(x, y),
+                radius=ir(.03 * self.width),
+                color=(0, 0, 255),
+                thickness=-1)
+            # print(f"drawing goal circle at {(x, y)} "
+            #       f"with radius {ir(.03*self.width)}")
+
+            # flip image, because plant grows from the bottom, not the top
+            img = cv2.flip(img, 0)
+
+
+            return img
 
     def reset(self):
         # Set env back to start - also necessary on first start
@@ -401,7 +450,7 @@ if __name__ == '__main__':
 
     while True:
         gse.reset()
-        img = gse.get_observation(debug_show_scatter=True)
+        img = gse.get_observation(debug_show_scatter=False)
         cv2.imshow("plant", img)
 
         for _ in range(20):
@@ -410,4 +459,4 @@ if __name__ == '__main__':
                 quit()
 
             gse.step(action)
-            cv2.imshow("plant", gse.get_observation(debug_show_scatter=True))
+            cv2.imshow("plant", gse.get_observation(debug_show_scatter=False))
