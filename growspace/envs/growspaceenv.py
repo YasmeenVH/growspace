@@ -284,14 +284,14 @@ class GrowSpaceEnv(gym.Env):
             target = np.where(target_img <= 255, target_img, 1)
 
             final_img = np.dstack((light, tree, target))
-            print("dimensions of binary :",final_img.shape)
+            #print("dimensions of binary :",final_img.shape)
 
             final_img = cv2.flip(final_img, 0)
 
             return final_img
 
 
-        else:
+        if self.obs_type == None:
         # place light as rectangle
             yellow = (0, 128, 128)  # RGB color (dark yellow)
             x1 = ir(self.x1_light * self.width)
