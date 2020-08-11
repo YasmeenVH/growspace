@@ -36,7 +36,7 @@ ir = to_int  # shortcut for function call
 
 class GrowSpaceEnv(gym.Env):
 
-    def __init__(self, width=84, height=84, light_dif=250, obs_type = 'Binary'):
+    def __init__(self, width=84, height=84, light_dif=250, obs_type = None):
         self.width = width  # do we keep?
         self.height = height  # do we keep?
         self.seed()
@@ -344,7 +344,7 @@ class GrowSpaceEnv(gym.Env):
 
             # flip image, because plant grows from the bottom, not the top
             img = cv2.flip(img, 0)
-
+            #print(img)
 
             return img
 
@@ -416,7 +416,7 @@ class GrowSpaceEnv(gym.Env):
         observation = self.get_observation()  #image
 
         done = False  # because we don't have a terminal condition
-        misc = {
+        misc = {"tips": tips, "target": self.target, "light": self.x1_light
         }  # (optional) additional information about plant/episode/other stuff, leave empty for now
         #print("steps:", self.steps)    # sanity check
         self.steps += 1
@@ -453,7 +453,7 @@ if __name__ == '__main__':
         img = gse.get_observation(debug_show_scatter=False)
         cv2.imshow("plant", img)
 
-        for _ in range(20):
+        for _ in range(30):
             action = key2action(cv2.waitKey(-1))
             if action is None:
                 quit()
