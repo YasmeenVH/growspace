@@ -8,6 +8,7 @@ import time
 from growspace.plants.tree import Branch
 from scipy.spatial import distance
 import itertools
+from sklearn import preprocessing
 
 #import growspace.data_structure.search_tree as b_tree
 #from growspace.data_structure.search_tree import key_range
@@ -233,6 +234,7 @@ class GrowSpaceEnv(gym.Env):
         #dist = norm([coords, self.target])
         # Get smallest distance to target
         min_dist = min(dist)
+        #print(min_dist)
 
         return min_dist
 
@@ -410,8 +412,13 @@ class GrowSpaceEnv(gym.Env):
         tips = self.tree_grow(xs, ys, .01, .15)
 
         # Calculate distance to target
-        reward = 1 / self.distance_target(tips)
-
+        if self.distance_target(tips) <= 0.1:
+            reward = 1/0.1 /10
+            #reward = preprocessing.normalize(reward)
+        else:
+            reward = 1 / self.distance_target(tips) /10
+        #print("this is reward:",reward)
+        #reward = preprocessing.normalize(reward)
         # Render image of environment at current state
         observation = self.get_observation()  #image
 
