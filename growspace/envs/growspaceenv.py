@@ -10,9 +10,6 @@ from scipy.spatial import distance
 import itertools
 from sklearn import preprocessing
 
-#import growspace.data_structure.search_tree as b_tree
-#from growspace.data_structure.search_tree import key_range
-
 
 from numba import jit
 from functools import partial
@@ -45,7 +42,6 @@ class GrowSpaceEnv(gym.Env):
         self.action_space = gym.spaces.Discrete(3)  # L, R, keep of light paddle
         self.observation_space = gym.spaces.Box(
             0, 255, shape=(84, 84, 3), dtype=np.uint8)
-        self.steps = 0
         self.obs_type = obs_type
 
         # note: I moved the code for the first branch into the reset function,
@@ -86,45 +82,10 @@ class GrowSpaceEnv(gym.Env):
     #@partial(jit, static_argnums=(0,))
     def tree_grow(self,x, y, mindist, maxdist):
 
-
-        ## TREEGROW STARTS HERE
-        # input x are the filtered scatter points
-        #print("test: ",self.bst.root.value)
-        #tips = self.bst.key_range(self.bst.root, self.x1_light, self.x2_light)
-        #print("amount of tips in range :",tips)
-        #b_idx for b_idx, branch in enumerate(self.branches) if any():
-        #dprint(len(self.bst))
-        #tips = self.bst.key_range(self.bst.root, self.x1_light, self.x2_light)
-        #@print("length of tips", tips)
-
         # apply filter to both idx and branches
         for i in range(len(x) - 1, 0, -1):  # number of possible scatters, check if they allow for branching with min_dist
             closest_branch = 0
             dist = 1
-            #tips = self.bst.key_range(self.bst.root, self.x1_light, self.x2_light)
-            #print(tips)
-            #tips = self.bst.key_range(self.bst.root, self.x1_light, self.x2_light)
-
-            ## search binary search tree for x values in between light1, light2
-
-
-            #branches = [branch_idx for branch_idx, branch in enumerate(self.branches) if any(xs in x_values for branch.x2 in branch)
-
-            # loop through branches and see which coordinate within available scatter is the closest
-            #for branch_idx, branch in enumerate(self.branches):
-                #if self.x1_light <= branch.x2 <= self.x2_light:
-                    #temp_dist = norm([x[i] - branch.x2,
-                                  #y[i] - branch.y2])  #euclidean distance
-                    #if temp_dist < dist:
-                        #dist = temp_dist
-                        #closest_branch = branch_idx
-            #branch_idx = [branch_idx for branch_idx, branch in enumerate(self.branches)if self.x1_light<=branch.x2 <= self.x2_light]
-            #temp_dist = [norm([x[i] - self.branches[branch].x2, y[i] - self.branches[branch].y2]) for branch in range(0, len(branch_idx))]
-
-            #for j in range(0, len(temp_dist)):
-                #if temp_dist[j] < dist:
-                    #dist = temp_dist[j]
-                    #closest_branch = branch_idx[j]
 
             if len(self.branches) > MAX_BRANCHING:
                 branches_trimmed = sample(self.branches, MAX_BRANCHING)
@@ -159,40 +120,6 @@ class GrowSpaceEnv(gym.Env):
                 branches_trimmed[closest_branch].grow_y += (
                     y[i] - branches_trimmed[closest_branch].y2) / (dist / BRANCH_LENGTH)
 
-                # print(f"closest branch: {closest_branch}\n"
-                #       f"grow_count = {self.branches[closest_branch].grow_count}\n"
-                #       f"grow_x* = {(x[i] - self.branches[closest_branch].x2) * dist}\n"
-                #       f"grow_x/ = {(x[i] - self.branches[closest_branch].x2) / (dist*10)}")
-
-
-        # generation of new branches (for
-        #
-        # ing) in previous step will generate a new branch with grow count
-
-        # location of branching available due to scattering
-
-        # branchfilter = np.logical_and(self.x_scatter >= self.x1_light,
-        # self.x_scatter <= self.x2_light)
-
-        # apply filter to both y and x coordinates through the power of Numpy magic :D
-        # ys = self.y_scatter[filter]
-        # xs = self.x_scatter[filter]
-        # rint("this is branches: ", self.branches[0].get_pt1_pt2()[1][0])
-
-        #
-        # for i in range(len(self.branches)):
-        #     if self.branches[i].grow_count > 0:
-        #         newBranch = Branch(
-        #             self.branches[i].x2, self.branches[i].x2 +
-        #             self.branches[i].grow_x / self.branches[i].grow_count,
-        #             self.branches[i].y2, self.branches[i].y2 +
-        #             self.branches[i].grow_y / self.branches[i].grow_count,
-        #             self.width, self.height)
-        #         self.branches.append(newBranch)
-        #         self.branches[i].child.append(newBranch)
-        #         self.branches[i].grow_count = 0
-        #         self.branches[i].grow_x = 0
-        #         self.branches[i].grow_y = 0
 
         for i in range(len(branches_trimmed)):
             if branches_trimmed[i].grow_count > 0:
@@ -377,11 +304,8 @@ class GrowSpaceEnv(gym.Env):
         self.x_scatter = np.random.uniform(0, 1, self.light_dif)
         self.y_scatter = np.random.uniform(0.25, 1, self.light_dif)
         self.steps = 0
-        #self.bst = b_tree.BST()
-        #self.bst.insert([self.branches[0].x2,self.branches[0].y2])  # should be one branch at the moment and this is initalizing root of binary search tree
-        #print(self.bst.root.value)
-        #self.b_keys = set()  #branch key ids
-        #self.b_keys.add(1)
+        self.new_branches = 0
+        self.tips_per_step = 0
 
         return self.get_observation()
 
@@ -402,11 +326,7 @@ class GrowSpaceEnv(gym.Env):
 
 
         # filter scattering
-
-        #tart = time.time()
         xs, ys = self.light_scatter()
-        #iff = time.time() - start
-        #rint(" filter scattering took: ", diff, "seconds")
 
         # Branching step for light in this position
         tips = self.tree_grow(xs, ys, .01, .15)
@@ -421,12 +341,28 @@ class GrowSpaceEnv(gym.Env):
         #reward = preprocessing.normalize(reward)
         # Render image of environment at current state
         observation = self.get_observation()  #image
+        print("these are tips:",tips)
+        print("length of tips:", len(tips))
 
         done = False  # because we don't have a terminal condition
-        misc = {"tips": tips, "target": self.target, "light": self.x1_light
-        }  # (optional) additional information about plant/episode/other stuff, leave empty for now
+        misc = {"tips": tips, "target": self.target, "light": self.x1_light}
+
+        if self.steps == 0:
+            self.new_branches = len(tips)
+            misc['new_branches'] = self.new_branches
+
+        else:
+            new_branches = len(tips)-self.new_branches
+            misc['new_branches'] = new_branches
+            self.new_branches = len(tips)  # reset for future step
+
+
+        # (optional) additional information about plant/episode/other stuff, leave empty for now
         #print("steps:", self.steps)    # sanity check
         self.steps += 1
+        #print(misc)
+        #self.number_of_branches = new_branches
+        #print("how many new branches? ", misc['new_branches'])
         return observation, reward, done, misc
 
     def render(self, mode='human',
