@@ -341,8 +341,8 @@ class GrowSpaceEnv(gym.Env):
         #reward = preprocessing.normalize(reward)
         # Render image of environment at current state
         observation = self.get_observation()  #image
-        print("these are tips:",tips)
-        print("length of tips:", len(tips))
+        #print("these are tips:",tips)
+        #print("length of tips:", len(tips))
 
         done = False  # because we don't have a terminal condition
         misc = {"tips": tips, "target": self.target, "light": self.x1_light}
