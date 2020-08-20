@@ -3,84 +3,129 @@ import time
 import growspace
 import numpy as np
 import matplotlib.pyplot as plt
-from sortedcontainers import SortedDict
+from scipy.spatial import distance
+import os, sys
+import imageio
+import cv2
 env = gym.make("GrowSpaceEnv-Images-v0")
+from scripts.random_solver import random_solver
+from array import *
+from itertools import chain
+from scripts.save_img_movie import save_file_movie_oracle, filter, atoi, natural_keys
 
 
 class Oracle(object):
     def __init__(self):
         pass
     def oracle(self):
-        state_space = np.zeros((84,84))
-        #print(state_space)
         env.seed()
-        start = env.reset()
-        #it +=1
-        count = 0
+        env.reset()
         rewards = []
-        timers_step = []
-        #dict_of_tips = SortedDict()
-        actions = [0, 1, 2]
-        #b_tips = set()
         target_x = env.target[0]
-        #rewards = set()
+        target = env.target
+
 ## remember the dictionary for misc is : {"tips": tips, "target": self.target, "light": self.x1_light, "new_branches: self.new_banches}
-        for s in range(30):        # same as ppo
-            print("this is branch:",env.branches[:])
-            #if s == 0:             # first step is different as tips are logged after each step
-            if target_x < env.x1_light:
-                s_t = env.step(0)
-            elif target_x > env.x2_light:
-                s_t = env.step(1)
+        for s in range(50):        # same as ppo
+            #print("this is branch:",env.branches[:])
+            #print(s)
+            if s == 0:             # first step is different as tips are logged after each step
+                if target_x < env.x1_light:
+                    s_t = env.step(0)  # left
+                elif target_x > env.x2_light:
+                    s_t = env.step(1)  # right
+                else:
+                    s_t = env.step(2)  # stay
             else:
-                s_t = env.step(2)
-            print("is this reward:", s_t[1])
-            print(env.x1_light)
+                n_new_tips = s_t[3]['new_branches']
+                #print(n_new_tips)
+
+                if n_new_tips == 0:  #if no new branches ,
+                    # get light back to plant
+                    # look for where tips are in x_range
+                    x_range = [i[0] for i in s_t[3]['tips']]
+                    dist_x = [target_x - i for i in x_range]
+                    min_dist = min(dist_x)
+                    if min_dist < 0:
+                        s_t = env.step(0)
+                    else:
+                        s_t = env.step(1)
+                else:
+                    #print("this is n_new_tips",n_new_tips)
+                    new_tip_coords = s_t[3]['tips'][-n_new_tips:]
+                    #print(new_tip_coords)
+                    #print('target:', target)
+                    dist = distance.cdist(new_tip_coords, [target], 'euclidean')
+                    min_dist = min(dist)
+                    index_x = [i for i, j in enumerate(dist) if j == min_dist]
+                    #print("index;", index_x)
+                    #print(new_tip_coords[index_x[0]])
+                    light_clue = new_tip_coords[index_x[0]][0] - env.x1_light   # only in x
+                    target_clue = target_x - new_tip_coords[index_x[0]][0]
+                    if target_clue > 0 and light_clue < 0.1:
+                        s_t = env.step(2)
+                    elif target_clue > 0 and light_clue > 0.1:
+                        s_t = env.step(1)
+                    else:
+                        s_t = env.step(0)
+                #if light_clue < (env.x2_light - env.x1_light)/2:
+
+                    #dist_x = []
+                    #dist = distance.cdist(x_range, target_x, 'euclidean')
+
+            #print("is this reward:", s_t[1])
+            #print(env.x1_light)
+            img = env.get_observation(debug_show_scatter=False)
+            path = '/home/y/Documents/finalprojectcomp767/growspace/scripts/png/'
+            cv2.imwrite(os.path.join(path, 'step_oracle' + str(s) + '.png'), img)
+            print(s_t[1])
             rewards.append(s_t[1])
-        return rewards
-        #print(rewards)
+            #rewards = rewards.tolist()
+        flatten_list = list(chain.from_iterable(rewards))
 
-            # else:
-            #
-            #     tips = s_t[3]['tips']
-            # n_tips_to_add = len(tips) - len(b_tips)
-            # print([b_tips])
-            # #print([:-n_tips_to_add])
-            # #b_tips.add(tips[:-n_tips_to_add])  # add last tips of list
-            # x_range = [i[0] for i in tips[:-n_tips_to_add]]  # find range of x for linking reward
-            # y_range = [i[1] for i in tips[:-n_tips_to_add]]
-            # dist = distance.cdist(b_tips[-n_tips_to_add], s_t[3]['target'],'euclidean')
-            # rewards.append(dist)
-            # index = min(dist)
-            # for i in range(len(dist)):
-            #     if dist[i] == index:
-            #         best_tip = n_tips_to_add[i]
-            #
-            #
-            #
-
-
-
-
-
-            #pick euclidean distance
-            #look at branch positionement within light range
-            #decide if light is to move
-            #reward = s_t[1]
-            #print(x_range)
-
-            #add reward to statespace matrix
-            #add
-
-            # s_t = env.step(action_t)
-
-
-
-
-
-
+        return flatten_list
 
 
 if __name__ == '__main__':
     Oracle = Oracle()
     run_oracle = Oracle.oracle()
+    png_dir = '/home/y/Documents/finalprojectcomp767/growspace/scripts/png/'
+    list_filter = filter(png_dir)
+    list_filter.sort(key=natural_keys)
+    print(list_filter)
+    save_file_movie_oracle(list_filter)
+
+    # #print(sum(run_oracle))
+    # timers_reset = []
+    # timings = []
+    # episodes = 100
+    # random_rewards = []
+    # oracle_rewards = []
+    # for _ in range(episodes):  # here we're timing the reset function
+    #     run_oracle = Oracle.oracle()
+    #     #flat_list = [[item] for item in run_oracle]
+    #     print("runoracle:", run_oracle)
+    #     oracle_rewards.append(run_oracle)
+    #
+    # for _ in range(episodes):
+    #     random_s = random_solver(50)
+    #     random_rewards.append(random_s)
+    #
+    # av_oracle = np.mean(oracle_rewards, axis=0)
+    # print("these are av rewards:",av_oracle)
+    # err_oracle = np.std(oracle_rewards, axis=0)
+    #
+    # av_random = np.mean(random_rewards, axis=0)
+    # err_random = np.std(random_rewards, axis=0)
+    # x = np.arange(0,50)
+    #
+    # fig, ax = plt.subplots(1)
+    # ax.plot(x, av_oracle, color = 'green')
+    #
+    # ax.plot(x, av_random, color = 'magenta')
+    # ax.fill_between(x, av_oracle+err_oracle, av_oracle-err_oracle, alpha=0.5, color='green')
+    # ax.fill_between(x, av_random + err_random, av_random - err_random, alpha=0.5, color='magenta')
+    # ax.set_title(r'over 100 episodes and 50 steps for oracle and random')
+    # ax.set_ylabel("rewards")
+    # ax.set_xlabel("steps")
+    # ax.grid()
+    # plt.show()
