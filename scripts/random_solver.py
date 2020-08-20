@@ -4,6 +4,8 @@ import growspace
 import numpy as np
 import matplotlib.pyplot as plt
 #import growspace.envs.growspaceenv
+from itertools import chain
+
 
 env = gym.make("GrowSpaceEnv-Images-v0")
 
@@ -24,8 +26,10 @@ def random_solver(num_steps):
 
         s_t = env.step(env.action_space.sample())  ### s_t --> tips, target, light
         rewards.append(s_t[1])
+    flatten_list = list(chain.from_iterable(rewards))
 
-    return rewards
+    return flatten_list
 
 if __name__ == '__main__':
-    random_solver(40)
+    random=random_solver(30)
+    print(random)
