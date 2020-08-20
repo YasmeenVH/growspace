@@ -330,10 +330,10 @@ class GrowSpaceEnv(gym.Env):
 
         # Branching step for light in this position
         tips = self.tree_grow(xs, ys, .01, .15)
-
+        #print("tips:", tips)
         # Calculate distance to target
         if self.distance_target(tips) <= 0.1:
-            reward = 1/0.1 /10
+            reward = [1/0.1 /10]
             #reward = preprocessing.normalize(reward)
         else:
             reward = 1 / self.distance_target(tips) /10
@@ -390,16 +390,20 @@ if __name__ == '__main__':
             return 2 # stay in place
         else:
             return None
-
+    rewards = []
     while True:
         gse.reset()
         img = gse.get_observation(debug_show_scatter=False)
         cv2.imshow("plant", img)
-
+        rewards = []
         for _ in range(30):
             action = key2action(cv2.waitKey(-1))
             if action is None:
                 quit()
 
-            gse.step(action)
+            b = gse.step(action)
+            rewards.append(b[1])
             cv2.imshow("plant", gse.get_observation(debug_show_scatter=False))
+        total = sum(rewards)
+
+        print("amount of rewards:", total)
