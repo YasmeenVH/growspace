@@ -7,15 +7,16 @@ from scipy.spatial import distance
 import os, sys
 import imageio
 import cv2
-env = gym.make("GrowSpaceEnv-Images-v0")
+#env = gym.make("GrowSpaceEnv-Images-v0")
 from scripts.random_solver import random_solver
 from array import *
 from itertools import chain
-from scripts.save_img_movie import save_file_movie_oracle, filter, atoi, natural_keys
-
+from scripts.save_img_movie import save_file_movie_oracle, filter, natural_keys
+#from growspace.envs.growspaceenv import GrowSpaceEnv
 
 class Oracle(object):
     def __init__(self):
+        #self.env = GrowSpaceEnv()
         pass
     def oracle(self):
         env.seed()
@@ -74,9 +75,20 @@ class Oracle(object):
 
             #print("is this reward:", s_t[1])
             #print(env.x1_light)
+            #cv2.waitKey(2)
             img = env.get_observation(debug_show_scatter=False)
+            #img = img.astype(np.uint8)
+            #while(True):
+            #cv2.imshow("oracle",img)
+            #cv2.waitKey(10000)
+            #print(img.shape)
+            #img = img.astype(np.uint8)
+            #img_g =
+            #cv2.imshow("plant",img)
+            #cv2.waitKey(0)
+            #im_rgb = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
             path = '/home/y/Documents/finalprojectcomp767/growspace/scripts/png/'
-            cv2.imwrite(os.path.join(path, 'step_oracle' + str(s) + '.png'), img)
+            cv2.imwrite(os.path.join(path, 'step_oracle_good' + str(s) + '.png'), img)
             print(s_t[1])
             rewards.append(s_t[1])
             #rewards = rewards.tolist()
@@ -86,6 +98,7 @@ class Oracle(object):
 
 
 if __name__ == '__main__':
+    env = gym.make("GrowSpaceEnv-Images-v0")
     Oracle = Oracle()
     run_oracle = Oracle.oracle()
     png_dir = '/home/y/Documents/finalprojectcomp767/growspace/scripts/png/'
