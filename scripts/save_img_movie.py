@@ -24,7 +24,7 @@ def filter(png_dir):
     movie_files = []
     print(os.listdir(png_dir))
     for i in range(0, len(os.listdir(png_dir))):
-        if os.listdir(png_dir)[i].startswith("step_oracle"):
+        if os.listdir(png_dir)[i].startswith("step_oracle_good"):
             movie_files.append(os.listdir(png_dir)[i])
             #print("[ng_di i",os.listdir(png_dir)[i])
     #files = sorted(movie_files)
@@ -69,7 +69,7 @@ def save_file_movie_oracle(movie_list):
         #print(file_name)
 
 
-    imageio.mimsave('../scripts/movie/movie_oracle_good.gif', images, fps=0.7)
+    imageio.mimsave('../scripts/movie/movie_oracle_good_3.gif', images, fps=0.7)
 if __name__ == '__main__':
   #run_episode()
 
