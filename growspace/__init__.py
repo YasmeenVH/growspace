@@ -1,4 +1,4 @@
-from gym import register
+from gym.envs.registration import register
 #
 # register(
 #     id=f'GrowSpaceEnv-States-v0',
@@ -12,15 +12,15 @@ from gym import register
 register(
     id=f'GrowSpaceEnv-Images-v0',
     entry_point='growspace.envs:GrowSpaceEnv',
-    kwargs={'obs_type':'Binary',
+    kwargs={'obs_type': None,
         # "observe_images": True
     },
-    max_episode_steps=30, # number of total steps in the environment
+    max_episode_steps=50, # number of total steps in the environment
 )
 register(
     id=f'GrowSpaceEnv-Images-v1',
     entry_point='growspace.envs:GrowSpaceSortedEnv',
-    kwargs={
+    kwargs={'obs_type': 'Binary',
         # "observe_images": True
     },
     max_episode_steps=25, # number of total steps in the environment
