@@ -333,7 +333,7 @@ class GrowSpaceEnv(gym.Env):
         #print("tips:", tips)
         # Calculate distance to target
         if self.distance_target(tips) <= 0.1:
-            reward = [1/0.1 /10]
+            reward = 1/0.1 /10
             #reward = preprocessing.normalize(reward)
         else:
             reward = 1 / self.distance_target(tips) /10
@@ -401,8 +401,9 @@ if __name__ == '__main__':
             if action is None:
                 quit()
 
-            b = gse.step(action)
-            rewards.append(b[1])
+            b,t,c,f = gse.step(action)
+            print(f["new_branches"])
+            rewards.append(t)
             cv2.imshow("plant", gse.get_observation(debug_show_scatter=False))
         total = sum(rewards)
 
