@@ -290,7 +290,8 @@ class GrowSpaceEnv(gym.Env):
                 img_width=self.width,
                 img_height=self.height)
         ]
-        self.target = [np.random.uniform(0, 1), np.random.uniform(.8, 1)]
+        #self.target = [np.random.uniform(0, 1), np.random.uniform(.8, 1)]
+        self.target = [np.random.uniform(0, 1), .8]
         self.light_width = .25
         if random_start > .87:
             self.x1_light = .75
@@ -356,7 +357,7 @@ class GrowSpaceEnv(gym.Env):
             misc['new_branches'] = new_branches
             self.new_branches = len(tips)  # reset for future step
 
-
+        misc['img'] = observation
         # (optional) additional information about plant/episode/other stuff, leave empty for now
         #print("steps:", self.steps)    # sanity check
         self.steps += 1
@@ -396,7 +397,7 @@ if __name__ == '__main__':
         img = gse.get_observation(debug_show_scatter=False)
         cv2.imshow("plant", img)
         rewards = []
-        for _ in range(30):
+        for _ in range(50):
             action = key2action(cv2.waitKey(-1))
             if action is None:
                 quit()
