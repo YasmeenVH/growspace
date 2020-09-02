@@ -54,7 +54,7 @@ def save_file_movie():
             images.append(imageio.imread(file_path))
             step+=1
 
-    imageio.mimsave('../scripts/movie/movie_oracle.gif', images,fps=1)
+    imageio.mimsave('../scripts/movie/movie_oracle_other.gif', images,fps=1)
 
 def save_file_movie_oracle(movie_list):
     png_dir = '/home/y/Documents/finalprojectcomp767/growspace/scripts/png/'
@@ -69,7 +69,7 @@ def save_file_movie_oracle(movie_list):
         #print(file_name)
 
 
-    imageio.mimsave('../scripts/movie/movie_oracle_good_3.gif', images, fps=0.7)
+    imageio.mimsave('../scripts/movie/movie_oracle_other.gif', images, fps=0.7)
 if __name__ == '__main__':
   #run_episode()
 
