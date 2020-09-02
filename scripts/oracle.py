@@ -68,25 +68,9 @@ class Oracle(object):
                         s_t = env.step(1)
                     else:
                         s_t = env.step(0)
-                #if light_clue < (env.x2_light - env.x1_light)/2:
 
-                    #dist_x = []
-                    #dist = distance.cdist(x_range, target_x, 'euclidean')
-
-            #print("is this reward:", s_t[1])
-            #print(env.x1_light)
-            #cv2.waitKey(2)
             img = env.get_observation(debug_show_scatter=False)
-            #img = img.astype(np.uint8)
-            #while(True):
-            #cv2.imshow("oracle",img)
-            #cv2.waitKey(10000)
-            #print(img.shape)
-            #img = img.astype(np.uint8)
-            #img_g =
-            #cv2.imshow("plant",img)
-            #cv2.waitKey(0)
-            #im_rgb = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+
             path = '/home/y/Documents/finalprojectcomp767/growspace/scripts/png/'
             cv2.imwrite(os.path.join(path, 'step_oracle_good' + str(s) + '.png'), img)
             print(s_t[1])
