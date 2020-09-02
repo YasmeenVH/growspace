@@ -19,7 +19,7 @@ register(
 )
 register(
     id=f'GrowSpaceEnv-Images-v1',
-    entry_point='growspace.envs:GrowSpaceSortedEnv',
+    entry_point='growspace.envs:GrowSpaceEnv',
     kwargs={'obs_type': 'Binary',
         # "observe_images": True
     },
@@ -27,7 +27,7 @@ register(
 )
 register(
     id=f'GrowSpaceEnv-Images-v2',
-    entry_point='growspace.envs:GrowSpaceSortedEnv',
+    entry_point='growspace.envs:GrowSpaceEnv',
     kwargs={'level': 'second',
         # "observe_images": True
     },
