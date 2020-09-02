@@ -27,7 +27,6 @@ def to_int(v):
 def unpack(w):
     return map(list, zip(*enumerate(w)))
 
-ssss
 
 ir = to_int  # shortcut for function call
 
