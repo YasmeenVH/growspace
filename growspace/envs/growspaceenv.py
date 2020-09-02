@@ -27,14 +27,14 @@ def to_int(v):
 def unpack(w):
     return map(list, zip(*enumerate(w)))
 
-
+ssss
 
 ir = to_int  # shortcut for function call
 
 
 class GrowSpaceEnv(gym.Env):
 
-    def __init__(self, width=84, height=84, light_dif=250, obs_type = None):
+    def __init__(self, width=84, height=84, light_dif=250, obs_type = None, level= None):
         self.width = width  # do we keep?
         self.height = height  # do we keep?
         self.seed()
@@ -43,7 +43,7 @@ class GrowSpaceEnv(gym.Env):
         self.observation_space = gym.spaces.Box(
             0, 255, shape=(84, 84, 3), dtype=np.uint8)
         self.obs_type = obs_type
-
+        self.level = level
         # note: I moved the code for the first branch into the reset function,
         # because when you start an environment for the first time,
         # you're supposed to call "reset()" first before doing anything else
@@ -280,7 +280,6 @@ class GrowSpaceEnv(gym.Env):
     def reset(self):
         # Set env back to start - also necessary on first start
         random_start = np.random.rand()  # is in range [0,1
-
         self.branches = [
             Branch(
                 x=random_start,
@@ -299,6 +298,15 @@ class GrowSpaceEnv(gym.Env):
             self.x1_light = 0
         else:
             self.x1_light = random_start - (self.light_width/2)
+
+        if self.level == 'second':
+            start_light = np.random.rand()
+            if start_light > .87:
+                self.x1_light = .75
+            elif start_light < 0.13:
+                self.x1_light = 0
+            else:
+                self.x1_light = start_light - (self.light_width / 2)
 
         self.x2_light = self.x1_light + self.light_width
 
