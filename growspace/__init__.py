@@ -28,7 +28,16 @@ register(
 register(
     id=f'GrowSpaceEnv-Images-v2',
     entry_point='growspace.envs:GrowSpaceEnv',
-    kwargs={'level': 'second',
+    kwargs={'obs_type': None, 'level': 'second',
+        # "observe_images": True
+    },
+    max_episode_steps=50, # number of total steps in the environment
+)
+
+register(
+    id=f'GrowSpaceEnv-Images-v2',
+    entry_point='growspace.envs:GrowSpaceEnv',
+    kwargs={'obs_type': 'Binary', 'level': 'second',
         # "observe_images": True
     },
     max_episode_steps=50, # number of total steps in the environment
