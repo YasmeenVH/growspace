@@ -35,7 +35,7 @@ register(
 )
 
 register(
-    id=f'GrowSpaceEnv-Images-v2',
+    id=f'GrowSpaceEnv-Images-v3',
     entry_point='growspace.envs:GrowSpaceEnv',
     kwargs={'obs_type': 'Binary', 'level': 'second',
         # "observe_images": True
