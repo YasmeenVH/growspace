@@ -7,6 +7,8 @@ from numpy.linalg import norm
 import time
 from growspace.plants.tree import Branch
 from scipy.spatial import distance
+#import sys
+#np.set_printoptions(threshold=sys.maxsize)
 import itertools
 from sklearn import preprocessing
 
@@ -180,8 +182,9 @@ class GrowSpaceEnv(gym.Env):
                 img, pt1=(x1, 0), pt2=(x2, self.height), color=yellow, thickness=-1)
             # print(img.shape)
             light_img = np.sum(img, axis=2)
+            print("light img to understand",light_img)
             light = np.where(light_img <=128, light_img, 1)
-
+            print("this is light", light)
             # ---tree--- #
             img1 = np.zeros((self.height, self.width, 3), dtype=np.uint8)
             for branch in self.branches:
@@ -195,22 +198,25 @@ class GrowSpaceEnv(gym.Env):
                     color=(0, 255, 0),
                     thickness=thiccness)
             tree_img = np.sum(img1, axis=2)
-            tree = np.where(tree_img <= 255, tree_img, 1)
+            print("this is tree_img", tree_img)
+            tree = np.where(tree_img < 255, tree_img, 1)
+            print("this is tree",tree)
 
             # ---target--- #
             img2 = np.zeros((self.height, self.width, 3), dtype=np.uint8)
             x = ir(self.target[0] * self.width)
             y = ir(self.target[1] * self.height)
             cv2.circle(
-                img,
+                img2,
                 center=(x, y),
                 radius=ir(.03 * self.width),
                 color=(0, 0, 255),
                 thickness=-1)
 
             target_img = np.sum(img2, axis=2)
-            target = np.where(target_img <= 255, target_img, 1)
-
+            print("test",target_img)
+            target = np.where(target_img < 255, target_img, 1)
+            print("this is a target", target)
             final_img = np.dstack((light, tree, target))
             #print("dimensions of binary :",final_img.shape)
 
@@ -278,7 +284,8 @@ class GrowSpaceEnv(gym.Env):
 
     def reset(self):
         # Set env back to start - also necessary on first start
-        random_start = np.random.rand()  # is in range [0,1
+        random_start = np.random.rand()  # is in range [0,1]
+        #random_start = 0.01
         self.branches = [
             Branch(
                 x=random_start,
@@ -290,6 +297,7 @@ class GrowSpaceEnv(gym.Env):
         ]
         #self.target = [np.random.uniform(0, 1), np.random.uniform(.8, 1)]
         self.target = [np.random.uniform(0, 1), .8]
+        #self.target = [0.01, 0.01]
         self.light_width = .25
         if random_start > .87:
             self.x1_light = .75
