@@ -7,8 +7,8 @@ from numpy.linalg import norm
 import time
 from growspace.plants.tree import Branch
 from scipy.spatial import distance
-#import sys
-#np.set_printoptions(threshold=sys.maxsize)
+import sys
+np.set_printoptions(threshold=sys.maxsize)
 import itertools
 from sklearn import preprocessing
 
@@ -35,7 +35,7 @@ ir = to_int  # shortcut for function call
 
 class GrowSpaceEnv(gym.Env):
 
-    def __init__(self, width=84, height=84, light_dif=250, obs_type = None, level= None):
+    def __init__(self, width=84, height=84, light_dif=250, obs_type = 'Binary', level= None):
         self.width = width  # do we keep?
         self.height = height  # do we keep?
         self.seed()
@@ -200,6 +200,7 @@ class GrowSpaceEnv(gym.Env):
             tree_img = np.sum(img1, axis=2)
             #print("this is tree_img", tree_img)
             tree = np.where(tree_img < 255, tree_img, 1)
+            print(type(tree))
             #print("this is tree",tree)
 
             # ---target--- #
@@ -385,6 +386,10 @@ class GrowSpaceEnv(gym.Env):
                debug_show_scatter=False):  # or mode="rgb_array"
         img = self.get_observation(debug_show_scatter)
 
+        if self.obs_type == 'Binary':
+            image = img.astype(np.uint8)
+            img = image * 255
+
         if mode == "human":
             cv2.imshow('plant', img)  # create opencv window to show plant
             cv2.waitKey(1)  # this is necessary or the window closes immediately
@@ -410,7 +415,10 @@ if __name__ == '__main__':
     while True:
         gse.reset()
         img = gse.get_observation(debug_show_scatter=False)
-        cv2.imshow("plant", img)
+        image = img.astype(np.uint8)
+        backtorgb = image * 255
+        print(backtorgb)
+        cv2.imshow("plant", backtorgb)
         rewards = []
         for _ in range(50):
             action = key2action(cv2.waitKey(-1))
