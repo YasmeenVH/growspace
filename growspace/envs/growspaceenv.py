@@ -200,7 +200,7 @@ class GrowSpaceEnv(gym.Env):
             tree_img = np.sum(img1, axis=2)
             #print("this is tree_img", tree_img)
             tree = np.where(tree_img < 255, tree_img, 1)
-            print(type(tree))
+            #print(type(tree))
             #print("this is tree",tree)
 
             # ---target--- #
