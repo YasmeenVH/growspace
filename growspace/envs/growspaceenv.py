@@ -35,7 +35,7 @@ ir = to_int  # shortcut for function call
 
 class GrowSpaceEnv(gym.Env):
 
-    def __init__(self, width=84, height=84, light_dif=250, obs_type = 'Binary', level= None):
+    def __init__(self, width=84, height=84, light_dif=250, obs_type = None, level= None):
         self.width = width  # do we keep?
         self.height = height  # do we keep?
         self.seed()
@@ -175,7 +175,7 @@ class GrowSpaceEnv(gym.Env):
 
             # ---light beam --- #
 
-            yellow = (0, 128, 128)  # RGB color (dark yellow)
+            yellow = (0, 128 , 128)  # RGB color (dark yellow)
             x1 = ir(self.x1_light * self.width)
             x2 = ir(self.x2_light * self.width)
             cv2.rectangle(
@@ -228,7 +228,7 @@ class GrowSpaceEnv(gym.Env):
 
         if self.obs_type == None:
         # place light as rectangle
-            yellow = (0, 128, 128)  # RGB color (dark yellow)
+            yellow = (255,0 , 0)  # RGB color (dark yellow)
             x1 = ir(self.x1_light * self.width)
             x2 = ir(self.x2_light * self.width)
             cv2.rectangle(
@@ -415,10 +415,10 @@ if __name__ == '__main__':
     while True:
         gse.reset()
         img = gse.get_observation(debug_show_scatter=False)
-        image = img.astype(np.uint8)
-        backtorgb = image * 255
-        print(backtorgb)
-        cv2.imshow("plant", backtorgb)
+        #image = img.astype(np.uint8)
+        #backtorgb = image * 255
+        #print(backtorgb)
+        cv2.imshow("plant", img)
         rewards = []
         for _ in range(50):
             action = key2action(cv2.waitKey(-1))
