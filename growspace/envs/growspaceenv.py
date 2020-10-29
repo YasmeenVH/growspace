@@ -16,7 +16,7 @@ from sklearn import preprocessing
 from numba import jit
 from functools import partial
 
-
+# customizable variables by user
 
 FIRST_BRANCH_HEIGHT = .24
 BRANCH_THICCNESS = .015
@@ -56,7 +56,7 @@ class GrowSpaceEnv(gym.Env):
 
         # select the instances where the conditions is true (where the x coordinate is within the light)
         if self.level == 'third':
-            if self.x1_light == self.x2_light:    # either 0 or 1 otherwise never the same
+            if self.x2_light <= LIGHT_DISPLACEMENT or self.x1_light >= 1-LIGHT_WIDTH:    # either 0 or 1 otherwise never the same
                 filter = np.logical_and(self.y_scatter <= self.y1_light,
                                 self.y_scatter >= self.y2_light)
             else:
@@ -83,32 +83,36 @@ class GrowSpaceEnv(gym.Env):
                     self.y1_light -= LIGHT_DISPLACEMENT
             else:
                 self.x1_light = 1 - LIGHT_WIDTH                        # for level 1 and 2, stay put
-
-            if self.level =="third":
-                if np.around(self.x2_light, 1) <= 1-LIGHT_WIDTH:  # limit of coordinates
-                    if 1-LIGHT_DISPLACEMENT <= self.y1_light <= 1:
-                        self.x1_light = 0
-                    else:
-                        self.y1_light += LIGHT_DISPLACEMENT
-
         else:
             self.x1_light += LIGHT_DISPLACEMENT  # move by defined amount of pixels
 
-    def light_move_L(self):
-        if np.around(self.x2_light,1) <= LIGHT_WIDTH:  # limit of coordinates
-            if self.level == 'third':
-                if self.y1_light <=self.x2_light = self.x1_light
-                #self.x2_light = 0
+        if self.level =='third':
+            if np.around(self.x2_light,1) <= LIGHT_DISPLACEMENT:  # limit of coordinates
+                if 1-LIGHT_DISPLACEMENT <= self.y1_light <= 1:
+                    self.x1_light = 0
+                else:
+                    self.y1_light += LIGHT_DISPLACEMENT
 
+
+
+    def light_move_L(self):
+        if np.around(self.x2_light,1) <= LIGHT_DISPLACEMENT:  # limit of coordinates
+            if self.level == 'third':
                 if self.y1_light <= FIRST_BRANCH_HEIGHT + LIGHT_WIDTH:
-                    self.y1_light = FIRST_BRANCH_HEIGHT + LIGHT_WIDTH  # stay put in y axis
+                    self.y1_light = FIRST_BRANCH_HEIGHT + LIGHT_WIDTH
                 else:
                     self.y1_light -= LIGHT_DISPLACEMENT
             else:
-                self.x1_light = 0 #stay put
+                self.x1_light = 0 # stay put
         else:
             self.x1_light -= LIGHT_DISPLACEMENT  # move by defined amount of pixels
 
+        if self.level == 'third':
+            if np.around(self.x1_light, 1) <= 1 - LIGHT_WIDTH:
+                if 1 - LIGHT_DISPLACEMENT <= self.y1_light <= 1:
+                    self.x1_light = 1-LIGHT_WIDTH
+                else:
+                    self.y1_light -= LIGHT_DISPLACEMENT
 
     #@staticmethod
     #@jit(nopython=True)
@@ -264,7 +268,7 @@ class GrowSpaceEnv(gym.Env):
 
             y1 = ir(self.y1_light * self.height)
             y2 = ir(self.y2_light * self.height)
-            if self.x1_light == self.x2_light:
+            if self.x2_light <= LIGHT_DISPLACEMENT or self.x1_light >= 1-LIGHT_WIDTH:
                 cv2.rectangle(
                     img, pt1=(0, y1), pt2=(self.width, y2), color=yellow, thickness=-1)
             else:
@@ -373,7 +377,7 @@ class GrowSpaceEnv(gym.Env):
         if action == 1:
             self.light_move_R()
 
-        if self.x1_light == 1 or self.x1_light == 0:
+        if self.x2_light <= LIGHT_WIDTH or self.x1_light >= 1-LIGHT_WIDTH:
             self.y2_light = self.y1_light - LIGHT_WIDTH
         else:
             self.x2_light = self.x1_light + LIGHT_WIDTH
@@ -382,7 +386,7 @@ class GrowSpaceEnv(gym.Env):
             # then we keep the light in place
             pass
 
-        if self.x1_light == self.x2_light:  # light is in horizontal position
+        if self.x2_light <= LIGHT_DISPLACEMENT or self.x1_light >= 1-LIGHT_WIDTH:  # light is in horizontal position
             convex_tips = np.array(self.tips)
             xs, ys = self.light_scatter()
             if len(convex_tips) >= 2:
@@ -395,12 +399,12 @@ class GrowSpaceEnv(gym.Env):
                 if self.y2_light < yys[y_max_idx]:   # if within the horizontal beam
 
 
-                    if self.x1_light == 0:
+                    if self.x2_light <= LIGHT_DISPLACEMENT:
                         filter = np.logical_and(xs >= 0, xs <= x_ymax)
                         xs = xs[filter]
                         ys = ys[filter]
 
-                    if self.x1_light == 1:
+                    if self.x1_light >= 1-LIGHT_WIDTH:
                         filter = np.logical_and(xs >= x_ymax, xs <= 1)
                         xs = xs[filter]
                         ys = ys[filter]
