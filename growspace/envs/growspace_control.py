@@ -82,7 +82,8 @@ class GrowSpaceEnv_Control(gym.Env):
         if self.light_width >= MAX_LIGHT_WIDTH:
             #self.light_width = self.light_width
             pass
-        elif self.x1_light 
+        elif self.x1_light +self.light_width >= 1:
+            self.light_width = 1-self.x1_light
         else:
             self.light_width += .1
 
