@@ -60,3 +60,11 @@ register(
     },
     max_episode_steps=50, # number of total steps in the environment
 )
+register(
+    id=f'GrowSpaceEnv-Control-v2',
+    entry_point='growspace.envs:GrowSpaceEnv_Control',
+    kwargs={'obs_type': None, 'level': 'second'
+        # "observe_images": True
+    },
+    max_episode_steps=50, # number of total steps in the environment
+)
