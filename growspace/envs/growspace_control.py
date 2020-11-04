@@ -32,7 +32,7 @@ ir = to_int  # shortcut for function call
 
 class GrowSpaceEnv_Control(gym.Env):
 
-    def __init__(self, width=DEFAULT_RES, height=DEFAULT_RES, light_dif=250, obs_type = None, level = 'second'):
+    def __init__(self, width=DEFAULT_RES, height=DEFAULT_RES, light_dif=250, obs_type = None, level = None):
         self.width = width  # do we keep?
         self.height = height  # do we keep?
         self.seed()
@@ -82,6 +82,7 @@ class GrowSpaceEnv_Control(gym.Env):
         if self.light_width >= MAX_LIGHT_WIDTH:
             #self.light_width = self.light_width
             pass
+        elif self.x1_light 
         else:
             self.light_width += .1
 
@@ -91,50 +92,53 @@ class GrowSpaceEnv_Control(gym.Env):
     def tree_grow(self,x, y, mindist, maxdist):
 
         # apply filter to both idx and branches
-        for i in range(len(x) - 1, 0, -1):  # number of possible scatters, check if they allow for branching with min_dist
-            closest_branch = 0
-            dist = 1
+        if len(x) == 0:
+            pass
+        else:
+            for i in range(len(x) - 1, 0, -1):  # number of possible scatters, check if they allow for branching with min_dist
+                closest_branch = 0
+                dist = 1
 
-            if len(self.branches) > MAX_BRANCHING:
-                branches_trimmed = sample(self.branches, MAX_BRANCHING)
-            else:
-                branches_trimmed = self.branches
-            branch_idx = [branch_idx for branch_idx, branch in enumerate(branches_trimmed)if self.x1_light <= branch.x2 <= self.x2_light]
-            temp_dist = [norm([x[i] - branches_trimmed[branch].x2, y[i] - branches_trimmed[branch].y2]) for branch in branch_idx]
+                if len(self.branches) > MAX_BRANCHING:
+                    branches_trimmed = sample(self.branches, MAX_BRANCHING)
+                else:
+                    branches_trimmed = self.branches
+                branch_idx = [branch_idx for branch_idx, branch in enumerate(branches_trimmed)if self.x1_light <= branch.x2 <= self.x2_light]
+                temp_dist = [norm([x[i] - branches_trimmed[branch].x2, y[i] - branches_trimmed[branch].y2]) for branch in branch_idx]
 
-            for j in range(0, len(temp_dist)):
-                if temp_dist[j] < dist:
-                    dist = temp_dist[j]
-                    closest_branch = branch_idx[j]
+                for j in range(0, len(temp_dist)):
+                    if temp_dist[j] < dist:
+                        dist = temp_dist[j]
+                        closest_branch = branch_idx[j]
 
 
-            # removes scatter points if reached
+                # removes scatter points if reached
 
-            if dist < mindist:
-                x = np.delete(x, i)
-                y = np.delete(y, i)
+                if dist < mindist:
+                    x = np.delete(x, i)
+                    y = np.delete(y, i)
 
-            # when distance is greater than max distance, branching occurs to find other points.
-            elif dist < maxdist:
-                branches_trimmed[closest_branch].grow_count += 1
-                branches_trimmed[closest_branch].grow_x += (
-                    x[i] - branches_trimmed[closest_branch].x2) / (dist/BRANCH_LENGTH)
-                branches_trimmed[closest_branch].grow_y += (
-                    y[i] - branches_trimmed[closest_branch].y2) / (dist / BRANCH_LENGTH)
+                # when distance is greater than max distance, branching occurs to find other points.
+                elif dist < maxdist:
+                    branches_trimmed[closest_branch].grow_count += 1
+                    branches_trimmed[closest_branch].grow_x += (
+                        x[i] - branches_trimmed[closest_branch].x2) / (dist/BRANCH_LENGTH)
+                    branches_trimmed[closest_branch].grow_y += (
+                        y[i] - branches_trimmed[closest_branch].y2) / (dist / BRANCH_LENGTH)
 
-        for i in range(len(branches_trimmed)):
-            if branches_trimmed[i].grow_count > 0:
-                newBranch = Branch(
-                    branches_trimmed[i].x2, branches_trimmed[i].x2 +
-                    branches_trimmed[i].grow_x / branches_trimmed[i].grow_count,
-                    branches_trimmed[i].y2, branches_trimmed[i].y2 +
-                    branches_trimmed[i].grow_y / branches_trimmed[i].grow_count,
-                    self.width, self.height)
-                self.branches.append(newBranch)
-                branches_trimmed[i].child.append(newBranch)
-                branches_trimmed[i].grow_count = 0
-                branches_trimmed[i].grow_x = 0
-                branches_trimmed[i].grow_y = 0
+            for i in range(len(branches_trimmed)):
+                if branches_trimmed[i].grow_count > 0:
+                    newBranch = Branch(
+                        branches_trimmed[i].x2, branches_trimmed[i].x2 +
+                        branches_trimmed[i].grow_x / branches_trimmed[i].grow_count,
+                        branches_trimmed[i].y2, branches_trimmed[i].y2 +
+                        branches_trimmed[i].grow_y / branches_trimmed[i].grow_count,
+                        self.width, self.height)
+                    self.branches.append(newBranch)
+                    branches_trimmed[i].child.append(newBranch)
+                    branches_trimmed[i].grow_count = 0
+                    branches_trimmed[i].grow_x = 0
+                    branches_trimmed[i].grow_y = 0
 
         # increase thickness of first elements added to tree as they grow
         self.branches[0].update_width()
