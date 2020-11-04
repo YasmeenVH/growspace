@@ -32,7 +32,7 @@ ir = to_int  # shortcut for function call
 
 class GrowSpaceEnv_Control(gym.Env):
 
-    def __init__(self, width=DEFAULT_RES, height=DEFAULT_RES, light_dif=250, obs_type = None, level = None):
+    def __init__(self, width=DEFAULT_RES, height=DEFAULT_RES, light_dif=LIGHT_DIF, obs_type = None, level = None):
         self.width = width  # do we keep?
         self.height = height  # do we keep?
         self.seed()
@@ -83,7 +83,7 @@ class GrowSpaceEnv_Control(gym.Env):
         if self.light_width >= MAX_LIGHT_WIDTH:
             #self.light_width = self.light_width
             pass
-        elif self.x1_light +self.light_width >= 1:
+        elif self.x1_light + self.light_width >= 1:
             self.light_width = 1-self.x1_light
         else:
             self.light_width += .1
@@ -225,8 +225,8 @@ class GrowSpaceEnv_Control(gym.Env):
             tree = np.where(tree_img < 255, tree_img, 1)
 
             # ---light + tree ----#
-            light_tree = light+tree  #addition of matrix
-            light_tree_binary = np.where(light_tree < 2, tree_img, 1)
+            # light_tree = light+tree  #addition of matrix
+            #light_tree_binary = np.where(light_tree < 2, tree_img, 1)
             # ---target--- #
             img2 = np.zeros((self.height, self.width, 3), dtype=np.uint8)
             x = ir(self.target[0] * self.width)
@@ -353,12 +353,13 @@ class GrowSpaceEnv_Control(gym.Env):
         if action == 4:
             # then we keep the light in place
             pass
-
+        print("light x1", self.x1_light)
+        print('action',action)
         self.x2_light = self.x1_light + self.light_width
 
         # filter scattering
         xs, ys = self.light_scatter()
-
+        print("scattering x:", xs, "scattering y:", ys)
         # Branching step for light in this position
         tips = self.tree_grow(xs, ys, .01, .15)
         #print("tips:", tips)
