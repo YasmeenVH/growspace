@@ -50,12 +50,13 @@ class GrowSpaceEnv_Control(gym.Env):
         # select scattering with respect to position of the light
 
         # select the instances where the conditions is true (where the x coordinate is within the light)
-        filter = np.logical_and(self.x_scatter > self.x1_light,
-                                self.x_scatter < self.x2_light)
+        filter = np.logical_and(self.x_scatter >= self.x1_light,
+                                self.x_scatter <= self.x2_light)
 
         # apply filter to both y and x coordinates through the power of Numpy magic :D
         ys = self.y_scatter[filter]
         xs = self.x_scatter[filter]
+        print("scatter:", xs, ys)
         return xs, ys
 
     def light_move_R(self):
@@ -90,7 +91,7 @@ class GrowSpaceEnv_Control(gym.Env):
     #@staticmethod
     #@jit(nopython=True)
     #@partial(jit, static_argnums=(0,))
-    def tree_grow(self,x, y, mindist, maxdist):
+    def tree_grow(self,x , y, mindist, maxdist):
 
         # apply filter to both idx and branches
         #print("what is value",len(x))
@@ -349,12 +350,11 @@ class GrowSpaceEnv_Control(gym.Env):
         if action == 3:
             self.light_decrease()
 
-        self.x2_light = self.x1_light + self.light_width
-
         if action == 4:
             # then we keep the light in place
             pass
 
+        self.x2_light = self.x1_light + self.light_width
 
         # filter scattering
         xs, ys = self.light_scatter()
