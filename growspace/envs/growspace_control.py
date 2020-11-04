@@ -56,7 +56,7 @@ class GrowSpaceEnv_Control(gym.Env):
         # apply filter to both y and x coordinates through the power of Numpy magic :D
         ys = self.y_scatter[filter]
         xs = self.x_scatter[filter]
-        print("scatter:", xs, ys)
+        #print("scatter:", xs, ys)
         return xs, ys
 
     def light_move_R(self):
@@ -95,7 +95,7 @@ class GrowSpaceEnv_Control(gym.Env):
 
         # apply filter to both idx and branches
         #print("what is value",len(x))
-        if len(x) == 0:
+        if len(x) == None:
             pass
         elif len(x) == 1:
             closest_branch = 0
