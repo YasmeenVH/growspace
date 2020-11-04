@@ -32,12 +32,12 @@ ir = to_int  # shortcut for function call
 
 class GrowSpaceEnv_Control(gym.Env):
 
-    def __init__(self, width=DEFAULT_RES, height=DEFAULT_RES, light_dif=250, obs_type = None, level = None):
+    def __init__(self, width=DEFAULT_RES, height=DEFAULT_RES, light_dif=250, obs_type = None, level = 'second'):
         self.width = width  # do we keep?
         self.height = height  # do we keep?
         self.seed()
         self.light_dif = light_dif
-        self.action_space = gym.spaces.Discrete(3)  # L, R, keep of light paddle
+        self.action_space = gym.spaces.Discrete(5)  # L, R, keep of light paddle
         self.observation_space = gym.spaces.Box(
             0, 255, shape=(84, 84, 3), dtype=np.uint8)
         self.obs_type = obs_type
@@ -163,7 +163,7 @@ class GrowSpaceEnv_Control(gym.Env):
 
             # ---light beam --- #
 
-            yellow = (0, 255 , 0)  # RGB color (dark yellow)
+            yellow = (0, 128 , 128)  # RGB color (dark yellow)
             x1 = ir(self.x1_light * self.width)
             x2 = ir(self.x2_light * self.width)
             cv2.rectangle(
@@ -180,11 +180,14 @@ class GrowSpaceEnv_Control(gym.Env):
                     img1,
                     pt1=pt1,
                     pt2=pt2,
-                    color=(0, 128, 128),
+                    color=(0, 255, 0),
                     thickness=thiccness)
             tree_img = np.sum(img1, axis=2)
             tree = np.where(tree_img < 255, tree_img, 1)
 
+            # ---light + tree ----#
+            light_tree = light+tree  #addition of matrix
+            light_tree_binary = np.where(light_tree < 2, tree_img, 1)
             # ---target--- #
             img2 = np.zeros((self.height, self.width, 3), dtype=np.uint8)
             x = ir(self.target[0] * self.width)
