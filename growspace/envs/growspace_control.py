@@ -93,6 +93,7 @@ class GrowSpaceEnv_Control(gym.Env):
     def tree_grow(self,x, y, mindist, maxdist):
 
         # apply filter to both idx and branches
+        print("what is value",len(x))
         if len(x) == 0:
             pass
         else:
