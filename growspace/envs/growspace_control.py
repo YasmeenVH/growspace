@@ -75,9 +75,11 @@ class GrowSpaceEnv_Control(gym.Env):
             self.x1_light = 0  # move by .1 leftdd
 
     def light_decrease(self):
-        if self.light_width <= MIN_LIGHT_WIDTH:
+        if np.around(self.light_width,1) <= MIN_LIGHT_WIDTH:
             self.light_width = self.light_width
             #passd
+       # elif MIN_LIGHT_WIDTH < self.light_width < MIN_LIGHT_WIDTH + LIGHT_W_INCREMENT/2:
+            #self.light_width = self.light_width
         else:
             self.light_width -= LIGHT_W_INCREMENT
 
@@ -363,7 +365,7 @@ class GrowSpaceEnv_Control(gym.Env):
 
         # filter scattering
         xs, ys = self.light_scatter()
-        print("scattering x:", xs, "scattering y:", ys)
+        print("scattering x len:", len(xs))
         print("this is lightx1 :", self.x1_light, "and light width:", self.light_width)
         # Branching step for light in this position
         tips = self.tree_grow(xs, ys, .01, .15)
