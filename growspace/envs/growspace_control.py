@@ -17,6 +17,7 @@ DEFAULT_RES = 84
 LIGHT_WIDTH = .25
 LIGHT_DIF = 250
 LIGHT_DISPLACEMENT = .1
+LIGHT_W_INCREMENT = .1
 MIN_LIGHT_WIDTH = .1
 MAX_LIGHT_WIDTH = .5
 
@@ -60,24 +61,25 @@ class GrowSpaceEnv_Control(gym.Env):
         return xs, ys
 
     def light_move_R(self):
-        if np.around(self.x1_light,1) >= 1-self.light_width:  # limit of coordinates
-            self.x1_light = 1-self.light_width  # stay put
-
+        if np.around(self.x1_light + self.light_width,2) <= 1 - LIGHT_DISPLACEMENT:  # limit of coordinates
+            self.x1_light += LIGHT_DISPLACEMENT  # stay put
         else:
-            self.x1_light += .1  # move by .1 right
+            self.x1_light = 1 - self.light_width
+            #self.x1_light += .1  # move by .1 right
 
     def light_move_L(self):
-        if np.around(self.x1_light,1) <= 0:  # limit of coordinates
-            self.x1_light = 0
+        if np.around(self.x1_light,2) >= LIGHT_DISPLACEMENT:  # limit of coordinates
+            print("what is happening???", self.x1_light)
+            self.x1_light -= LIGHT_DISPLACEMENT
         else:
-            self.x1_light -= .1  # move by .1 left
+            self.x1_light = 0  # move by .1 leftdd
 
     def light_decrease(self):
-        if 0 < self.light_width < MIN_LIGHT_WIDTH:
-            #self.light_width = self.light_width
-            pass
+        if self.light_width <= MIN_LIGHT_WIDTH:
+            self.light_width = self.light_width
+            #passd
         else:
-            self.light_width -= .1
+            self.light_width -= LIGHT_W_INCREMENT
 
     def light_increase(self):
         if self.light_width >= MAX_LIGHT_WIDTH:
@@ -86,17 +88,19 @@ class GrowSpaceEnv_Control(gym.Env):
         elif self.x1_light + self.light_width >= 1:
             self.light_width = 1-self.x1_light
         else:
-            self.light_width += .1
+            self.light_width += LIGHT_W_INCREMENT
 
     #@staticmethod
     #@jit(nopython=True)
     #@partial(jit, static_argnums=(0,))
-    def tree_grow(self,x , y, mindist, maxdist):
+    def tree_grow(self,x, y, mindist, maxdist):
 
         # apply filter to both idx and branches
         #print("what is value",len(x))
         if len(x) == None:
-            pass
+            print("pass")
+            branches_trimmed = 0
+            #pass
         elif len(x) == 1:
             closest_branch = 0
             dist = 1
