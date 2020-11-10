@@ -69,7 +69,7 @@ class GrowSpaceEnv_Control(gym.Env):
 
     def light_move_L(self):
         if np.around(self.x1_light,2) >= LIGHT_DISPLACEMENT:  # limit of coordinates
-            print("what is happening???", self.x1_light)
+            #print("what is happening???", self.x1_light)
             self.x1_light -= LIGHT_DISPLACEMENT
         else:
             self.x1_light = 0  # move by .1 leftdd
@@ -98,7 +98,7 @@ class GrowSpaceEnv_Control(gym.Env):
         # apply filter to both idx and branches
         #print("what is value",len(x))
         if len(x) == None:
-            print("pass")
+            #print("pass")
             branches_trimmed = 0
             #pass
         elif len(x) == 1:
@@ -357,13 +357,13 @@ class GrowSpaceEnv_Control(gym.Env):
         if action == 4:
             # then we keep the light in place
             pass
-        print("light x1", self.x1_light)
-        print('action',action)
+        #print("light x1", self.x1_light)
+        #print('action',action)
         self.x2_light = self.x1_light + self.light_width
 
         # filter scattering
         xs, ys = self.light_scatter()
-        print("scattering x:", xs, "scattering y:", ys)
+        #print("scattering x:", xs, "scattering y:", ys)
         # Branching step for light in this position
         tips = self.tree_grow(xs, ys, .01, .15)
         #print("tips:", tips)
