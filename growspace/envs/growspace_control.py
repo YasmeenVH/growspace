@@ -365,8 +365,8 @@ class GrowSpaceEnv_Control(gym.Env):
 
         # filter scattering
         xs, ys = self.light_scatter()
-        print("scattering x len:", len(xs))
-        print("this is lightx1 :", self.x1_light, "and light width:", self.light_width)
+        #print("scattering x len:", len(xs))
+        #print("this is lightx1 :", self.x1_light, "and light width:", self.light_width)
         # Branching step for light in this position
         tips = self.tree_grow(xs, ys, .01, .15)
         #print("tips:", tips)
