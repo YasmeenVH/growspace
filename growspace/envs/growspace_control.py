@@ -33,15 +33,19 @@ ir = to_int  # shortcut for function call
 
 class GrowSpaceEnv_Control(gym.Env):
 
-    def __init__(self, width=DEFAULT_RES, height=DEFAULT_RES, light_dif=LIGHT_DIF, obs_type = None, level = None):
+    def __init__(self, width=DEFAULT_RES, height=DEFAULT_RES, light_dif=LIGHT_DIF, obs_type = 'Binary', level = None):
         self.width = width  # do we keep?
         self.height = height  # do we keep?
         self.seed()
         self.light_dif = light_dif
         self.action_space = gym.spaces.Discrete(5)  # L, R, keep of light paddle
-        self.observation_space = gym.spaces.Box(
-            0, 255, shape=(84, 84, 3), dtype=np.uint8)
         self.obs_type = obs_type
+        if self.obs_type == None:
+            self.observation_space = gym.spaces.Box(
+                0, 255, shape=(84, 84, 3), dtype=np.uint8)
+        if self.obs_type == 'Binary':
+            self.observation_space = gym.spaces.Box(
+                0, 1, shape=(84, 84, 5), dtype=np.uint8)
         self.level = level
 
     def seed(self, seed=None):
@@ -231,8 +235,8 @@ class GrowSpaceEnv_Control(gym.Env):
             tree = np.where(tree_img < 255, tree_img, 1)
 
             # ---light + tree ----#
-            # light_tree = light+tree  #addition of matrix
-            #light_tree_binary = np.where(light_tree < 2, tree_img, 1)
+            light_tree = light+tree  #addition of matrices
+            light_tree_binary = np.where(light_tree < 2,light_tree, 1)
             # ---target--- #
             img2 = np.zeros((self.height, self.width, 3), dtype=np.uint8)
             x = ir(self.target[0] * self.width)
@@ -246,8 +250,9 @@ class GrowSpaceEnv_Control(gym.Env):
 
             target_img = np.sum(img2, axis=2)
             target = np.where(target_img < 255, target_img, 1)
-
-            final_img = np.dstack((light, tree, target))
+            light_target = light + target  # additions of matrices
+            light_target_binary = np.where(light_target< 2, light_target, 1)
+            final_img = np.dstack((light, tree,light_tree_binary, target, light_target_binary))
             final_img = cv2.flip(final_img, 0)
 
             return final_img
@@ -441,9 +446,9 @@ if __name__ == '__main__':
     while True:
         gse.reset()
         img = gse.get_observation(debug_show_scatter=False)
-        #image = img.astype(np.uint8)
-        #backtorgb = image * 255
-        #print(backtorgb)
+        image = img.astype(np.uint8)
+        backtorgb = image * 255
+        print(backtorgb)
         cv2.imshow("plant", img)
         rewards = []
         for _ in range(50):
