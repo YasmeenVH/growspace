@@ -33,7 +33,7 @@ ir = to_int  # shortcut for function call
 
 class GrowSpaceEnv_Control(gym.Env):
 
-    def __init__(self, width=DEFAULT_RES, height=DEFAULT_RES, light_dif=LIGHT_DIF, obs_type = 'Binary', level = None):
+    def __init__(self, width=DEFAULT_RES, height=DEFAULT_RES, light_dif=LIGHT_DIF, obs_type = None, level = None):
         self.width = width  # do we keep?
         self.height = height  # do we keep?
         self.seed()
@@ -252,9 +252,9 @@ class GrowSpaceEnv_Control(gym.Env):
             target = np.where(target_img < 255, target_img, 1)
             light_target = light + target  # additions of matrices
             light_target_binary = np.where(light_target< 2, light_target, 1)
-            final_img = np.dstack((light, tree,light_tree_binary, target, light_target_binary))
+            final_img = np.dstack((light, light_tree_binary, light_target_binary))
             final_img = cv2.flip(final_img, 0)
-
+            print("dimensions of final shape", np.shape(final_img))
             return final_img
 
 
@@ -300,7 +300,7 @@ class GrowSpaceEnv_Control(gym.Env):
 
             img = cv2.flip(img, 0)
 
-
+            print("dimensions of final shape", np.shape(img))
             return img
 
     def reset(self):
