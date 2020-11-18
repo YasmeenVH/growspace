@@ -374,6 +374,8 @@ class GrowSpaceEnv_Fairness(gym.Env):
         self.light_width = LIGHT_WIDTH
         random_start = np.random.rand()  # is in range [0,1
         random_start2 = np.random.rand()
+        #print("what is r1", random_start)
+        #print("what is r2", random_start2)
         if abs(random_start2-random_start) < self.light_width:
             random_start2 = random_start2 + self.light_width
         if random_start2 > 1:
@@ -400,21 +402,14 @@ class GrowSpaceEnv_Fairness(gym.Env):
         #self.target = [np.random.uniform(0, 1), np.random.uniform(.8, 1)]
         self.target = [np.random.uniform(0, 1), .8]
 
-        if random_start > .87:
+
+        start_light = np.random.rand()
+        if start_light > .87:
             self.x1_light = .75
-        elif random_start < 0.13:
+        elif start_light < 0.13:
             self.x1_light = 0
         else:
-            self.x1_light = random_start - (self.light_width/2)
-
-        if self.level == 'second':
-            start_light = np.random.rand()
-            if start_light > .87:
-                self.x1_light = .75
-            elif start_light < 0.13:
-                self.x1_light = 0
-            else:
-                self.x1_light = start_light - (self.light_width / 2)
+            self.x1_light = start_light - (self.light_width / 2)
 
         self.x2_light = self.x1_light + self.light_width
 
