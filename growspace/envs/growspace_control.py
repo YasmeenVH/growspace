@@ -254,7 +254,7 @@ class GrowSpaceEnv_Control(gym.Env):
             light_target_binary = np.where(light_target< 2, light_target, 1)
             final_img = np.dstack((light, light_tree_binary, light_target_binary))
             final_img = cv2.flip(final_img, 0)
-            print("dimensions of final shape", np.shape(final_img))
+            #print("dimensions of final shape", np.shape(final_img))
             return final_img
 
 
