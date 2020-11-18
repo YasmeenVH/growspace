@@ -427,7 +427,6 @@ class GrowSpaceEnv_Fairness(gym.Env):
         return self.get_observation()
 
     def step(self, action):
-        # Two possible actions, move light left or right
 
         if action == 0:
             self.light_move_L()
@@ -435,14 +434,19 @@ class GrowSpaceEnv_Fairness(gym.Env):
         if action == 1:
             self.light_move_R()
 
-        self.x2_light = self.x1_light + self.light_width
-
         if action == 2:
+            self.light_increase()
+
+        if action == 3:
+            self.light_decrease()
+
+        if action == 4:
             # then we keep the light in place
             pass
 
-
+        self.x2_light = self.x1_light + self.light_width
         # filter scattering
+
         xs, ys = self.light_scatter()
 
         # Branching step for light in this position
