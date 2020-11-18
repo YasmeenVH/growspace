@@ -17,6 +17,14 @@ FIRST_BRANCH_HEIGHT = .24
 BRANCH_THICCNESS = .015
 BRANCH_LENGTH = 1/9
 MAX_BRANCHING = 10
+DEFAULT_RES = 84
+LIGHT_WIDTH = .25
+LIGHT_DIF = 250
+LIGHT_DISPLACEMENT = .1
+LIGHT_W_INCREMENT = .1
+MIN_LIGHT_WIDTH = .1
+MAX_LIGHT_WIDTH = .5
+
 
 def to_int(v):
     return int(round(v))
@@ -28,17 +36,21 @@ def unpack(w):
 ir = to_int  # shortcut for function call
 
 
-class GrowSpaceEnv(gym.Env):
+class GrowSpaceEnv_Fairness(gym.Env):
 
-    def __init__(self, width=84, height=84, light_dif=250, obs_type = None, level=None):
-        self.width = width  # do we keep?
-        self.height = height  # do we keep?
+    def __init__(self, width=DEFAULT_RES, height=DEFAULT_RES, light_dif=LIGHT_DIF, obs_type = None, level=None):
+        self.width = width
+        self.height = height
         self.seed()
         self.light_dif = light_dif
-        self.action_space = gym.spaces.Discrete(3)  # L, R, keep of light paddle
-        self.observation_space = gym.spaces.Box(
-            0, 255, shape=(84, 84, 3), dtype=np.uint8)
+        self.action_space = gym.spaces.Discrete(5)  # L, R, keep of light paddle
         self.obs_type = obs_type
+        if self.obs_type == None:
+            self.observation_space = gym.spaces.Box(
+                0, 255, shape=(84, 84, 3), dtype=np.uint8)
+        if self.obs_type == 'Binary':
+            self.observation_space = gym.spaces.Box(
+                0, 1, shape=(84, 84, 5), dtype=np.uint8)
         self.level = level
         # note: I moved the code for the first branch into the reset function,
         # because when you start an environment for the first time,
@@ -60,17 +72,35 @@ class GrowSpaceEnv(gym.Env):
         return xs, ys
 
     def light_move_R(self):
-        if np.around(self.x1_light,1) >= .8:  # limit of coordinates
-            self.x1_light = .8  # stay put
-
+        if np.around(self.x1_light + self.light_width,2) <= 1 - LIGHT_DISPLACEMENT:  # limit of coordinates
+            self.x1_light += LIGHT_DISPLACEMENT  # stay put
         else:
-            self.x1_light += .1  # move by .1 right
+            self.x1_light = 1 - self.light_width
 
     def light_move_L(self):
-        if np.around(self.x1_light,1) <= .1:  # limit of coordinates
-            self.x1_light = 0
+        if np.around(self.x1_light,2) >= LIGHT_DISPLACEMENT:  # limit of coordinates
+            #print("what is happening???", self.x1_light)
+            self.x1_light -= LIGHT_DISPLACEMENT
         else:
-            self.x1_light -= .1  # move by .1 left
+            self.x1_light = 0  # move by .1 leftdd
+
+    def light_decrease(self):
+        if np.around(self.light_width,1) <= MIN_LIGHT_WIDTH:
+            self.light_width = self.light_width
+            #passd
+       # elif MIN_LIGHT_WIDTH < self.light_width < MIN_LIGHT_WIDTH + LIGHT_W_INCREMENT/2:
+            #self.light_width = self.light_width
+        else:
+            self.light_width -= LIGHT_W_INCREMENT
+
+    def light_increase(self):
+        if self.light_width >= MAX_LIGHT_WIDTH:
+            #self.light_width = self.light_width
+            pass
+        elif self.x1_light + self.light_width >= 1:
+            self.light_width = 1-self.x1_light
+        else:
+            self.light_width += LIGHT_W_INCREMENT
 
 
     #@staticmethod
@@ -191,6 +221,7 @@ class GrowSpaceEnv(gym.Env):
 
         self.branches2[0].update_width()
         branch_coords = []
+        branch_coords2 = []
 
         #sending coordinates out
         for branch in self.branches:
@@ -199,11 +230,11 @@ class GrowSpaceEnv(gym.Env):
 
         for branch in self.branches2:
             # x2 and y2 since they are the tips
-            branch_coords.append([branch.x2, branch.y2])
+            branch_coords2.append([branch.x2, branch.y2])
 
         #print("branching has occured")
 
-        return branch_coords
+        return branch_coords, branch_coords2
 
     def distance_target(self, coords):
         # Calculate distance from each tip grown
@@ -340,8 +371,14 @@ class GrowSpaceEnv(gym.Env):
 
     def reset(self):
         # Set env back to start - also necessary on first start
+        self.light_width = LIGHT_WIDTH
         random_start = np.random.rand()  # is in range [0,1
         random_start2 = np.random.rand()
+        if abs(random_start2-random_start) < self.light_width:
+            random_start2 = random_start2 + self.light_width
+        if random_start2 > 1:
+            random_start2 = 0.99
+
         self.branches = [
             Branch(
                 x=random_start,
@@ -362,7 +399,7 @@ class GrowSpaceEnv(gym.Env):
                 img_height=self.height)]
         #self.target = [np.random.uniform(0, 1), np.random.uniform(.8, 1)]
         self.target = [np.random.uniform(0, 1), .8]
-        self.light_width = .25
+
         if random_start > .87:
             self.x1_light = .75
         elif random_start < 0.13:
@@ -412,11 +449,22 @@ class GrowSpaceEnv(gym.Env):
         tips = self.tree_grow(xs, ys, .01, .15)
         #print("tips:", tips)
         # Calculate distance to target
-        if self.distance_target(tips) <= 0.1:
-            reward = 1/0.1 /10
+        d1 = self.distance_target(tips[0])
+        d2 = self.distance_target(tips[1])
+
+        if d1 <= 0.1:
+            r1 = 1/0.1 /10
             #reward = preprocessing.normalize(reward)
         else:
-            reward = 1 / self.distance_target(tips) /10
+            r1 = (1 / d1 /10)*.5
+
+        if d2 <= 0.1:
+            r2 = 1/0.1 /10
+            #reward = preprocessing.normalize(reward)
+        else:
+            r2 = (1 / d2 /10)*.5
+
+        reward = r1+r2
         #print("this is reward:",reward)
         #reward = preprocessing.normalize(reward)
         # Render image of environment at current state
@@ -428,13 +476,13 @@ class GrowSpaceEnv(gym.Env):
         misc = {"tips": tips, "target": self.target, "light": self.x1_light}
 
         if self.steps == 0:
-            self.new_branches = len(tips)
+            self.new_branches = len(tips[0]) + len(tips[1])
             misc['new_branches'] = self.new_branches
 
         else:
-            new_branches = len(tips)-self.new_branches
+            new_branches = len(tips[0])+len(tips[1])-self.new_branches
             misc['new_branches'] = new_branches
-            self.new_branches = len(tips)  # reset for future step
+            self.new_branches = len(tips[0]) + len(tips[1]) # reset for future step
 
         misc['img'] = observation
         # (optional) additional information about plant/episode/other stuff, leave empty for now
@@ -459,7 +507,7 @@ class GrowSpaceEnv(gym.Env):
 if __name__ == '__main__':
     import time
 
-    gse = GrowSpaceEnv()
+    gse = GrowSpaceEnv_Fairness()
 
     def key2action(key):
         if key == ord('a'):
