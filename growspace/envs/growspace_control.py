@@ -45,7 +45,7 @@ class GrowSpaceEnv_Control(gym.Env):
                 0, 255, shape=(84, 84, 3), dtype=np.uint8)
         if self.obs_type == 'Binary':
             self.observation_space = gym.spaces.Box(
-                0, 1, shape=(84, 84, 5), dtype=np.uint8)
+                0, 1, shape=(84, 84, 3), dtype=np.uint8)
         self.level = level
 
     def seed(self, seed=None):
