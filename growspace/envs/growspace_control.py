@@ -300,7 +300,7 @@ class GrowSpaceEnv_Control(gym.Env):
 
             img = cv2.flip(img, 0)
 
-            print("dimensions of final shape", np.shape(img))
+            #print("dimensions of final shape", np.shape(img))
             return img
 
     def reset(self):
