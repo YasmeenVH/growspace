@@ -343,6 +343,7 @@ class GrowSpaceEnv_Control(gym.Env):
         self.steps = 0
         self.new_branches = 0
         self.tips_per_step = 0
+        self.light_move = 0
 
         return self.get_observation()
 
@@ -389,16 +390,19 @@ class GrowSpaceEnv_Control(gym.Env):
         #print("length of tips:", len(tips))
 
         done = False  # because we don't have a terminal condition
-        misc = {"tips": tips, "target": self.target, "light": self.x1_light}
+        misc = {"tips": tips, "target": self.target, "light": self.x1_light, "light_width": LIGHT_WIDTH, "step": self.steps}
 
         if self.steps == 0:
             self.new_branches = len(tips)
             misc['new_branches'] = self.new_branches
+            self.light_move = self.light_move
 
         else:
             new_branches = len(tips)-self.new_branches
             misc['new_branches'] = new_branches
             self.new_branches = len(tips)  # reset for future step
+            self.light_move = np.abs(self.light_move - self.x1_light)
+            misc['light_move'] = self.light_move
 
         misc['img'] = observation
         # (optional) additional information about plant/episode/other stuff, leave empty for now
