@@ -379,9 +379,11 @@ class GrowSpaceEnv_Control(gym.Env):
         # Calculate distance to target
         if self.distance_target(tips) <= 0.1:
             reward = 1/0.1 /10
+            success = 1
             #reward = preprocessing.normalize(reward)
         else:
             reward = 1 / self.distance_target(tips) /10
+            success = 0
         #print("this is reward:",reward)
         #reward = preprocessing.normalize(reward)
         # Render image of environment at current state
@@ -390,7 +392,7 @@ class GrowSpaceEnv_Control(gym.Env):
         #print("length of tips:", len(tips))
 
         done = False  # because we don't have a terminal condition
-        misc = {"tips": tips, "target": self.target, "light": self.x1_light, "light_width": LIGHT_WIDTH, "step": self.steps}
+        misc = {"tips": tips, "target": self.target, "light": self.x1_light, "light_width": LIGHT_WIDTH, "step": self.steps, "success": success }
 
         if self.steps == 0:
             self.new_branches = len(tips)
@@ -411,6 +413,7 @@ class GrowSpaceEnv_Control(gym.Env):
         #print(misc)
         #self.number_of_branches = new_branches
         #print("how many new branches? ", misc['new_branches'])
+        #print("what type of data", type(misc['new_branches']))
         return observation, reward, done, misc
 
     def render(self, mode='human',
