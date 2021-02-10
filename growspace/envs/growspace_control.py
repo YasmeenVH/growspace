@@ -305,8 +305,8 @@ class GrowSpaceEnv_Control(gym.Env):
 
     def reset(self):
         # Set env back to start - also necessary on first start
-        random_start = np.random.rand()  # is in range [0,1]
-        #random_start = 0.01
+        #random_start = np.random.rand()  # is in range [0,1]
+        random_start = 0.07
         self.branches = [
             Branch(
                 x=random_start,
@@ -317,8 +317,8 @@ class GrowSpaceEnv_Control(gym.Env):
                 img_height=self.height)]
 
         #self.target = [np.random.uniform(0, 1), np.random.uniform(.8, 1)]
-        self.target = [np.random.uniform(0, 1), .8]
-
+        #self.target = [np.random.uniform(0, 1), .8]
+        self.target = [random_start, .8]
         self.light_width = .25
         if random_start > .87:
             self.x1_light = .75
@@ -392,7 +392,7 @@ class GrowSpaceEnv_Control(gym.Env):
         #print("length of tips:", len(tips))
 
         done = False  # because we don't have a terminal condition
-        misc = {"tips": tips, "target": self.target, "light": self.x1_light, "light_width": LIGHT_WIDTH, "step": self.steps, "success": success }
+        misc = {"tips": tips, "target": self.target, "light": self.x1_light, "light_width": self.light_width, "step": self.steps, "success": success }
 
         if self.steps == 0:
             self.new_branches = len(tips)
@@ -407,6 +407,7 @@ class GrowSpaceEnv_Control(gym.Env):
             misc['light_move'] = self.light_move
 
         misc['img'] = observation
+        #print(self.light_width, "this is light width")
         # (optional) additional information about plant/episode/other stuff, leave empty for now
         #print("steps:", self.steps)    # sanity check
         self.steps += 1
