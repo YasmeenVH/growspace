@@ -19,7 +19,7 @@ register(
 )
 
 register(
-    id=f'GrowSpaceEnv-Control-Easy-v0',
+    id=f'GrowSpaceEnv-ControlEasy-v0',
     entry_point='growspace.envs:GrowSpaceEnv_Control',
     kwargs={'obs_type': None, 'level': None, 'setting': 'easy',
         # "observe_images": True
@@ -28,7 +28,7 @@ register(
 )
 
 register(
-    id=f'GrowSpaceEnv-Control-v0-hard',
+    id=f'GrowSpaceEnv-ControlHard-v0',
     entry_point='growspace.envs:GrowSpaceEnv_Control',
     kwargs={'obs_type': None, 'level': None, 'setting': 'hard',
         # "observe_images": True
