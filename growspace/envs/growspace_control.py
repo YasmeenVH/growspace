@@ -33,7 +33,7 @@ ir = to_int  # shortcut for function call
 
 class GrowSpaceEnv_Control(gym.Env):
 
-    def __init__(self, width=DEFAULT_RES, height=DEFAULT_RES, light_dif=LIGHT_DIF, obs_type = None, level = None):
+    def __init__(self, width=DEFAULT_RES, height=DEFAULT_RES, light_dif=LIGHT_DIF, obs_type = None, level = None, setting = 'easy'):
         self.width = width  # do we keep?
         self.height = height  # do we keep?
         self.seed()
@@ -47,6 +47,7 @@ class GrowSpaceEnv_Control(gym.Env):
             self.observation_space = gym.spaces.Box(
                 0, 1, shape=(84, 84, 3), dtype=np.uint8)
         self.level = level
+        self.setting = setting
 
     def seed(self, seed=None):
         return [np.random.seed(seed)]
@@ -305,8 +306,17 @@ class GrowSpaceEnv_Control(gym.Env):
 
     def reset(self):
         # Set env back to start - also necessary on first start
-        #random_start = np.random.rand()  # is in range [0,1]
-        random_start = 0.07
+        # is in range [0,1]
+        if self.setting == 'easy':
+            random_start = 0.07
+            self.target = [random_start, .8]
+
+        elif self.setting == 'hard':
+            random_start = 0.07
+            self.target = [1-random_start, .8]
+        else:
+            random_start = np.random.rand() # is in range [0,1]
+            self.target = [random_start, .8]
         self.branches = [
             Branch(
                 x=random_start,
@@ -318,7 +328,6 @@ class GrowSpaceEnv_Control(gym.Env):
 
         #self.target = [np.random.uniform(0, 1), np.random.uniform(.8, 1)]
         #self.target = [np.random.uniform(0, 1), .8]
-        self.target = [random_start, .8]
         self.light_width = .25
         if random_start > .87:
             self.x1_light = .75
