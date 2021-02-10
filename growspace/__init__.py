@@ -19,7 +19,7 @@ register(
 )
 
 register(
-    id=f'GrowSpaceEnv-Control-v0-easy',
+    id=f'GrowSpaceEnv-Control-Easy-v0',
     entry_point='growspace.envs:GrowSpaceEnv_Control',
     kwargs={'obs_type': None, 'level': None, 'setting': 'easy',
         # "observe_images": True
