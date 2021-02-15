@@ -46,9 +46,45 @@ register(
 )
 
 register(
+    id=f'GrowSpaceEnv-ControlEasy-v1',
+    entry_point='growspace.envs:GrowSpaceEnv_Control',
+    kwargs={'obs_type': 'binary', 'level': None, 'setting': 'easy',
+        # "observe_images": True
+    },
+    max_episode_steps=50, # number of total steps in the environment
+)
+register(
+    id=f'GrowSpaceEnv-ControlHard-v1',
+    entry_point='growspace.envs:GrowSpaceEnv_Control',
+    kwargs={'obs_type': 'binary', 'level': None, 'setting': 'hard',
+        # "observe_images": True
+    },
+    max_episode_steps=50, # number of total steps in the environment
+)
+
+
+register(
     id=f'GrowSpaceEnv-Hierarchy-v0',
     entry_point='growspace.envs:GrowSpaceEnv_Control',
-    kwargs={'obs_type': None, 'level': 'second',
+    kwargs={'obs_type': None, 'level': 'second', 'setting': None,
+        # "observe_images": True
+    },
+    max_episode_steps=50, # number of total steps in the environment
+)
+
+register(
+    id=f'GrowSpaceEnv-HierarchyEasy-v0',
+    entry_point='growspace.envs:GrowSpaceEnv_Control',
+    kwargs={'obs_type': None, 'level': 'second', 'setting': 'easy',
+        # "observe_images": True
+    },
+    max_episode_steps=50, # number of total steps in the environment
+)
+
+register(
+    id=f'GrowSpaceEnv-HierarchyHard-v0',
+    entry_point='growspace.envs:GrowSpaceEnv_Control',
+    kwargs={'obs_type': None, 'level': 'second', 'setting': 'hard',
         # "observe_images": True
     },
     max_episode_steps=50, # number of total steps in the environment
@@ -57,7 +93,25 @@ register(
 register(
     id=f'GrowSpaceEnv-Hierarchy-v1',
     entry_point='growspace.envs:GrowSpaceEnv_Control',
-    kwargs={'obs_type': 'Binary', 'level': 'second',
+    kwargs={'obs_type': 'Binary', 'level': 'second', 'setting': None,
+        # "observe_images": True
+    },
+    max_episode_steps=50, # number of total steps in the environment
+)
+
+register(
+    id=f'GrowSpaceEnv-HierarchyEasy-v1',
+    entry_point='growspace.envs:GrowSpaceEnv_Control',
+    kwargs={'obs_type': 'binary', 'level': 'second', 'setting': 'easy',
+        # "observe_images": True
+    },
+    max_episode_steps=50, # number of total steps in the environment
+)
+
+register(
+    id=f'GrowSpaceEnv-HierarchyHard-v1',
+    entry_point='growspace.envs:GrowSpaceEnv_Control',
+    kwargs={'obs_type': 'binary', 'level': 'second', 'setting': 'hard',
         # "observe_images": True
     },
     max_episode_steps=50, # number of total steps in the environment
