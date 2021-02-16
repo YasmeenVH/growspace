@@ -105,75 +105,74 @@ class GrowSpaceEnv_Control(gym.Env):
         # apply filter to both idx and branches
         #print("what is value",len(x))
 
-        if len(x) == None:
+        #if len(x) == None:
             #print("pass")
-            branches_trimmed = 0
+            #branches_trimmed = [0]
             #pass
-        elif len(x) == 1:
+       # elif len(x) == 1:
+            #closest_branch = 0
+            #dist = 1
+            #if len(self.branches) > MAX_BRANCHING:
+                #branches_trimmed = sample(self.branches, MAX_BRANCHING)
+            #else:
+                #branches_trimmed = self.branches
+            #branch_idx = [branch_idx for branch_idx, branch in enumerate(branches_trimmed) if
+                         # self.x1_light <= branch.x2 <= self.x2_light]
+           # temp_dist = [norm([x - branches_trimmed[branch].x2, y - branches_trimmed[branch].y2]) for branch in
+                         #branch_idx]
+
+            #for j in range(0, len(temp_dist)):
+             #   if temp_dist[j] < dist:
+             #       dist = temp_dist[j]
+             #       closest_branch = branch_idx[j]
+
+            # removes scatter points if reached
+
+            #if dist < mindist:
+             #   x = np.delete(x)
+            #y = np.delete(y)
+#
+            # when distance is greater than max distance, branching occurs to find other points.
+            #elif dist < maxdist:
+                #branches_trimmed[closest_branch].grow_count += 1
+                #branches_trimmed[closest_branch].grow_x += (x - branches_trimmed[closest_branch].x2) / (dist / BRANCH_LENGTH)
+                #branches_trimmed[closest_branch].grow_y += (y - branches_trimmed[closest_branch].y2) / (dist / BRANCH_LENGTH)
+        #else:
+        global branches_trimmed
+        for i in range(len(x) - 1, 0, -1):  # number of possible scatters, check if they allow for branching with min_dist
             closest_branch = 0
             dist = 1
+
             if len(self.branches) > MAX_BRANCHING:
                 branches_trimmed = sample(self.branches, MAX_BRANCHING)
             else:
                 branches_trimmed = self.branches
-            branch_idx = [branch_idx for branch_idx, branch in enumerate(branches_trimmed) if
-                          self.x1_light <= branch.x2 <= self.x2_light]
-            temp_dist = [norm([x - branches_trimmed[branch].x2, y - branches_trimmed[branch].y2]) for branch in
-                         branch_idx]
+            branch_idx = [branch_idx for branch_idx, branch in enumerate(branches_trimmed)if self.x1_light <= branch.x2 <= self.x2_light]
+            temp_dist = [norm([x[i] - branches_trimmed[branch].x2, y[i] - branches_trimmed[branch].y2]) for branch in branch_idx]
 
             for j in range(0, len(temp_dist)):
                 if temp_dist[j] < dist:
                     dist = temp_dist[j]
                     closest_branch = branch_idx[j]
 
+
             # removes scatter points if reached
 
             if dist < mindist:
-                x = np.delete(x)
-                y = np.delete(y)
+                x = np.delete(x, i)
+                y = np.delete(y, i)
 
             # when distance is greater than max distance, branching occurs to find other points.
             elif dist < maxdist:
                 branches_trimmed[closest_branch].grow_count += 1
                 branches_trimmed[closest_branch].grow_x += (
-                                                                   x - branches_trimmed[closest_branch].x2) / (
-                                                                       dist / BRANCH_LENGTH)
+                    x[i] - branches_trimmed[closest_branch].x2) / (dist/BRANCH_LENGTH)
                 branches_trimmed[closest_branch].grow_y += (
-                                                                   y - branches_trimmed[closest_branch].y2) / (
-                                                                       dist / BRANCH_LENGTH)
-        else:
-            for i in range(len(x) - 1, 0, -1):  # number of possible scatters, check if they allow for branching with min_dist
-                closest_branch = 0
-                dist = 1
+                    y[i] - branches_trimmed[closest_branch].y2) / (dist / BRANCH_LENGTH)
 
-                if len(self.branches) > MAX_BRANCHING:
-                    branches_trimmed = sample(self.branches, MAX_BRANCHING)
-                else:
-                    branches_trimmed = self.branches
-                branch_idx = [branch_idx for branch_idx, branch in enumerate(branches_trimmed)if self.x1_light <= branch.x2 <= self.x2_light]
-                temp_dist = [norm([x[i] - branches_trimmed[branch].x2, y[i] - branches_trimmed[branch].y2]) for branch in branch_idx]
-
-                for j in range(0, len(temp_dist)):
-                    if temp_dist[j] < dist:
-                        dist = temp_dist[j]
-                        closest_branch = branch_idx[j]
-
-
-                # removes scatter points if reached
-
-                if dist < mindist:
-                    x = np.delete(x, i)
-                    y = np.delete(y, i)
-
-                # when distance is greater than max distance, branching occurs to find other points.
-                elif dist < maxdist:
-                    branches_trimmed[closest_branch].grow_count += 1
-                    branches_trimmed[closest_branch].grow_x += (
-                        x[i] - branches_trimmed[closest_branch].x2) / (dist/BRANCH_LENGTH)
-                    branches_trimmed[closest_branch].grow_y += (
-                        y[i] - branches_trimmed[closest_branch].y2) / (dist / BRANCH_LENGTH)
-
-        print('branches trimmed', print(branches_trimmed))
+        #print('branches trimmed', branches_trimmed)
+        #if branches_trimmed == 0:
+            #pass
         for i in range(len(branches_trimmed)):
             if branches_trimmed[i].grow_count > 0:
                 newBranch = Branch(
