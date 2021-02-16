@@ -33,7 +33,7 @@ ir = to_int  # shortcut for function call
 
 class GrowSpaceEnv_Control(gym.Env):
 
-    def __init__(self, width=DEFAULT_RES, height=DEFAULT_RES, light_dif=LIGHT_DIF, obs_type = None, level = None, setting = 'easy'):
+    def __init__(self, width=DEFAULT_RES, height=DEFAULT_RES, light_dif=LIGHT_DIF, obs_type = None, level = 'second', setting = 'easy'):
         self.width = width  # do we keep?
         self.height = height  # do we keep?
         self.seed()
@@ -104,6 +104,7 @@ class GrowSpaceEnv_Control(gym.Env):
 
         # apply filter to both idx and branches
         #print("what is value",len(x))
+
         if len(x) == None:
             #print("pass")
             branches_trimmed = 0
@@ -117,7 +118,7 @@ class GrowSpaceEnv_Control(gym.Env):
                 branches_trimmed = self.branches
             branch_idx = [branch_idx for branch_idx, branch in enumerate(branches_trimmed) if
                           self.x1_light <= branch.x2 <= self.x2_light]
-            temp_dist = [norm([x[i] - branches_trimmed[branch].x2, y[i] - branches_trimmed[branch].y2]) for branch in
+            temp_dist = [norm([x - branches_trimmed[branch].x2, y - branches_trimmed[branch].y2]) for branch in
                          branch_idx]
 
             for j in range(0, len(temp_dist)):
@@ -128,17 +129,17 @@ class GrowSpaceEnv_Control(gym.Env):
             # removes scatter points if reached
 
             if dist < mindist:
-                x = np.delete(x, i)
-                y = np.delete(y, i)
+                x = np.delete(x)
+                y = np.delete(y)
 
             # when distance is greater than max distance, branching occurs to find other points.
             elif dist < maxdist:
                 branches_trimmed[closest_branch].grow_count += 1
                 branches_trimmed[closest_branch].grow_x += (
-                                                                   x[i] - branches_trimmed[closest_branch].x2) / (
+                                                                   x - branches_trimmed[closest_branch].x2) / (
                                                                        dist / BRANCH_LENGTH)
                 branches_trimmed[closest_branch].grow_y += (
-                                                                   y[i] - branches_trimmed[closest_branch].y2) / (
+                                                                   y - branches_trimmed[closest_branch].y2) / (
                                                                        dist / BRANCH_LENGTH)
         else:
             for i in range(len(x) - 1, 0, -1):  # number of possible scatters, check if they allow for branching with min_dist
@@ -337,7 +338,12 @@ class GrowSpaceEnv_Control(gym.Env):
             self.x1_light = random_start - (self.light_width/2)
 
         if self.level == 'second':
-            start_light = np.random.rand()
+            if self.setting == 'hard':
+                start_light = self.target[0]
+            elif self.setting == 'easy':
+                start_light = np.random.rand()
+            else:
+                start_light = np.random.rand()
             if start_light > .87:
                 self.x1_light = .75
             elif start_light < 0.13:
