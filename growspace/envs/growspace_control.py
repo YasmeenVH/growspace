@@ -173,6 +173,7 @@ class GrowSpaceEnv_Control(gym.Env):
                     branches_trimmed[closest_branch].grow_y += (
                         y[i] - branches_trimmed[closest_branch].y2) / (dist / BRANCH_LENGTH)
 
+        print('branches trimmed', print(branches_trimmed))
         for i in range(len(branches_trimmed)):
             if branches_trimmed[i].grow_count > 0:
                 newBranch = Branch(
