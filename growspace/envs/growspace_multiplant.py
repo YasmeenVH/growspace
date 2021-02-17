@@ -38,7 +38,7 @@ ir = to_int  # shortcut for function call
 
 class GrowSpaceEnv_Fairness(gym.Env):
 
-    def __init__(self, width=DEFAULT_RES, height=DEFAULT_RES, light_dif=LIGHT_DIF, obs_type = None, level=None):
+    def __init__(self, width=DEFAULT_RES, height=DEFAULT_RES, light_dif=LIGHT_DIF, obs_type = None, level=None, setting = 'hard_above'):
         self.width = width
         self.height = height
         self.seed()
@@ -52,6 +52,7 @@ class GrowSpaceEnv_Fairness(gym.Env):
             self.observation_space = gym.spaces.Box(
                 0, 1, shape=(84, 84, 5), dtype=np.uint8)
         self.level = level
+        self.setting = setting
         # note: I moved the code for the first branch into the reset function,
         # because when you start an environment for the first time,
         # you're supposed to call "reset()" first before doing anything else
@@ -370,13 +371,29 @@ class GrowSpaceEnv_Fairness(gym.Env):
             return img
 
     def reset(self):
-        # Set env back to start - also necessary on first start
         self.light_width = LIGHT_WIDTH
-        random_start = np.random.rand()  # is in range [0,1
-        random_start2 = np.random.rand()
-        #print("what is r1", random_start)
-        #print("what is r2", random_start2)
-        if abs(random_start2-random_start) < self.light_width:
+
+        if self.setting == 'easy':
+            random_start = np.random.rand()
+            random_start2 = random_start + self.light_width
+            self.target = [random_start+(self.light_width/2), 0.8]
+
+        elif self.setting == 'hard_middle':
+            random_start = 0.1
+            random_start2 = 0.9
+            self.target = [0.5, 0.8]
+
+        elif self.setting == 'hard_above':
+            random_start = 0.1
+            random_start2 = 0.9
+            self.target = [random_start2, 0.8]
+        else:
+            random_start = np.random.rand()
+            random_start2 = np.random.rand()
+            self.target = [np.random.rand(), 0.8]  # [np.random.uniform(0, 1), .8]
+
+        start_light = np.random.rand()
+        if np.abs(random_start2-random_start) < self.light_width:
             random_start2 = random_start2 + self.light_width
         if random_start2 > 1:
             random_start2 = 0.99
@@ -399,11 +416,7 @@ class GrowSpaceEnv_Fairness(gym.Env):
                 y2=FIRST_BRANCH_HEIGHT,
                 img_width=self.width,
                 img_height=self.height)]
-        #self.target = [np.random.uniform(0, 1), np.random.uniform(.8, 1)]
-        self.target = [np.random.uniform(0, 1), .8]
 
-
-        start_light = np.random.rand()
         if start_light > .87:
             self.x1_light = .75
         elif start_light < 0.13:
@@ -418,6 +431,9 @@ class GrowSpaceEnv_Fairness(gym.Env):
         self.steps = 0
         self.new_branches = 0
         self.tips_per_step = 0
+        self.b1 = 0 #branches from plant 1
+        self.b2 = 0 #branches from plant 2
+        self.light_move = 0
 
         return self.get_observation()
 
@@ -452,18 +468,24 @@ class GrowSpaceEnv_Fairness(gym.Env):
         d2 = self.distance_target(tips[1])
 
         if d1 <= 0.1:
-            r1 = 1/0.1 /10
+            r1 = (1/0.1 /10)*.5
             #reward = preprocessing.normalize(reward)
         else:
             r1 = (1 / d1 /10)*.5
 
         if d2 <= 0.1:
-            r2 = 1/0.1 /10
+            r2 = (1/0.1 /10)*.5
             #reward = preprocessing.normalize(reward)
         else:
             r2 = (1 / d2 /10)*.5
 
         reward = r1+r2
+
+        if reward == 1:
+            success = 1
+        else:
+            success = 0
+
         #print("this is reward:",reward)
         #reward = preprocessing.normalize(reward)
         # Render image of environment at current state
@@ -472,16 +494,30 @@ class GrowSpaceEnv_Fairness(gym.Env):
         #print("length of tips:", len(tips))
 
         done = False  # because we don't have a terminal condition
-        misc = {"tips": tips, "target": self.target, "light": self.x1_light}
+        misc = {"tips": tips, "target": self.target, "light": self.x1_light, "light_width": self.light_width, "step": self.steps, "success": success}
 
         if self.steps == 0:
             self.new_branches = len(tips[0]) + len(tips[1])
+            self.b1 = len(tips[0])
+            self.b2 = len(tips[1])
+
             misc['new_branches'] = self.new_branches
+            misc['new_b1'] = self.b1
+            misc['new_b2'] = self.b2
+            self.light_move = self.light_move
+            #misc['new_branches_1'] = self.new_branches
+            #misc['new_branches_2'] = self.new_branches
 
         else:
             new_branches = len(tips[0])+len(tips[1])-self.new_branches
+            new_b1 = len(tips[0]) - self.b1
+            new_b2 = len(tips[1]) - self.b2
+            misc['new_b1'] = new_b1
+            misc['new_b2'] = new_b2
             misc['new_branches'] = new_branches
             self.new_branches = len(tips[0]) + len(tips[1]) # reset for future step
+            self.light_move = np.abs(self.light_move - self.x1_light)
+            misc['light_move'] = self.light_move
 
         misc['img'] = observation
         # (optional) additional information about plant/episode/other stuff, leave empty for now
@@ -510,11 +546,15 @@ if __name__ == '__main__':
 
     def key2action(key):
         if key == ord('a'):
-            return 0 # move left
+            return 0  # move left
         elif key == ord('d'):
-            return 1 # move right
+            return 1  # move right
         elif key == ord('s'):
-            return 2 # stay in place
+            return 4  # stay in place
+        elif key == ord('w'):
+            return 2
+        elif key == ord('x'):
+            return 3
         else:
             return None
     rewards = []
@@ -529,7 +569,7 @@ if __name__ == '__main__':
                 quit()
 
             b,t,c,f = gse.step(action)
-            print(f["new_branches"])
+            #print(f["new_branches"])
             rewards.append(t)
             cv2.imshow("plant", gse.get_observation(debug_show_scatter=False))
         total = sum(rewards)
