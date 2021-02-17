@@ -127,6 +127,33 @@ register(
 )
 
 register(
+    id=f'GrowSpaceEnv-FairnessEasy-v0',
+    entry_point='growspace.envs:GrowSpaceEnv_Fairness',
+    kwargs={'obs_type': None, 'level': None, 'setting':'easy',
+        # "observe_images": True
+    },
+    max_episode_steps=50, # number of total steps in the environment
+)
+
+register(
+    id=f'GrowSpaceEnv-FairnessMiddle-v0',
+    entry_point='growspace.envs:GrowSpaceEnv_Fairness',
+    kwargs={'obs_type': None, 'level': None, 'setting':'hard_middle',
+        # "observe_images": True
+    },
+    max_episode_steps=50, # number of total steps in the environment
+)
+
+register(
+    id=f'GrowSpaceEnv-FairnessAbove-v0',
+    entry_point='growspace.envs:GrowSpaceEnv_Fairness',
+    kwargs={'obs_type': None, 'level': None, 'setting':'hard_above',
+        # "observe_images": True
+    },
+    max_episode_steps=50, # number of total steps in the environment
+)
+
+register(
     id=f'GrowSpaceEnv-Fairness-v1',
     entry_point='growspace.envs:GrowSpaceEnv_Fairness',
     kwargs={'obs_type': 'Binary', 'level': 'second',
