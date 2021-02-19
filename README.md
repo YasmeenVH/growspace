@@ -89,7 +89,23 @@ Under Consruction
 ## Installation
 `pip install -e`
 
-## Baseline Testing
+## Training
 Repository for testing PPO baseline is found [here](https://github.com/YasmeenVH/growspaceenv_baselines/tree/master/a2c_ppo_acktr)
+``` python
+# PyTorch
+conda install pytorch torchvision -c soumith
+
+# Download Baselines
+git clone https://github.com/openai/baselines.git
+cd baselines
+pip install -e .
+
+# Other requirements
+pip install -r requirements.txt
+
+# Run Code
+python main.py --env-name "GrowSpaceEnv-ControlEasy-v0" --custom-gym growspace --algo ppo --use-gae --lr 2.5e-4 --clip-param 0.1 --value-loss-coef 0.5 --num-processes 1 --num-steps 2000 --num-mini-batch 4 --log-interval 1 --use-linear-lr-decay --entropy-coef 0.01 --comet "control_easy_1"
+
+```
 
 
