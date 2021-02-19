@@ -4,47 +4,6 @@ The goal of this project is to model plant branching with respect to light. The 
 ## Plant Branching
 The growth of the plant follows [Space Colonization Algorithm ](http://algorithmicbotany.org/papers/colonization.egwnp2007.large.pdf) which have been used for rending realistic trees in games. This algorithm is based on a cloud of points which have been inspired by the grown of tree in order to provide a certain attraction to the growing branches. 
 
-## Environment
-The environment is a 84x84x3 pixel space where the light makes scattering points available. The target is located in the top third area of the environment and the plant always starts at a random location. The plant will only be attracted to current scattering under the light. The environment was made within the OpenAI Gym Environment framework.
-
-### Challenges
- Tasks               | Control       | Hierarchical  | Fairness | Multi-Objective
----|---|---|---|--- 
- Grow Plant          |  [x]          | [x]           | [x]      | [x]            
- Get to Target       |  [x]          | [x]           | [x]      |                
- Find Plant          |               | [x]           | [x]      | [x]            
- Grow Multiple Plants|               |               | [x]      |                
- Grow into Shape     |               |               |          | [x]            
-
-
-#### Control
-Grow the plant to target with the light beam. The episode starts with 
-
-#### Hierarchical Learning 
-Find the plant with the light beam to initiliaze growth and grow the plant to target with the light beam.
-
-#### Multi-objective and Fairness
-
-### Observations &  States
-Current position of branches and light position. Two types of observations are available: RGB images or stacked binary matrices representing the growing plant, the light and, the target.
-
-### Actions
-#### Light Movement
-- Move light right
-- Move light left
-- Stay in current position 
-
-#### Light Focus
-- Increase light width
-- Decrease light width
-
-### Rewards 
-Closest distance to the target(s)
-
-## Installation
-`pip install -e`
-
-
 ## Growth Algorithm Pseudocode
 
 ```python
@@ -76,3 +35,60 @@ def step():
     update_all_branch_widths(branches)
 
 ```
+
+## Environment
+The environment is a 84x84x3 pixel space where the light makes scattering points available. The target is located in the top third area of the environment and the plant always starts at a random location. The plant will only be attracted to current scattering under the light. The environment was made within the OpenAI Gym Environment framework.
+### Observations &  States
+Current position of branches and light position. Two types of observations are available: RGB images or stacked binary matrices representing the growing plant, the light and, the target.
+
+### Actions
+#### Light Movement
+- Move light right
+- Move light left
+- Stay in current position 
+
+#### Light Focus
+- Increase light width
+- Decrease light width
+
+### Rewards 
+Closest distance to the target(s)
+
+### Challenges
+ Tasks               | Control       | Hierarchical  | Fairness | Multi-Objective
+---|---|---|---|--- 
+ Grow Plant          |  [x]          | [x]           | [x]      | [x]            
+ Get to Target       |  [x]          | [x]           | [x]      |                
+ Find Plant          |               | [x]           | [x]      | [x]            
+ Grow Multiple Plants|               |               | [x]      |                
+ Grow into Shape     |               |               |          | [x]            
+
+
+#### Control
+Grow the plant to target with the light beam. An episode starts with the light above the plant.
+```python
+import gym
+import growspace  
+env = gym.make('GrowSpaceEnv-Control-v0')
+```
+
+#### Hierarchical Learning 
+Find the plant with the light beam to initiliaze growth and grow the plant to target with the light beam.
+```python
+env = gym.make('GrowSpaceEnv-Hierarchical-v0')
+```
+
+#### Fairness
+Find both plants and grow them towards the target. The objective is to maintain plants at similar growth stages for every time step.
+```python
+env = gym.make('GrowSpaceEnv-Fairness-v0')
+```
+#### Multi-objective 
+Under Consruction
+
+
+
+## Installation
+`pip install -e`
+
+
