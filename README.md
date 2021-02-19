@@ -8,13 +8,13 @@ The growth of the plant follows [Space Colonization Algorithm ](http://algorithm
 The environment is a 84x84x3 pixel space where the light makes scattering points available. The target is located in the top third area of the environment and the plant always starts at a random location. The plant will only be attracted to current scattering under the light. The environment was made within the OpenAI Gym Environment framework.
 
 ### Challenges
-| Tasks               | Control       | Hierarchical  | Fairness | Multi-Objective|
-| --------------------|:-------------:|: ------------:|: -------:|---------------:| 
-| Grow Plant          |  [x]          | [x]           | [x]      | [x]            |
-| Get to Target       |  [x]          | [x]           | [x]      |                |
-| Find Plant          |               | [x]           | [x]      | [x]            |
-| Grow Multiple Plants|               |               | [x]      |                |
-| Grow into Shape     |               |               |          | [x]            |
+ Tasks               | Control       | Hierarchical  | Fairness | Multi-Objective
+---|---|---|---|--- 
+ Grow Plant          |  [x]          | [x]           | [x]      | [x]            
+ Get to Target       |  [x]          | [x]           | [x]      |                
+ Find Plant          |               | [x]           | [x]      | [x]            
+ Grow Multiple Plants|               |               | [x]      |                
+ Grow into Shape     |               |               |          | [x]            
 
 
 #### Control
