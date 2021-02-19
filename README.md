@@ -6,13 +6,14 @@ The goal of this project is to model plant branching with respect to light. The 
 
 ## Installation
 ``` python
+# create conda environment with dependencies, file is in ./scripts/conda
+conda env create --name envname --file=growspace.yml
+
 git clone https://github.com/YasmeenVH/growspace
 cd growspace
 pip install -e .
 cd ..
 
-# create conda environment with dependencies, file is in ./scripts/conda
-conda env create --name envname --file=growspace.yml
 ```
 
 ## Plant Branching
