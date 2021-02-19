@@ -58,6 +58,18 @@ Current position of branches and light position. Two types of observations are a
 ### Rewards 
 Closest distance to the target(s)
 
+## Installation
+``` python
+git clone https://github.com/YasmeenVH/growspace
+cd growspace
+pip install -e .
+cd ..
+
+# create conda environment with dependencies, file is in ./scripts/conda
+conda env create --name envname --file=growspace.yml
+
+```
+
 ### Challenges
  Tasks               | Control       | Hierarchical  | Fairness | Multi-Objective
 ---|---|---|---|--- 
@@ -90,17 +102,7 @@ env = gym.make('GrowSpaceEnv-Fairness-v0')
 #### Multi-objective 
 Under Consruction
 
-## Installation
-``` python
-git clone https://github.com/YasmeenVH/growspace
-cd growspace
-pip install -e .
-cd ..
 
-# create conda environment with dependencies, file is in ./scripts/conda
-conda env create --name envname --file=growspace.yml
-
-```
 
 ## Training
 Repository for testing PPO baseline is found [here](https://github.com/YasmeenVH/growspaceenv_baselines/tree/master/a2c_ppo_acktr)
