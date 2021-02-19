@@ -3,6 +3,18 @@ The goal of this project is to model plant branching with respect to light. The 
 
 ![alt text](https://github.com/YasmeenVH/growspace/blob/master/scripts/GrowSpaceEnv-HierarchyHard-v0-210218-163806.gif)
 
+
+## Installation
+``` python
+git clone https://github.com/YasmeenVH/growspace
+cd growspace
+pip install -e .
+cd ..
+
+# create conda environment with dependencies, file is in ./scripts/conda
+conda env create --name envname --file=growspace.yml
+```
+
 ## Plant Branching
 The growth of the plant follows [Space Colonization Algorithm ](http://algorithmicbotany.org/papers/colonization.egwnp2007.large.pdf) which have been used for rending realistic trees in games. This algorithm is based on a cloud of points which have been inspired by the grown of tree in order to provide a certain attraction to the growing branches. 
 
@@ -57,18 +69,6 @@ Current position of branches and light position. Two types of observations are a
 
 ### Rewards 
 Closest distance to the target(s)
-
-## Installation
-``` python
-git clone https://github.com/YasmeenVH/growspace
-cd growspace
-pip install -e .
-cd ..
-
-# create conda environment with dependencies, file is in ./scripts/conda
-conda env create --name envname --file=growspace.yml
-
-```
 
 ### Challenges
  Tasks               | Control       | Hierarchical  | Fairness | Multi-Objective
