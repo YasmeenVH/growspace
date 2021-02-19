@@ -1,8 +1,12 @@
 # Grow Space
 The goal of this project is to model plant branching with respect to light. The project presents an environment with a light source, a target and a plant growing.The environment allows for the light to move on highest edge of the environment along the x-axis in order to maximize plant growth and guide the plant towards the desired target.
 
+![alt text](https://github.com/YasmeenVH/growspace/blob/master/scripts/GrowSpaceEnv-HierarchyHard-v0-210218-163806.gif)
+
 ## Plant Branching
 The growth of the plant follows [Space Colonization Algorithm ](http://algorithmicbotany.org/papers/colonization.egwnp2007.large.pdf) which have been used for rending realistic trees in games. This algorithm is based on a cloud of points which have been inspired by the grown of tree in order to provide a certain attraction to the growing branches. 
+
+![alt text](https://github.com/YasmeenVH/growspace/blob/master/scripts/beam.png)
 
 ### Growth Algorithm Pseudocode
 
@@ -87,7 +91,7 @@ env = gym.make('GrowSpaceEnv-Fairness-v0')
 Under Consruction
 
 ## Installation
-`pip install -e`
+`pip install -e .`
 
 ## Training
 Repository for testing PPO baseline is found [here](https://github.com/YasmeenVH/growspaceenv_baselines/tree/master/a2c_ppo_acktr)
