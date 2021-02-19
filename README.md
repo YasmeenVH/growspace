@@ -91,7 +91,16 @@ env = gym.make('GrowSpaceEnv-Fairness-v0')
 Under Consruction
 
 ## Installation
-`pip install -e .`
+``` python
+git clone https://github.com/YasmeenVH/growspace
+cd growspace
+pip install -e .
+cd ..
+
+# create conda environment with dependencies, file is in ./scripts/conda
+conda env create --name envname --file=growspace.yml
+
+```
 
 ## Training
 Repository for testing PPO baseline is found [here](https://github.com/YasmeenVH/growspaceenv_baselines/tree/master/a2c_ppo_acktr)
