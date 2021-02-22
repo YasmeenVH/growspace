@@ -33,7 +33,7 @@ ir = to_int  # shortcut for function call
 
 class GrowSpaceEnv_Control(gym.Env):
 
-    def __init__(self, width=DEFAULT_RES, height=DEFAULT_RES, light_dif=LIGHT_DIF, obs_type = None, level = 'second', setting = 'easy'):
+    def __init__(self, width=DEFAULT_RES, height=DEFAULT_RES, light_dif=LIGHT_DIF, obs_type = None, level = 'second', setting = 'hard'):
         self.width = width  # do we keep?
         self.height = height  # do we keep?
         self.seed()
@@ -309,19 +309,28 @@ class GrowSpaceEnv_Control(gym.Env):
         # Set env back to start - also necessary on first start
         # is in range [0,1]
         if self.setting == 'easy':
-            random_start = 0.07
+            random_start = np.random.rand()
+            random_start2 = random_start
             self.target = [random_start, .8]
 
         elif self.setting == 'hard':
-            random_start = 0.07
-            self.target = [1-random_start, .8]
+            coin_flip = np.random.randint(2, size = 1)
+            if coin_flip == 0:
+                random_start = np.random.uniform(low = 0.05, high = 0.2)
+                random_start2 = np.random.uniform(low = 0.8, high = 0.95)
+            if coin_flip == 1:
+                random_start = np.random.uniform(low = 0.8, high = 0.95)
+                random_start2 = np.random.uniform(low = 0.05, high = 0.2)
+
+            self.target = [random_start, .8]
         else:
             random_start = np.random.rand() # is in range [0,1]
+            random_start2 = np.random.rand()
             self.target = [random_start, .8]
         self.branches = [
             Branch(
-                x=random_start,
-                x2=random_start,
+                x=random_start2,
+                x2=random_start2,
                 y=0,
                 y2=FIRST_BRANCH_HEIGHT,
                 img_width=self.width,
