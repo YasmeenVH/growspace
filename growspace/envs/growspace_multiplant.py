@@ -379,14 +379,20 @@ class GrowSpaceEnv_Fairness(gym.Env):
             self.target = [random_start+(self.light_width/2), 0.8]
 
         elif self.setting == 'hard_middle':
-            random_start = 0.1
-            random_start2 = 0.9
+            random_start = np.random.uniform(low=0.05, high=0.2)
+            random_start2 = np.random.uniform(low=0.8, high=0.95)
+
             self.target = [0.5, 0.8]
 
         elif self.setting == 'hard_above':
-            random_start = 0.1
-            random_start2 = 0.9
-            self.target = [random_start2, 0.8]
+            coin_flip = np.random.randint(2, size=1)
+            random_start = np.random.uniform(low=0.05, high=0.2)
+            random_start2 = np.random.uniform(low=0.8, high=0.95)
+            if coin_flip == 0:
+                self.target = [random_start, 0.8]
+            if coin_flip == 1:
+                self.target = [random_start2, 0.8]
+
         else:
             random_start = np.random.rand()
             random_start2 = np.random.rand()
