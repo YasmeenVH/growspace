@@ -21,6 +21,7 @@ LIGHT_DISPLACEMENT = .1
 LIGHT_W_INCREMENT = .1
 MIN_LIGHT_WIDTH = .1
 MAX_LIGHT_WIDTH = .5
+MAX_STEPS = 25
 
 def to_int(v):
     return int(round(v))
@@ -407,7 +408,7 @@ class GrowSpaceEnv_Control(gym.Env):
         #print("these are tips:",tips)
         #print("length of tips:", len(tips))
 
-        done = False  # because we don't have a terminal condition
+        done = self.steps == MAX_STEPS
         misc = {"tips": tips, "target": self.target, "light": self.x1_light, "light_width": self.light_width, "step": self.steps, "success": success }
 
         if self.steps == 0:
@@ -475,7 +476,8 @@ if __name__ == '__main__':
         print(backtorgb)
         cv2.imshow("plant", img)
         rewards = []
-        for _ in range(50):
+        c = False
+        while not c:
             action = key2action(cv2.waitKey(-1))
             if action is None:
                 quit()
@@ -485,5 +487,4 @@ if __name__ == '__main__':
             rewards.append(t)
             cv2.imshow("plant", gse.get_observation(debug_show_scatter=False))
         total = sum(rewards)
-
         print("amount of rewards:", total)

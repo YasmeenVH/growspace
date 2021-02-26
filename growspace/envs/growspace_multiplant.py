@@ -20,6 +20,7 @@ LIGHT_DISPLACEMENT = .1
 LIGHT_W_INCREMENT = .1
 MIN_LIGHT_WIDTH = .1
 MAX_LIGHT_WIDTH = .5
+MAX_STEPS = 50
 
 
 class Actions(Enum):
@@ -42,7 +43,6 @@ ir = to_int  # shortcut for function call
 
 
 class GrowSpaceEnv_Fairness(gym.Env):
-
     def __init__(self, width=DEFAULT_RES, height=DEFAULT_RES, light_dif=LIGHT_DIF, obs_type=None, level=None, setting='hard_above'):
         self.width = width
         self.height = height
@@ -134,8 +134,7 @@ class GrowSpaceEnv_Fairness(gym.Env):
                 branches_trimmed[closest_branch].grow_y += (y[i] - branches_trimmed[closest_branch].y2) / (dist / BRANCH_LENGTH)
 
         ## FOR SECOND TREE
-        for i in range(len(x) - 1, 0,
-                       -1):  # number of possible scatters, check if they allow for branching with min_dist
+        for i in range(len(x) - 1, 0, -1):  # number of possible scatters, check if they allow for branching with min_dist
             closest_branch = 0
             dist = 1
 
@@ -437,7 +436,7 @@ class GrowSpaceEnv_Fairness(gym.Env):
         # print("these are tips:",tips)
         # print("length of tips:", len(tips))
 
-        done = False  # because we don't have a terminal condition
+        done = self.steps == MAX_STEPS
         misc = {"tips": tips, "target": self.target, "light": self.x1_light, "light_width": self.light_width, "step": self.steps, "success": success}
 
         if self.steps == 0:
