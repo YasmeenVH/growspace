@@ -1,6 +1,8 @@
 import enum
+import random
 
 import cv2
+import gym
 import numpy as np
 from growspace.envs.growspace_control import GrowSpaceEnv_Control
 
@@ -38,6 +40,7 @@ class GrowSpaceWater(GrowSpaceEnv_Control):
         self.branch_water_usage = 0.1
         self.paint_water = False
         super().__init__()
+        self.action_space = self.action_space.__class__(self.action_space.n)
 
     def step(self, action):
         resource_cost = 0.
@@ -48,12 +51,12 @@ class GrowSpaceWater(GrowSpaceEnv_Control):
             resource_cost += 1.
             self.paint_water = True
 
-        s, r, t, i = super().step(action)
+        s, reward, t, i = super().step(action)
 
-        r -= resource_cost
+        reward -= resource_cost
         if i['new_branches']:
             self.water_level -= i['new_branches'] * self.branch_water_usage
-        return s, r, t, i
+        return s, reward, t, i
 
     def get_observation(self, *args, **kwargs):
         obs = super().get_observation(*args, **kwargs)
@@ -86,10 +89,58 @@ class GrowSpaceWater(GrowSpaceEnv_Control):
             return img
 
 
+class ContinuousActions(enum.IntEnum):
+    light_velocity = 0
+    beam_width = 1
+    # water = 2 # TODO add water -> 3 actions
+
+
+import warnings
+
+warnings.warn("remember to implement continuous water")
+
+
+class GrowSpaceContinuous(GrowSpaceEnv_Control):
+    def __init__(self):
+        super().__init__()
+        self.action_space = gym.spaces.Box(-1, 1, (len(ContinuousActions),))
+
+    def step(self, action):
+        desired_light_displacement = action[ContinuousActions.light_velocity]
+        beam_width_change = action[ContinuousActions.beam_width]
+        self.continous_light_move(desired_light_displacement)
+        self.continous_light_width_change(beam_width_change)
+        step, reward, terminal, info = super().step(Actions.noop)
+        return step, reward, terminal, info
+
+    def continous_light_move(self, desired_light_displacement):
+        new_x1_light = self.x1_light + desired_light_displacement
+        new_x2_light = new_x1_light + self.light_width
+
+        warnings.warn('assert new_x2_light <= 1 and new_x1_light >= 0, "Ouch! light bean is wide, it\'s outside the sides"')
+
+        if new_x2_light > 1:
+            right_overflow = (new_x2_light - 1)
+            new_x1_light -= right_overflow
+
+        if new_x1_light < 0:
+            left_overflow = -new_x1_light
+            new_x1_light = 0
+
+        self.x1_light = new_x1_light
+
+    def continous_light_width_change(self, beam_change):
+        new_width = self.light_width + beam_change
+        new_width_clipped = np.clip(new_width, MIN_LIGHT_WIDTH, MAX_LIGHT_WIDTH)
+        right_overflow = max(0, self.x1_light + new_width_clipped - 1)
+        self.light_width = new_width_clipped - right_overflow
+        assert self.light_width + self.x1_light <= 1 and self.x1_light >= 0, "Ouch! light bean is wide, it's outside the sides"
+
+
 if __name__ == '__main__':
 
-    env = GrowSpaceWater()
-
+    # env = GrowSpaceWater()
+    env = GrowSpaceContinuous()
 
     def key2action(key):
         if key == ord('a'):
@@ -104,6 +155,22 @@ if __name__ == '__main__':
             return 3
         elif key == ord('e'):
             return 5
+        else:
+            return None
+
+    def key2continuous_action(key):
+        if key == ord('a'):
+            return np.array([-0.25, 0])
+        elif key == ord('d'):
+            return np.array([0.25, 0])
+        elif key == ord('q'):
+            return np.array([-0.25, -0.1])
+        elif key == ord('e'):
+            return np.array([0.25, 0.1])
+        elif key == ord('z'):
+            return np.array([0, -0.1])
+        elif key == ord('c'):
+            return np.array([0, 0.1])
         else:
             return None
 
