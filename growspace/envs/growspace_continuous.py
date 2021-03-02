@@ -4,6 +4,7 @@ import cv2
 import gym
 import numpy as np
 from growspace.envs.growspace_control import GrowSpaceEnv_Control
+from growspace.envs.growspace_resources import Actions
 
 FIRST_BRANCH_HEIGHT = .24
 BRANCH_THICCNESS = .015
@@ -34,7 +35,7 @@ class GrowSpaceContinuous(GrowSpaceEnv_Control):
         super().__init__()
         self.action_space = gym.spaces.Box(-1, 1, (len(ContinuousActions),))
 
-    def step(self, action):
+    def step(self, action: np.ndarray):
         desired_light_displacement = action[ContinuousActions.light_velocity]
         beam_width_change = action[ContinuousActions.beam_width]
         self.continous_light_move(desired_light_displacement)
@@ -45,8 +46,6 @@ class GrowSpaceContinuous(GrowSpaceEnv_Control):
     def continous_light_move(self, desired_light_displacement):
         new_x1_light = self.x1_light + desired_light_displacement
         new_x2_light = new_x1_light + self.light_width
-
-        warnings.warn('assert new_x2_light <= 1 and new_x1_light >= 0, "Ouch! light bean is wide, it\'s outside the sides"')
 
         if new_x2_light > 1:
             right_overflow = (new_x2_light - 1)
@@ -66,9 +65,8 @@ class GrowSpaceContinuous(GrowSpaceEnv_Control):
         assert self.light_width + self.x1_light <= 1 and self.x1_light >= 0, "Ouch! light bean is wide, it's outside the sides"
 
 
-if __name__ == '__main__':
+def enjoy():
     env = GrowSpaceContinuous()
-
 
     def key2continuous_action(key):
         if key == ord('a'):
@@ -86,8 +84,6 @@ if __name__ == '__main__':
         else:
             return None
 
-
-    rewards = []
     while True:
         env.reset()
         img = env.get_observation(debug_show_scatter=False)
@@ -98,7 +94,7 @@ if __name__ == '__main__':
         rewards = []
         c = False
         while not c:
-            action = key2action(cv2.waitKey(-1))
+            action = key2continuous_action(cv2.waitKey(-1))
             if action is None:
                 quit()
 
@@ -108,3 +104,7 @@ if __name__ == '__main__':
             cv2.imshow("plant", env.get_observation(debug_show_scatter=False))
         total = sum(rewards)
         print("amount of rewards:", total)
+
+
+if __name__ == '__main__':
+    enjoy()
