@@ -474,18 +474,24 @@ class GrowSpaceEnv_Fairness(gym.Env):
         d2 = self.distance_target(tips[1])
 
         if d1 <= 0.1:
-            r1 = (1/0.1 /10)*.5
+            r1 = (1/0.1 /10) *.5
             #reward = preprocessing.normalize(reward)
         else:
-            r1 = (1 / d1 /10)*.5
+            r1 = (1 / d1 /10) *.5
 
         if d2 <= 0.1:
-            r2 = (1/0.1 /10)*.5
+            r2 = (1/0.1 /10) *.5
             #reward = preprocessing.normalize(reward)
         else:
             r2 = (1 / d2 /10)*.5
 
-        reward = r1+r2
+        #reward = r1+r2
+        if r1 < r2:
+            reward = r1
+        elif r2 == r1:
+            reward = r2
+        else:
+            reward = r2
 
         if reward == 1:
             success = 1
