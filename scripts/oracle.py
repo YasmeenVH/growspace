@@ -8,7 +8,7 @@ import os, sys
 import imageio
 import cv2
 #env = gym.make("GrowSpaceEnv-Images-v0")
-from scripts.random_solver import random_solver
+#from scripts.random_solver import random_solver
 from array import *
 from itertools import chain
 from scripts.save_img_movie import save_file_movie_oracle, filter, natural_keys
@@ -72,17 +72,22 @@ class Oracle(object):
             img = env.get_observation(debug_show_scatter=False)
 
             path = '/home/y/Documents/finalprojectcomp767/growspace/scripts/png/'
-            cv2.imwrite(os.path.join(path, 'step_oracle_good' + str(s) + '.png'), img)
+            cv2.imwrite(os.path.join(path, 'step_oracle_control_easy' + str(s) + '.png'), img)
             print(s_t[1])
-            rewards.append(s_t[1])
+            rewards.append(np.float(s_t[1]))
             #rewards = rewards.tolist()
-        flatten_list = list(chain.from_iterable(rewards))
+        print(rewards)
+        #rewards_good = [[i] for i in rewards]
+
+#       #flatten_list = list(chain.from_iterable(rewards))
+        flatten_list = np.sum(rewards)
+        print('total r:',flatten_list)
 
         return flatten_list
 
 
 if __name__ == '__main__':
-    env = gym.make("GrowSpaceEnv-Images-v0")
+    env = gym.make("GrowSpaceEnv-ControlEasy-v0")
     Oracle = Oracle()
     run_oracle = Oracle.oracle()
     png_dir = '/home/y/Documents/finalprojectcomp767/growspace/scripts/png/'
