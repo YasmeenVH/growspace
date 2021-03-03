@@ -165,7 +165,7 @@ class GrowSpaceEnv_Mnist(gym.Env):
                 #print('check2')
             else:
                 branches_trimmed = self.branches
-                print('check3')
+
 
             branch_idx = [branch_idx for branch_idx, branch in enumerate(branches_trimmed)if self.x1_light <= branch.x2 <= self.x2_light or
                           self.y2_light <= branch.y2 <= self.y1_light]
@@ -344,13 +344,13 @@ class GrowSpaceEnv_Mnist(gym.Env):
                 # print(f"drawing branch from {pt1} to {pt2} "
                 #       f"with thiccness {branch.width/50 * self.width}")
 
-            z = np.where(self.mnist_shape < 255, img, 255)
+            z = np.where(self.mnist_shape < 255, img, 150)
             #img = np.sum(mnist, img)
             #for i in range(len(img)):
                 #if self.mnist_shape[i] == 255:
                     #img[i] = self.mnist_shape[i]
                 #img[i] = self.mnist_shape[i]
-            # place goal as filled circle with center and radius
+            # place goal as filled circle with center and radiusw
             # also important - place goal last because must be always visible
             #x = ir(self.target[0] * self.width)
             #y = ir(self.target[1] * self.height)
@@ -369,6 +369,7 @@ class GrowSpaceEnv_Mnist(gym.Env):
             #print(mnist)
             #print(img)
             #img = img+mnist
+            #print('this is img',img[0])
             img = cv2.flip(z, 0)
             #print(img)
 
@@ -420,6 +421,13 @@ class GrowSpaceEnv_Mnist(gym.Env):
         self.y2_light = self.y1_light - LIGHT_WIDTH
         self.tips = [self.branches[0].x2, self.branches[0].y2]
         print("this is light displacement", LIGHT_DISPLACEMENT)
+
+
+        # print("test",target_img)
+        self.mnist_pixels = (self.get_observation()[:,:,2]/150)  # binary map of mnist shape
+        self.plant_original = (self.get_observation()[:,:,1]/255) # binary map of original stem
+        #print('this is mnist_img',mnist_pixels)
+        #self.mnist_pixels = np.where(self.mnist_shape < 255,
         return self.get_observation()
 
     def step(self, action):
@@ -478,17 +486,30 @@ class GrowSpaceEnv_Mnist(gym.Env):
 
         # Branching step for light in this position
         tips = self.tree_grow(xs, ys, .01, .15)
-        #print("tips:", tips)
-        # Calculate distance to target
-        if self.distance_target(tips) <= 0.1:
-            reward = 1/0.1 /10
-            #reward = preprocessing.normalize(reward)
-        else:
-            reward = 1 / self.distance_target(tips) /10
-        #print("this is reward:",reward)
-        #reward = preprocessing.normalize(reward)
+
         # Render image of environment at current state
         observation = self.get_observation()  #image
+        plant = (observation[:,:,1]/255) # binary map of plant
+        plant[plant>0.6] =1
+        plant = plant.astype(int)
+        print('plant', type(plant))
+        true_plant = np.subtract(plant,self.plant_original)
+        mnist = (observation[:,:,2]/150) # binary map of mnist
+        mnist[mnist>0.5] =1
+        mnist = mnist.astype(int)
+        print('mnist',np.ndim(mnist))
+        #intersection = np.all(true_plant == mnist) ### need to fix intersection
+
+        check = np.sum((true_plant, mnist), axis=0)
+        intersection = np.sum(np.where(check < 2, 0, 1))
+        print('intersection', intersection)
+        union = np.sum(np.where(check<2,check,1))
+        print('union',union)
+        reward = intersection / union
+
+        #print(union)
+        #self.mnist_img
+        #reward = np.where(observation)
         #print("these are tips:",tips)
         #print("length of tips:", len(tips))
 
@@ -529,7 +550,7 @@ class GrowSpaceEnv_Mnist(gym.Env):
             cv2.imshow('plant', img)  # create opencv window to show plant
             cv2.waitKey(1)  # this is necessary or the window closes immediately
         else:
-            return imga
+            return img
 
 
 if __name__ == '__main__':
