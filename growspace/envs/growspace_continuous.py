@@ -70,13 +70,11 @@ def enjoy():
 
     def key2continuous_action(key):
         if key == ord('a'):
-            return np.array([-0.25, 0])
+            return np.array([-0.15, 0])
         elif key == ord('d'):
-            return np.array([0.25, 0])
-        elif key == ord('q'):
-            return np.array([-0.25, -0.1])
+            return np.array([-0.15, -0.1])
         elif key == ord('e'):
-            return np.array([0.25, 0.1])
+            return np.array([0.15, 0.1])
         elif key == ord('z'):
             return np.array([0, -0.1])
         elif key == ord('c'):
