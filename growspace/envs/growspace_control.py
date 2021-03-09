@@ -6,6 +6,7 @@ import numpy as np
 from numpy.linalg import norm
 from growspace.plants.tree import Branch
 from scipy.spatial import distance
+from scipy.spatial import ConvexHull, convex_hull_plot_2d
 import sys
 np.set_printoptions(threshold=sys.maxsize)
 
@@ -27,13 +28,13 @@ def to_int(v):
 def unpack(w):
     return map(list, zip(*enumerate(w)))
 
-
+#def intersection(x1,y1,x2,y2):
+   # xdiff = x1 - x2,
 ir = to_int  # shortcut for function call
-
 
 class GrowSpaceEnv_Control(gym.Env):
 
-    def __init__(self, width=DEFAULT_RES, height=DEFAULT_RES, light_dif=LIGHT_DIF, obs_type = None, level = None, setting = 'easy'):
+    def __init__(self, width=DEFAULT_RES, height=DEFAULT_RES, light_dif=LIGHT_DIF, obs_type = None, level = 'second', setting = 'hard'):
         self.width = width  # do we keep?
         self.height = height  # do we keep?
         self.seed()
@@ -195,6 +196,8 @@ class GrowSpaceEnv_Control(gym.Env):
             # x2 and y2 since they are the tips
             branch_coords.append([branch.x2, branch.y2])
         #print("branching has occured")
+
+        self.tips = branch_coords
 
         return branch_coords
 
@@ -367,6 +370,7 @@ class GrowSpaceEnv_Control(gym.Env):
         self.new_branches = 0
         self.tips_per_step = 0
         self.light_move = 0
+        self.tips = [self.branches[0].x2, self.branches[0].y2]
 
         return self.get_observation()
 
@@ -393,7 +397,83 @@ class GrowSpaceEnv_Control(gym.Env):
         self.x2_light = self.x1_light + self.light_width
 
         # filter scattering
-        xs, ys = self.light_scatter()
+        try:
+            convex_tips = np.array(self.tips)
+            print('what is length:',len(convex_tips))
+            xs, ys = self.light_scatter()
+            if len(convex_tips) >= 2:
+                print('check')
+                hull = ConvexHull(convex_tips)
+                print('check2')
+                print('what is this:',convex_tips[hull.vertices,0])
+                print('what is this8:', convex_tips[hull.vertices, 1])
+                xxs = convex_tips[hull.vertices, 0]  # x coords for convex hull around tips
+                yys = convex_tips[hull.vertices, 1]  # y coords for convex hull around tips
+                x_max_idx = np.where(xxs == np.amax(xxs))  # idx where most right tip is
+                x_min_idx = np.where(xxs == np.amin(xxs))  # idx where most left tip is
+                y_max_idx = np.where(yys == np.amax(yys))  # idx highest tip
+                print(x_max_idx[0], 'this is the idx')
+                x_min_idx = np.where(min(xxs))
+                y_max = xxs[y_max_idx]
+                print(xs,'this is xs')
+
+                if self.x1_light < xxs[x_min_idx] < self.x2_light:  # if within the horizontal beam
+
+                    if self.x1_light < xxs[x_max_idx] < self.x2_light:
+
+                        # full convex is in within the beam
+                        if yys[x_min_idx] < yys[x_max_idx]:
+                            if xxs[x_min_idx] < xxs[x_max_idx]:
+                                filter1 = np.logical_and(xs >= xxs[x_min_idx], xs <= xxs[x_max_idx])
+                                filter2 = np.logical_and(ys >= 0, ys <= yys[x_min_idx])
+                            else:
+                                filter1 = np.logical_and(xs >= xxs[x_max_idx], xs <= xxs[x_min_idx])
+                                filter2 = np.logical_and(ys >= 0, ys <= yys[x_max_idx])
+
+                    # convex is on left side and in between beam
+                    filter1 = np.logical_and(xs >= xxs[x_min_idx], xs <= self.x2_light)
+                    filter2 = np.logical_and(ys <= yys[x_min_idx], ys >= 0)
+                    # figure out how to sum two boolean arrays
+                    idx = [i for i in range(len(filter1)) if filter1[i] == filter2[i] == True]
+                    print("what is idx", idx)
+
+                elif self.x1_light < xxs[x_max_idx] < self.x2_light:
+
+                    # convex is on right side and in between beam
+                    filter1 = np.logical_and(xs <= xxs[x_max_idx], xs >= self.x1_light)
+                    filter2 = np.logical_and(ys <= yys[x_max_idx], ys >= 0)
+                    # figure out how to sum two boolean arrays
+                    idx = [i for i in range(len(filter1)) if (filter1[i] == True) and (filter2[i]  == True)]
+                    print("what is idx", idx)
+                    xs = [xs[i] for i in idx]
+                    ys = [ys[i] for i in idx]
+
+                elif xxs[x_min_idx] < self.x1_light < self.x2_light < xxs[x_max_idx]:
+                    # width of light is covering convex with no exposed edges
+                    y1 = []
+                    y2 = []
+                    for i in range(len(xxs)):
+                        if xxs[i+1]< self.x1_light < xxs[i]:
+                            y1.append(yys[i])
+                            y1.append(xxs[i+1])
+                        if xxs[i+1] < self.x2_light < xxs[i]:
+                            y2.append(yys[i])
+                            y2.append(xxs[i+1])
+                    y_min = min(min(y1), min(y2))
+                    filter1 = np.logical_and(xs >= self.x1_light, xs <= self.x2_light)
+                    filter2 = np.logical_and(ys <= y_min, ys >= 0)
+
+                    idx = [i for i in range(len(filter1)) if (filter1[i] == True) and (filter2[i] == True)]
+                    print("what is idx", idx)
+                    xs = [xs[i] for i in idx]
+                    ys = [ys[i] for i in idx]
+
+                else:
+                    pass #this  is when beam is not covering plants
+        except:
+            pass
+
+
         #print("scattering x len:", len(xs))
         #print("this is lightx1 :", self.x1_light, "and light width:", self.light_width)
         # Branching step for light in this position
@@ -477,9 +557,9 @@ if __name__ == '__main__':
     while True:
         gse.reset()
         img = gse.get_observation(debug_show_scatter=False)
-        image = img.astype(np.uint8)
-        backtorgb = image * 255
-        print(backtorgb)
+        #image = img.astype(np.uint8)
+        #backtorgb = image * 255
+        #wwasssssssssssssssssssssssssssssssssssssssprint(backtorgb)
         cv2.imshow("plant", img)
         rewards = []
         for _ in range(50):
