@@ -399,23 +399,23 @@ class GrowSpaceEnv_Control(gym.Env):
         # filter scattering
         try:
             convex_tips = np.array(self.tips)
-            print('what is length:',len(convex_tips))
+            #print('what is length:',len(convex_tips))
             xs, ys = self.light_scatter()
             if len(convex_tips) >= 2:
-                print('check')
+                #print('check')
                 hull = ConvexHull(convex_tips)
-                print('check2')
-                print('what is this:',convex_tips[hull.vertices,0])
-                print('what is this8:', convex_tips[hull.vertices, 1])
+                #print('check2')
+                #print('what is this:',convex_tips[hull.vertices,0])
+               # print('what is this8:', convex_tips[hull.vertices, 1])
                 xxs = convex_tips[hull.vertices, 0]  # x coords for convex hull around tips
                 yys = convex_tips[hull.vertices, 1]  # y coords for convex hull around tips
                 x_max_idx = np.where(xxs == np.amax(xxs))  # idx where most right tip is
                 x_min_idx = np.where(xxs == np.amin(xxs))  # idx where most left tip is
                 y_max_idx = np.where(yys == np.amax(yys))  # idx highest tip
-                print(x_max_idx[0], 'this is the idx')
+                #print(x_max_idx[0], 'this is the idx')
                 x_min_idx = np.where(min(xxs))
                 y_max = xxs[y_max_idx]
-                print(xs,'this is xs')
+                #print(xs,'this is xs')
 
                 if self.x1_light < xxs[x_min_idx] < self.x2_light:  # if within the horizontal beam
 
@@ -435,7 +435,7 @@ class GrowSpaceEnv_Control(gym.Env):
                     filter2 = np.logical_and(ys <= yys[x_min_idx], ys >= 0)
                     # figure out how to sum two boolean arrays
                     idx = [i for i in range(len(filter1)) if filter1[i] == filter2[i] == True]
-                    print("what is idx", idx)
+                    #print("what is idx", idx)
 
                 elif self.x1_light < xxs[x_max_idx] < self.x2_light:
 
@@ -444,7 +444,7 @@ class GrowSpaceEnv_Control(gym.Env):
                     filter2 = np.logical_and(ys <= yys[x_max_idx], ys >= 0)
                     # figure out how to sum two boolean arrays
                     idx = [i for i in range(len(filter1)) if (filter1[i] == True) and (filter2[i]  == True)]
-                    print("what is idx", idx)
+                    #print("what is idx", idx)
                     xs = [xs[i] for i in idx]
                     ys = [ys[i] for i in idx]
 
@@ -464,7 +464,7 @@ class GrowSpaceEnv_Control(gym.Env):
                     filter2 = np.logical_and(ys <= y_min, ys >= 0)
 
                     idx = [i for i in range(len(filter1)) if (filter1[i] == True) and (filter2[i] == True)]
-                    print("what is idx", idx)
+                    #print("what is idx", idx)
                     xs = [xs[i] for i in idx]
                     ys = [ys[i] for i in idx]
 
