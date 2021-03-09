@@ -28,8 +28,14 @@ def to_int(v):
 def unpack(w):
     return map(list, zip(*enumerate(w)))
 
-#def intersection(x1,y1,x2,y2):
-   # xdiff = x1 - x2,
+def intersection_(coords, light_x):
+    xdiff = coords[0] - coords[1]
+    ydiff = coords[2] - coords[3]
+    delta = ydiff/xdiff
+    b = coords[2] - (coords[0] * delta)
+    y = (delta * light_x) + b
+    return
+
 ir = to_int  # shortcut for function call
 
 class GrowSpaceEnv_Control(gym.Env):
@@ -430,40 +436,48 @@ class GrowSpaceEnv_Control(gym.Env):
                                 filter1 = np.logical_and(xs >= xxs[x_max_idx], xs <= xxs[x_min_idx])
                                 filter2 = np.logical_and(ys >= 0, ys <= yys[x_max_idx])
 
-                    # convex is on left side and in between beam
+                    # convex is on right side and in between beam
                     filter1 = np.logical_and(xs >= xxs[x_min_idx], xs <= self.x2_light)
                     filter2 = np.logical_and(ys <= yys[x_min_idx], ys >= 0)
-                    # figure out how to sum two boolean arrays
-                    idx = [i for i in range(len(filter1)) if filter1[i] == filter2[i] == True]
-                    #print("what is idx", idx)
+
+                    # Filtering for values that are not shaded
+                    idx = [i for i in range(len(filter1)) if (filter1[i] == False) and (filter2[i] == False)]
+                    xs = [xs[i] for i in idx]
+                    ys = [ys[i] for i in idx]
 
                 elif self.x1_light < xxs[x_max_idx] < self.x2_light:
 
-                    # convex is on right side and in between beam
+                    # convex is on left side and in between beam
                     filter1 = np.logical_and(xs <= xxs[x_max_idx], xs >= self.x1_light)
-                    filter2 = np.logical_and(ys <= yys[x_max_idx], ys >= 0)
-                    # figure out how to sum two boolean arrays
-                    idx = [i for i in range(len(filter1)) if (filter1[i] == True) and (filter2[i]  == True)]
-                    #print("what is idx", idx)
+                    filter2 = np.logical_and(ys >= 0,ys <= yys[x_max_idx])
+
+                    # Filtering for values that are not shaded
+                    idx = [i for i in range(len(filter1)) if (filter1[i] == False) and (filter2[i] == False)]
                     xs = [xs[i] for i in idx]
                     ys = [ys[i] for i in idx]
 
                 elif xxs[x_min_idx] < self.x1_light < self.x2_light < xxs[x_max_idx]:
                     # width of light is covering convex with no exposed edges
-                    y1 = []
-                    y2 = []
-                    for i in range(len(xxs)):
-                        if xxs[i+1]< self.x1_light < xxs[i]:
-                            y1.append(yys[i])
-                            y1.append(xxs[i+1])
-                        if xxs[i+1] < self.x2_light < xxs[i]:
-                            y2.append(yys[i])
-                            y2.append(xxs[i+1])
-                    y_min = min(min(y1), min(y2))
-                    filter1 = np.logical_and(xs >= self.x1_light, xs <= self.x2_light)
-                    filter2 = np.logical_and(ys <= y_min, ys >= 0)
+                    intersection_1 = []
+                    intersection_2 = []
 
-                    idx = [i for i in range(len(filter1)) if (filter1[i] == True) and (filter2[i] == True)]
+                    for i in range(len(xxs)):
+                        # find intersecting vertex with convex
+                        if xxs[i+1]< self.x1_light < xxs[i]:
+                            intersection_1.append(xxs[i], xxs[i+1])
+                            intersection_1.append(yys[i], yys[i+1])
+
+                        if xxs[i+1] < self.x2_light < xxs[i]:
+                            intersection_2.append(xxs[i], xxs[i+1])
+                            intersection_2.append(yys[i], yys[i+1])
+                            #print('what is intersection2',intersection_2)
+                    y1 = intersection_(intersection_1,self.x1_light)
+                    y2 = intersection_(intersection_2,self.x2_light)
+                    y_limit = min(y1,y2)
+                    filter1 = np.logical_and(xs <= self.x1_light, xs >= self.x2_light)
+                    filter2 = np.logical_and(ys >= 0, ys <= y_limit)
+
+                    idx = [i for i in range(len(filter1)) if (filter1[i] == False) and (filter2[i] == False)]
                     #print("what is idx", idx)
                     xs = [xs[i] for i in idx]
                     ys = [ys[i] for i in idx]
