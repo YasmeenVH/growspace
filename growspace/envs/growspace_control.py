@@ -484,13 +484,13 @@ if __name__ == '__main__':
         print(backtorgb)
         cv2.imshow("plant", img)
         rewards = []
-        c = False
-        while not c:
+        done = False
+        while not done:
             action = key2action(cv2.waitKey(-1))
             if action is None:
                 quit()
 
-            b,t,c,f = gse.step(action)
+            b,t,done,f = gse.step(action)
             print(f["new_branches"])
             rewards.append(t)
             cv2.imshow("plant", gse.get_observation(debug_show_scatter=False))

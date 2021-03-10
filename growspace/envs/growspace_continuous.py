@@ -31,19 +31,27 @@ class ContinuousActions(enum.IntEnum):
 
 
 class GrowSpaceContinuous(GrowSpaceEnv_Control):
-    def __init__(self):
+    def __init__(self, seed=123):
         super().__init__()
         self.action_space = gym.spaces.Box(-1, 1, (len(ContinuousActions),))
+        self.set_seed = seed
 
     def step(self, action: np.ndarray):
         desired_light_displacement = action[ContinuousActions.light_velocity]
         beam_width_change = action[ContinuousActions.beam_width]
-        self.continous_light_move(desired_light_displacement)
+        self.continuous_light_move(desired_light_displacement)
         self.continous_light_width_change(beam_width_change)
         step, reward, terminal, info = super().step(Actions.noop)
         return step, reward, terminal, info
 
-    def continous_light_move(self, desired_light_displacement):
+    def reset_to_be_fixed(self): # TODO
+        """ If used with ppo there is an error as it uses the reset from another class
+        and not the one from growspace_control.py """
+
+        self.seed(seed=self.set_seed)
+        super().reset()
+
+    def continuous_light_move(self, desired_light_displacement):
         new_x1_light = self.x1_light + desired_light_displacement
         new_x2_light = new_x1_light + self.light_width
 
