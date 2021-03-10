@@ -419,7 +419,7 @@ class GrowSpaceEnv_Control(gym.Env):
                 x_min_idx = np.where(xxs == np.amin(xxs))  # idx where most left tip is
                 y_max_idx = np.where(yys == np.amax(yys))  # idx highest tip
                 #print(x_max_idx[0], 'this is the idx')
-                x_min_idx = np.where(min(xxs))
+                #x_min_idx = np.where(min(xxs))
                 y_max = xxs[y_max_idx]
                 #print(xs,'this is xs')
 
