@@ -1,7 +1,9 @@
-#from growspace.envs.growspace_shape import GrowSpaceEnv
 from growspace.envs.growspaceenv_sorted import GrowSpaceSortedEnv
 from growspace.envs.growspace_control import GrowSpaceEnv_Control
 from growspace.envs.growspace_multiplant import GrowSpaceEnv_Fairness
+from growspace.envs.growspace_shape import GrowSpaceEnv_Mnist
+from growspace.envs.spotlight import GrowSpaceEnvSpotlightMnist
+
 #from growspace.envs.growspace_shape import GrowSpaceEnv_Mnist
 from growspace.envs.growspace_continuous import GrowSpaceContinuous
 from growspace.envs.growspace_sun_mnist import GrowSpaceEnvSunMnist

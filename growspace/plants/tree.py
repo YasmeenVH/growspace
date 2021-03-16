@@ -1,4 +1,7 @@
+import numpy as np
+
 GROWTH_MULTIPLIER = .02  # keep this below 1 to prevent exponential growth
+
 
 
 def valid_coord(x):
@@ -8,18 +11,11 @@ def valid_coord(x):
 
 
 class Branch(object):
-
     def __init__(self, x, x2, y, y2, img_width, img_height):
-        assert valid_coord(x)
-        assert valid_coord(x2)
-        assert valid_coord(y)
-        assert valid_coord(y2)
-        assert valid_coord(x)
-        assert valid_coord(x2)
-        assert valid_coord(y)
-        assert valid_coord(y2)
-        self.p = (x, y)
-        self.p2 = (x2, y2)
+        self.x = x
+        self.y = y
+        self.x2 = x2
+        self.y2 = y2
 
         self.img_width = img_width
         self.img_height = img_height
@@ -29,22 +25,6 @@ class Branch(object):
         self.grow_y = 0
         self.width = .5
         self.child = []
-
-    @property
-    def x(self):
-        return self.p[0]
-
-    @property
-    def y(self):
-        return self.p[1]
-
-    @property
-    def x2(self):
-        return self.p2[0]
-
-    @property
-    def y2(self):
-        return self.p2[1]
 
     def update_width(self):
         width = 0
@@ -63,6 +43,64 @@ class Branch(object):
         y2 = int(round(self.y2 * self.img_height))
 
         return (x1, y1), (x2, y2)
+
+    # def draw_branch(self):
+    #     plt.ylim(0, 100)
+    #     plt.xlim(0, 100)
+    #     plt.plot([self.x,self.x2],[self.y,self.y2], linewidth=np.sqrt(self.width), color='green')
+
+
+class PixelBranch:
+    def valid_coord(self, x):
+        assert isinstance(x, int)
+        assert 0 <= x < self.img_side
+        return True
+
+    def __init__(self, x, x2, y, y2, img_width, img_height):
+        assert img_width == img_height, "Only square images are supported"
+        self.img_side = img_width
+
+        assert self.valid_coord(x)
+        assert self.valid_coord(x2)
+        assert self.valid_coord(y)
+        assert self.valid_coord(y2)
+        assert self.valid_coord(x)
+        assert self.valid_coord(x2)
+        assert self.valid_coord(y)
+        assert self.valid_coord(y2)
+
+        self.p = (x, y)
+        self.tip_point = (x2, y2)
+
+        self.grow_count = 0
+        self.grow_direction = np.array([0, 0])
+        self.width = .5
+        self.child = []
+
+    @property
+    def x(self):
+        return self.p[0]
+
+    @property
+    def y(self):
+        return self.p[1]
+
+    @property
+    def x2(self):
+        return self.tip_point[0]
+
+    @property
+    def y2(self):
+        return self.tip_point[1]
+
+    def update_width(self):
+        width = 0
+        for i in range(len(self.child)):
+            width += self.child[i].update_width()  # because exponential growth
+
+        self.width += width * GROWTH_MULTIPLIER
+
+        return self.width
 
 
 if __name__ == '__main__':
