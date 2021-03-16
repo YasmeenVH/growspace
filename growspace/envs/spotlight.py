@@ -55,7 +55,7 @@ class GrowSpaceEnvSpotlightMnist(gym.Env):
         self.action_space = gym.spaces.Discrete(5)  # L, R, keep of light paddle, or increase, decrease
         self.feature_maps = np.zeros((len(Features), self.height, self.width), dtype=np.uint8)
 
-        self.observation_space = gym.spaces.Box(0, 255, shape=(28, 28, 3), dtype=np.uint8)
+        self.observation_space = gym.spaces.Box(0, 255, shape=(self.height, self.width, 3), dtype=np.uint8)
 
         assert os.path.isfile(PATH), "path to mnist image is not valid"
 
@@ -135,7 +135,7 @@ class GrowSpaceEnvSpotlightMnist(gym.Env):
 
         # sending coordinates out
         for branch in self.branches:
-            branch_coords.append([branch.tip_point])
+            branch_coords.append(branch.tip_point)
 
         self.tips = branch_coords
         return branch_coords
@@ -191,30 +191,24 @@ class GrowSpaceEnvSpotlightMnist(gym.Env):
 
     def step(self, action):
         if action == 0:
-            self.move_sun(0.1)
-
-        if action == 1:
-            self.move_sun(-0.1)
-
-        if action == 2:
             self.focus_radius = min(0.2, self.focus_radius + 0.05)
 
-        if action == 3:
+        if action == 1:
             self.focus_radius = max(0.05, self.focus_radius - 0.05)
 
-        if action == 5:
-            self.focus_point.array[0] -= 0.1
+        if action == 2:
+            self.focus_point[0] -= 0.1
 
-        if action == 6:
-            self.focus_point.array[0] += 0.1
-
-        if action == 7:
-            self.focus_point.array[1] += 0.1
-
-        if action == 8:
-            self.focus_point.array[1] -= 0.1
+        if action == 3:
+            self.focus_point[0] += 0.1
 
         if action == 4:
+            self.focus_point[1] += 0.1
+
+        if action == 5:
+            self.focus_point[1] -= 0.1
+
+        if action == 6:
             pass
         self.draw_spotlight()
 
@@ -243,8 +237,8 @@ class GrowSpaceEnvSpotlightMnist(gym.Env):
         self.steps += 1
         return observation, reward, done, misc
 
-    def move_sun(self, angle_change):
-        self.sun_angle = (self.sun_angle + angle_change) % (2 * math.pi)
+    # def move_sun(self, angle_change):
+    #     self.sun_angle = (self.sun_angle + angle_change) % (2 * math.pi)
 
     @property
     def sun_position(self):
