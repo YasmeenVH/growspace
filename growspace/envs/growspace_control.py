@@ -146,6 +146,8 @@ class GrowSpaceEnv_Control(gym.Env):
             dist = 1
 
             if len(self.branches) > MAX_BRANCHING:
+                import random
+                random.seed(123)
                 branches_trimmed = sample(self.branches, MAX_BRANCHING)
             else:
                 branches_trimmed = self.branches
@@ -416,7 +418,7 @@ class GrowSpaceEnv_Control(gym.Env):
         #print("these are tips:",tips)
         #print("length of tips:", len(tips))
 
-        done = self.steps == MAX_STEPS
+        done = False # self.steps == MAX_STEPS
         misc = {"tips": tips, "target": self.target, "light": self.x1_light, "light_width": self.light_width, "step": self.steps, "success": success }
 
         if self.steps == 0:

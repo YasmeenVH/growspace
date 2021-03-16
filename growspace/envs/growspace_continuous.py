@@ -17,7 +17,6 @@ LIGHT_DISPLACEMENT = .1
 LIGHT_W_INCREMENT = .1
 MIN_LIGHT_WIDTH = .1
 MAX_LIGHT_WIDTH = .5
-MAX_STEPS = 25
 
 
 def to_int(v):
@@ -31,12 +30,13 @@ class ContinuousActions(enum.IntEnum):
 
 
 class GrowSpaceContinuous(GrowSpaceEnv_Control):
-    def __init__(self, seed=123):
-        super().__init__()
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
         self.action_space = gym.spaces.Box(-1, 1, (len(ContinuousActions),))
-        self.set_seed = seed
+        self.set_seed = 123
 
     def step(self, action: np.ndarray):
+        self.seed(seed=self.set_seed)
         desired_light_displacement = action[ContinuousActions.light_velocity]
         beam_width_change = action[ContinuousActions.beam_width]
         self.continuous_light_move(desired_light_displacement)
@@ -44,12 +44,9 @@ class GrowSpaceContinuous(GrowSpaceEnv_Control):
         step, reward, terminal, info = super().step(Actions.noop)
         return step, reward, terminal, info
 
-    def reset_to_be_fixed(self): # TODO
-        """ If used with ppo there is an error as it uses the reset from another class
-        and not the one from growspace_control.py """
-
+    def reset(self):
         self.seed(seed=self.set_seed)
-        super().reset()
+        return super().reset()
 
     def continuous_light_move(self, desired_light_displacement):
         new_x1_light = self.x1_light + desired_light_displacement
@@ -66,7 +63,7 @@ class GrowSpaceContinuous(GrowSpaceEnv_Control):
         self.x1_light = new_x1_light
 
     def continous_light_width_change(self, beam_change):
-        new_width = self.light_width + beam_change
+        new_width = self.light_width + beam_change/10
         new_width_clipped = np.clip(new_width, MIN_LIGHT_WIDTH, MAX_LIGHT_WIDTH)
         right_overflow = max(0, self.x1_light + new_width_clipped - 1)
         self.light_width = new_width_clipped - right_overflow
@@ -88,7 +85,7 @@ def enjoy():
         elif key == ord('c'):
             return np.array([0, 0.1])
         else:
-            return None
+            print("key not valid, options are: 'a','d','e','z','c's")
 
     while True:
         env.reset()
@@ -98,14 +95,15 @@ def enjoy():
         print(backtorgb)
         cv2.imshow("plant", img)
         rewards = []
-        c = False
-        while not c:
+        done = False
+        while not done:
             action = key2continuous_action(cv2.waitKey(-1))
             if action is None:
                 quit()
 
-            b, t, c, f = env.step(action)
+            b, t, done, f = env.step(action)
             print(f["new_branches"])
+            print(b.sum())
             rewards.append(t)
             cv2.imshow("plant", env.get_observation(debug_show_scatter=False))
         total = sum(rewards)
