@@ -1,6 +1,7 @@
 import math
 import random
 import sys
+import os
 from enum import IntEnum
 from random import sample
 
@@ -24,7 +25,7 @@ LIGHT_DISPLACEMENT = .1
 LIGHT_W_INCREMENT = .1
 MIN_LIGHT_WIDTH = .1
 MAX_LIGHT_WIDTH = .5
-PATH = '../../scripts/png/mnist_data/mnist_1.png'
+PATH = '../growspace/scripts/png/mnist_data/mnist_1.png'
 
 
 def to_int(v):
@@ -55,6 +56,9 @@ class GrowSpaceEnvSpotlightMnist(gym.Env):
         self.feature_maps = np.zeros((len(Features), self.height, self.width), dtype=np.uint8)
 
         self.observation_space = gym.spaces.Box(0, 255, shape=(28, 28, 3), dtype=np.uint8)
+
+        assert os.path.isfile(PATH), "path to mnist image is not valid"
+
         self.mnist_shape = cv2.imread(path)
 
         self.focus_point = np.array([0.5, 0.5])
