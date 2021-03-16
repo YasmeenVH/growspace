@@ -183,5 +183,6 @@ register(
 register(
     id=f'GrowSpaceEnv-Continuous-v0',
     entry_point='growspace.envs:GrowSpaceContinuous',
+    max_episode_steps=50,
 )
 # TOOD(Manuel): Register water, continuous
