@@ -1,4 +1,5 @@
 from gym.envs.registration import register
+
 #
 # register(
 #     id=f'GrowSpaceEnv-States-v0',
@@ -13,169 +14,165 @@ register(
     id=f'GrowSpaceEnv-Control-v0',
     entry_point='growspace.envs:GrowSpaceEnv_Control',
     kwargs={'obs_type': None, 'level': None, 'setting': None,
-        # "observe_images": True
-    },
-    max_episode_steps=50, # number of total steps in the environment
+            # "observe_images": True
+            },
+    max_episode_steps=50,  # number of total steps in the environment
 )
 
 register(
     id=f'GrowSpaceEnv-ControlEasy-v0',
     entry_point='growspace.envs:GrowSpaceEnv_Control',
     kwargs={'obs_type': None, 'level': None, 'setting': 'easy',
-        # "observe_images": True
-    },
-    max_episode_steps=50, # number of total steps in the environment
+            # "observe_images": True
+            },
+    max_episode_steps=50,  # number of total steps in the environment
 )
 
 register(
     id=f'GrowSpaceEnv-ControlHard-v0',
     entry_point='growspace.envs:GrowSpaceEnv_Control',
     kwargs={'obs_type': None, 'level': None, 'setting': 'hard',
-        # "observe_images": True
-    },
-    max_episode_steps=50, # number of total steps in the environment
+            # "observe_images": True
+            },
+    max_episode_steps=50,  # number of total steps in the environment
 )
 
 register(
     id=f'GrowSpaceEnv-Control-v1',
     entry_point='growspace.envs:GrowSpaceEnv_Control',
     kwargs={'obs_type': 'Binary', 'level': None,
-        # "observe_images": True
-    },
-    max_episode_steps=50, # number of total steps in the environment
+            # "observe_images": True
+            },
+    max_episode_steps=50,  # number of total steps in the environment
 )
 
 register(
     id=f'GrowSpaceEnv-ControlEasy-v1',
     entry_point='growspace.envs:GrowSpaceEnv_Control',
     kwargs={'obs_type': 'binary', 'level': None, 'setting': 'easy',
-        # "observe_images": True
-    },
-    max_episode_steps=50, # number of total steps in the environment
+            # "observe_images": True
+            },
+    max_episode_steps=50,  # number of total steps in the environment
 )
 register(
     id=f'GrowSpaceEnv-ControlHard-v1',
     entry_point='growspace.envs:GrowSpaceEnv_Control',
     kwargs={'obs_type': 'binary', 'level': None, 'setting': 'hard',
-        # "observe_images": True
-    },
-    max_episode_steps=50, # number of total steps in the environment
+            # "observe_images": True
+            },
+    max_episode_steps=50,  # number of total steps in the environment
 )
-
 
 register(
     id=f'GrowSpaceEnv-Hierarchy-v0',
     entry_point='growspace.envs:GrowSpaceEnv_Control',
     kwargs={'obs_type': None, 'level': 'second', 'setting': None,
-        # "observe_images": True
-    },
-    max_episode_steps=50, # number of total steps in the environment
+            # "observe_images": True
+            },
+    max_episode_steps=50,  # number of total steps in the environment
 )
 
 register(
     id=f'GrowSpaceEnv-HierarchyEasy-v0',
     entry_point='growspace.envs:GrowSpaceEnv_Control',
     kwargs={'obs_type': None, 'level': 'second', 'setting': 'easy',
-        # "observe_images": True
-    },
-    max_episode_steps=50, # number of total steps in the environment
+            # "observe_images": True
+            },
+    max_episode_steps=50,  # number of total steps in the environment
 )
 
 register(
     id=f'GrowSpaceEnv-HierarchyHard-v0',
     entry_point='growspace.envs:GrowSpaceEnv_Control',
     kwargs={'obs_type': None, 'level': 'second', 'setting': 'hard',
-        # "observe_images": True
-    },
-    max_episode_steps=50, # number of total steps in the environment
+            # "observe_images": True
+            },
+    max_episode_steps=50,  # number of total steps in the environment
 )
 
 register(
     id=f'GrowSpaceEnv-Hierarchy-v1',
     entry_point='growspace.envs:GrowSpaceEnv_Control',
     kwargs={'obs_type': 'Binary', 'level': 'second', 'setting': None,
-        # "observe_images": True
-    },
-    max_episode_steps=50, # number of total steps in the environment
+            # "observe_images": True
+            },
+    max_episode_steps=50,  # number of total steps in the environment
 )
 
 register(
     id=f'GrowSpaceEnv-HierarchyEasy-v1',
     entry_point='growspace.envs:GrowSpaceEnv_Control',
     kwargs={'obs_type': 'binary', 'level': 'second', 'setting': 'easy',
-        # "observe_images": True
-    },
-    max_episode_steps=50, # number of total steps in the environment
+            # "observe_images": True
+            },
+    max_episode_steps=50,  # number of total steps in the environment
 )
 
 register(
     id=f'GrowSpaceEnv-HierarchyHard-v1',
     entry_point='growspace.envs:GrowSpaceEnv_Control',
     kwargs={'obs_type': 'binary', 'level': 'second', 'setting': 'hard',
-        # "observe_images": True
-    },
-    max_episode_steps=50, # number of total steps in the environment
+            # "observe_images": True
+            },
+    max_episode_steps=50,  # number of total steps in the environment
 )
 
 register(
     id=f'GrowSpaceEnv-Fairness-v0',
     entry_point='growspace.envs:GrowSpaceEnv_Fairness',
     kwargs={'obs_type': None, 'level': None,
-        # "observe_images": True
-    },
-    max_episode_steps=50, # number of total steps in the environment
+            # "observe_images": True
+            },
+    max_episode_steps=50,  # number of total steps in the environment
 )
 
 register(
     id=f'GrowSpaceEnv-FairnessEasy-v0',
     entry_point='growspace.envs:GrowSpaceEnv_Fairness',
-    kwargs={'obs_type': None, 'level': None, 'setting':'easy',
-        # "observe_images": True
-    },
-    max_episode_steps=50, # number of total steps in the environment
+    kwargs={'obs_type': None, 'level': None, 'setting': 'easy',
+            # "observe_images": True
+            },
+    max_episode_steps=50,  # number of total steps in the environment
 )
 
 register(
     id=f'GrowSpaceEnv-FairnessMiddle-v0',
     entry_point='growspace.envs:GrowSpaceEnv_Fairness',
-    kwargs={'obs_type': None, 'level': None, 'setting':'hard_middle',
-        # "observe_images": True
-    },
-    max_episode_steps=50, # number of total steps in the environment
+    kwargs={'obs_type': None, 'level': None, 'setting': 'hard_middle',
+            # "observe_images": True
+            },
+    max_episode_steps=50,  # number of total steps in the environment
 )
 
 register(
     id=f'GrowSpaceEnv-FairnessAbove-v0',
     entry_point='growspace.envs:GrowSpaceEnv_Fairness',
-    kwargs={'obs_type': None, 'level': None, 'setting':'hard_above',
-        # "observe_images": True
-    },
-    max_episode_steps=50, # number of total steps in the environment
+    kwargs={'obs_type': None, 'level': None, 'setting': 'hard_above',
+            # "observe_images": True
+            },
+    max_episode_steps=50,  # number of total steps in the environment
 )
 
 register(
     id=f'GrowSpaceEnv-Fairness-v1',
     entry_point='growspace.envs:GrowSpaceEnv_Fairness',
     kwargs={'obs_type': 'Binary', 'level': 'second',
-        # "observe_images": True
-    },
-    max_episode_steps=50, # number of total steps in the environment
+            # "observe_images": True
+            },
+    max_episode_steps=50,  # number of total steps in the environment
 )
 
 register(
-    id=f'GrowSpaceEnv-Mnist-v0',
-    entry_point='growspace.envs:GrowSpaceEnv_Mnist',
-    kwargs={'obs_type': None, 'level': None,
-        # "observe_images": True
-    },
-    max_episode_steps=50, # number of total steps in the environment
+    id=f'GrowSpaceSpotlight-Mnist-v0',
+    entry_point='growspace.envs:GrowSpaceEnvSpotlightMnist',
+    max_episode_steps=50,  # number of total steps in the environment
 )
 
 register(
     id=f'GrowSpaceEnv-Mnist-v1',
     entry_point='growspace.envs:GrowSpaceEnv_Mnist',
     kwargs={'obs_type': 'Binary', 'level': None,
-        # "observe_images": True
-    },
-    max_episode_steps=50, # number of total steps in the environment
+            # "observe_images": True
+            },
+    max_episode_steps=50,  # number of total steps in the environment
 )
