@@ -1,4 +1,4 @@
-import math
+
 import random
 import sys
 import os
@@ -25,7 +25,7 @@ LIGHT_DISPLACEMENT = .1
 LIGHT_W_INCREMENT = .1
 MIN_LIGHT_WIDTH = .1
 MAX_LIGHT_WIDTH = .5
-PATH = '../growspace/scripts/png/mnist_data/mnist_1.png'
+PATH = os.path.dirname(__file__) + '/../../scripts/png/mnist_data/mnist_1.png'
 
 
 def to_int(v):
@@ -57,7 +57,7 @@ class GrowSpaceEnvSpotlightMnist(gym.Env):
 
         self.observation_space = gym.spaces.Box(0, 255, shape=(self.height, self.width, 3), dtype=np.uint8)
 
-        assert os.path.isfile(PATH), "path to mnist image is not valid"
+        assert os.path.isfile(path), "path to mnist image is not valid"
 
         self.mnist_shape = cv2.imread(path)
 
@@ -237,8 +237,8 @@ class GrowSpaceEnvSpotlightMnist(gym.Env):
         self.steps += 1
         return observation, reward, done, misc
 
-    # def move_sun(self, angle_change):
-    #     self.sun_angle = (self.sun_angle + angle_change) % (2 * math.pi)
+
+
 
     @property
     def sun_position(self):
