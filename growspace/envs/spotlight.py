@@ -73,6 +73,7 @@ class GrowSpaceEnvSpotlightMnist(gym.Env):
         self.tips = None
 
     def render(self, mode='human'):
+        return self.venv.render(mode=mode)
         raise NotImplementedError
 
     def seed(self, seed=None):
