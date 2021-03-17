@@ -63,7 +63,6 @@ class GrowSpaceEnvSpotlightMnist(gym.Env):
 
         self.focus_point = None
         self.focus_radius = None
-        self.draw_spotlight()
 
         self.branches = None
         self.target = None
