@@ -176,6 +176,7 @@ class GrowSpaceEnvSpotlightMnist(gym.Env):
         ]
         self.target = np.array([np.random.randint(0, self.width), ir(.8 * self.height)])
 
+        self.focus_point = np.array([random_start, FIRST_BRANCH_HEIGHT])
         x_scatter = np.random.randint(0, self.width, LIGHT_DIF)
         y_scatter = np.random.randint(0, self.height, LIGHT_DIF)
         self.feature_maps[Features.scatter].fill(False)
