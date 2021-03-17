@@ -112,12 +112,11 @@ class GrowSpaceEnvSpotlightMnist(gym.Env):
                 branch_length = BRANCH_LENGTH / dist
                 photon = activated_photons[i]
                 g = (photon - closest_branch.tip_point) * branch_length
-                closest_branch.grow_direction += g
+                closest_branch.grow_direction += g.astype(np.int)
 
         for branch in branches_trimmed:
             if branch.grow_count > 0:
-                x2 = branch.x2 + branch.grow_x / branch.grow_count
-                y2 = branch.y2 + branch.grow_y / branch.grow_count
+                (x2, y2) = branch.tip_point + branch.grow_direction / branch.grow_count
                 # TODO: clip if needded
 
                 newBranch = growspace.plants.tree.PixelBranch(branch.x2, ir(x2), branch.y2, ir(y2), self.width, self.height)
