@@ -142,3 +142,5 @@ cython_debug/
 .idea/
 /runs/
 /wandb/
+/growspace/envs/geometer/
+/growspace/envs/MNIST/raw/
