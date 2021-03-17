@@ -72,9 +72,19 @@ class GrowSpaceEnvSpotlightMnist(gym.Env):
         self.tips_per_step = None
         self.tips = None
 
-    def render(self, mode='human'):
-        return self.venv.render(mode=mode)
-        raise NotImplementedError
+    def render(self, mode='human', debug_show_scatter=False):  # or mode="rgb_array"
+        """
+        @mode: ['mode', 'rgb_array']
+
+        """
+        img = self.get_observation(debug_show_scatter)
+        img = img.astype(np.uint8)
+
+        if mode == "human":
+            cv2.imshow('plant', img)  # create opencv window to show plant
+            cv2.waitKey(1)  # this is necessary or the window closes immediately
+        else:
+            return img
 
     def seed(self, seed=None):
         return [np.random.seed(seed)]
@@ -85,7 +95,8 @@ class GrowSpaceEnvSpotlightMnist(gym.Env):
 
     def tree_grow(self, activated_photons, mindist, maxdist):
         branches_trimmed = self.branches
-        for i in range(len(activated_photons) - 1, 0, -1):  # number of possible scatters, check if they allow for branching with min_dist
+        for i in range(len(activated_photons) - 1, 0,
+                       -1):  # number of possible scatters, check if they allow for branching with min_dist
             closest_branch = 0
             dist = 1 * self.width
 
@@ -122,7 +133,8 @@ class GrowSpaceEnvSpotlightMnist(gym.Env):
                 y2 = branch.y2 + branch.grow_y / branch.grow_count
                 # TODO: clip if needded
 
-                newBranch = growspace.plants.tree.PixelBranch(branch.x2, ir(x2), branch.y2, ir(y2), self.width, self.height)
+                newBranch = growspace.plants.tree.PixelBranch(branch.x2, ir(x2), branch.y2, ir(y2), self.width,
+                                                              self.height)
                 self.branches.append(newBranch)
                 branch.child.append(newBranch)
                 branch.grow_count = 0
@@ -152,7 +164,8 @@ class GrowSpaceEnvSpotlightMnist(gym.Env):
         yellow = (0, 128, 128)  # RGB color (dark yellow)
         blue = (255, 0, 0)
         img[self.feature_maps[Features.light].nonzero()] = yellow
-        cv2.circle(img, tuple(self.to_image(self.focus_point)), int(self.focus_radius * self.height), (0, 255, 0), thickness=2)
+        cv2.circle(img, tuple(self.to_image(self.focus_point)), int(self.focus_radius * self.height), (0, 255, 0),
+                   thickness=2)
 
         if debug_show_scatter:
             pts = self.light_scatter()
@@ -173,7 +186,8 @@ class GrowSpaceEnvSpotlightMnist(gym.Env):
     def reset(self):
         random_start = random.randint(0, self.width - 1)
         self.branches = [
-            growspace.plants.tree.PixelBranch(x=random_start, x2=random_start, y=0, y2=FIRST_BRANCH_HEIGHT, img_width=self.width, img_height=self.height)
+            growspace.plants.tree.PixelBranch(x=random_start, x2=random_start, y=0, y2=FIRST_BRANCH_HEIGHT,
+                                              img_width=self.width, img_height=self.height)
         ]
         self.target = np.array([np.random.randint(0, self.width), ir(.8 * self.height)])
 
@@ -250,7 +264,8 @@ class GrowSpaceEnvSpotlightMnist(gym.Env):
 
     def draw_spotlight(self):
         self.feature_maps[Features.light].fill(False)
-        cv2.circle(self.feature_maps[Features.light], tuple(self.to_image(self.focus_point)), int(self.focus_radius * self.height), True, thickness=-1)
+        cv2.circle(self.feature_maps[Features.light], tuple(self.to_image(self.focus_point)),
+                   int(self.focus_radius * self.height), True, thickness=-1)
 
     def to_image(self, p):
         if hasattr(p, "normalized_array"):
