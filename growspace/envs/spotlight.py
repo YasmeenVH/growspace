@@ -16,16 +16,16 @@ import growspace.plants.tree
 np.set_printoptions(threshold=sys.maxsize)
 # customizable variables by user
 
-BRANCH_THICCNESS = .015
+BRANCH_THICCNESS = 0.015
 MAX_BRANCHING = 10
 DEFAULT_RES = 71
-LIGHT_WIDTH = .25
+LIGHT_WIDTH = 0.25
 LIGHT_DIF = 250
-LIGHT_DISPLACEMENT = .1
-LIGHT_W_INCREMENT = .1
-MIN_LIGHT_WIDTH = .1
-MAX_LIGHT_WIDTH = .5
-PATH = os.path.dirname(__file__) + '/../../scripts/png/mnist_data/mnist_1.png'
+LIGHT_DISPLACEMENT = 0.1
+LIGHT_W_INCREMENT = 0.1
+MIN_LIGHT_WIDTH = 0.1
+MAX_LIGHT_WIDTH = 0.5
+PATH = os.path.dirname(__file__) + "/../../scripts/png/mnist_data/mnist_1.png"
 
 
 def to_int(v):
@@ -34,7 +34,7 @@ def to_int(v):
 
 ir = to_int  # shortcut for function calld
 
-FIRST_BRANCH_HEIGHT = ir(.24 * DEFAULT_RES)
+FIRST_BRANCH_HEIGHT = ir(0.24 * DEFAULT_RES)
 BRANCH_LENGTH = (1 / 9) * DEFAULT_RES
 
 
@@ -71,7 +71,7 @@ class GrowSpaceEnvSpotlightMnist(gym.Env):
         self.tips_per_step = None
         self.tips = None
 
-    def render(self, mode='human'):
+    def render(self, mode="human"):
         raise NotImplementedError
 
     def seed(self, seed=None):
@@ -83,7 +83,8 @@ class GrowSpaceEnvSpotlightMnist(gym.Env):
 
     def tree_grow(self, activated_photons, mindist, maxdist):
         branches_trimmed = self.branches
-        for i in range(len(activated_photons) - 1, 0, -1):  # number of possible scatters, check if they allow for branching with min_dist
+        # number of possible scatters, check if they allow for branching with min_dist
+        for i in range(len(activated_photons) - 1, 0, -1):
             closest_branch = 0
             dist = 1 * self.width
 
@@ -93,13 +94,12 @@ class GrowSpaceEnvSpotlightMnist(gym.Env):
                 branches_trimmed = self.branches
 
             for branch in branches_trimmed:
-                if self.feature_maps[Features.light][branch.tip_point[::-1]]:
-                    photon_ptx = activated_photons[i]
-                    tip_to_scatter = norm(photon_ptx - branch.tip_point)
-                    if tip_to_scatter < dist:
-                        print(closest_branch, tip_to_scatter)
-                        dist = tip_to_scatter
-                        closest_branch = branch
+                # if self.feature_maps[Features.light][branch.tip_point[::-1]]: # this was alsready done in light scatter func
+                photon_ptx = np.flip(activated_photons[i])  # flip was necessary bc coordinate systems are inverted -
+                tip_to_scatter = norm(photon_ptx - np.array(branch.tip_point))  # one is np.array, one is tuple
+                if tip_to_scatter < dist:
+                    dist = tip_to_scatter
+                    closest_branch = branch
 
             # removes scatter points if reached
 
@@ -112,14 +112,17 @@ class GrowSpaceEnvSpotlightMnist(gym.Env):
                 branch_length = BRANCH_LENGTH / dist
                 photon = activated_photons[i]
                 g = (photon - closest_branch.tip_point) * branch_length
-                closest_branch.grow_direction += g.astype(np.int)
+                closest_branch.grow_direction += np.round(np.flip(g)).astype(np.int)
 
         for branch in branches_trimmed:
             if branch.grow_count > 0:
                 (x2, y2) = branch.tip_point + branch.grow_direction / branch.grow_count
-                # TODO: clip if needded
+                x2 = np.clip(x2, 0, self.width)
+                y2 = np.clip(y2, 0, self.height)
 
-                newBranch = growspace.plants.tree.PixelBranch(branch.x2, ir(x2), branch.y2, ir(y2), self.width, self.height)
+                newBranch = growspace.plants.tree.PixelBranch(
+                    branch.x2, ir(x2), branch.y2, ir(y2), self.width, self.height
+                )
                 self.branches.append(newBranch)
                 branch.child.append(newBranch)
                 branch.grow_count = 0
@@ -139,7 +142,7 @@ class GrowSpaceEnvSpotlightMnist(gym.Env):
         return branch_coords
 
     def distance_target(self, coords):
-        dist = distance.cdist(coords, [self.target], 'euclidean')
+        dist = distance.cdist(coords, [self.target], "euclidean")
         min_dist = min(dist)
         return min_dist
 
@@ -170,9 +173,16 @@ class GrowSpaceEnvSpotlightMnist(gym.Env):
     def reset(self):
         random_start = random.randint(0, self.width - 1)
         self.branches = [
-            growspace.plants.tree.PixelBranch(x=random_start, x2=random_start, y=0, y2=FIRST_BRANCH_HEIGHT, img_width=self.width, img_height=self.height)
+            growspace.plants.tree.PixelBranch(
+                x=random_start,
+                x2=random_start,
+                y=0,
+                y2=FIRST_BRANCH_HEIGHT,
+                img_width=self.width,
+                img_height=self.height,
+            )
         ]
-        self.target = np.array([np.random.randint(0, self.width), ir(.8 * self.height)])
+        self.target = np.array([np.random.randint(0, self.width), ir(0.8 * self.height)])
 
         self.focus_point = np.array([random_start / self.width, FIRST_BRANCH_HEIGHT / self.height])
         self.focus_radius = 0.1
@@ -185,7 +195,9 @@ class GrowSpaceEnvSpotlightMnist(gym.Env):
         self.steps = 0
         self.new_branches = 0
         self.tips_per_step = 0
-        self.tips = [self.branches[0].tip_point, ]
+        self.tips = [
+            self.branches[0].tip_point,
+        ]
 
         self.draw_spotlight()
         return self.get_observation()
@@ -214,7 +226,7 @@ class GrowSpaceEnvSpotlightMnist(gym.Env):
         self.draw_spotlight()
 
         pts = self.light_scatter()
-        tips = self.tree_grow(pts, .01 * self.width, .15 * self.width)
+        tips = self.tree_grow(pts, 0.01 * self.width, 0.15 * self.width)
 
         if self.distance_target(tips) <= 0.1:
             reward = 1 / 0.1 / 10
@@ -227,20 +239,26 @@ class GrowSpaceEnvSpotlightMnist(gym.Env):
 
         if self.steps == 0:
             self.new_branches = len(tips)
-            misc['new_branches'] = self.new_branches
+            misc["new_branches"] = self.new_branches
 
         else:
             new_branches = len(tips) - self.new_branches
-            misc['new_branches'] = new_branches
+            misc["new_branches"] = new_branches
             self.new_branches = len(tips)  # reset for future step
 
-        misc['img'] = observation
+        misc["img"] = observation
         self.steps += 1
         return observation, float(reward), done, misc
 
     def draw_spotlight(self):
         self.feature_maps[Features.light].fill(False)
-        cv2.circle(self.feature_maps[Features.light], tuple(self.to_image(self.focus_point)), int(self.focus_radius * self.height), True, thickness=-1)
+        cv2.circle(
+            self.feature_maps[Features.light],
+            tuple(self.to_image(self.focus_point)),
+            int(self.focus_radius * self.height),
+            True,
+            thickness=-1,
+        )
 
     def to_image(self, p):
         if hasattr(p, "normalized_array"):
@@ -251,31 +269,29 @@ class GrowSpaceEnvSpotlightMnist(gym.Env):
 
 
 def enjoy():
-    gse = gym.make('GrowSpaceSpotlight-Mnist-v0')
+    gse = gym.make("GrowSpaceSpotlight-Mnist-v0")
 
     def key2action(key):
-        if key == ord('+'):
+        if key == ord("+"):
             return 0  # move left
-        elif key == ord('-'):
+        elif key == ord("-"):
             return 1  # move right
-        elif key == ord('a'):
+        elif key == ord("a"):
             return 2
-        elif key == ord('d'):
+        elif key == ord("d"):
             return 3
-        elif key == ord('w'):
+        elif key == ord("w"):
             return 4
-        elif key == ord('s'):
+        elif key == ord("s"):
             return 5
-        elif key == ord('x'):
+        elif key == ord("x"):
             return 6
         else:
             return None
 
-    rewards = []
-    print('what is this')
     while True:
         gse.reset()
-        img = gse.get_observation(debug_show_scatter=False)
+        img = gse.get_observation(debug_show_scatter=True)
         cv2.imshow("plant", img)
         cv2.waitKey(-1)
         rewards = []
@@ -287,7 +303,7 @@ def enjoy():
             b, t, c, f = gse.step(action)
             print(f["new_branches"])
             rewards.append(t)
-            cv2.imshow("plant", gse.get_observation(debug_show_scatter=False))
+            cv2.imshow("plant", gse.get_observation(debug_show_scatter=True))
         total = sum(rewards)
 
         print("amount of rewards:", total)  # cv2.waitKey(1)  # this is necessary or the window closes immediately
@@ -296,7 +312,7 @@ def enjoy():
 
 
 def profile():
-    gse = gym.make('GrowSpaceSpotlight-Mnist-v0')
+    gse = gym.make("GrowSpaceSpotlight-Mnist-v0")
     gse.reset()
 
     def do_step():
@@ -310,6 +326,24 @@ def profile():
     print("hi")
 
 
-if __name__ == '__main__':
-    # profile()
+if __name__ == "__main__":
+    # import matplotlib.pyplot as plt
+    #
+    # env = GrowSpaceEnvSpotlightMnist()
+    # env.reset()
+    # fig, axs = plt.subplots(1, 2)
+    # axs[0].imshow(env.feature_maps[Features.light])
+    # axs[1].imshow(env.feature_maps[Features.scatter])
+    # plt.show()
+    #
+    # env.draw_spotlight()
+    # pts = env.light_scatter()
+    # print(pts.shape)
+    # fig, axs = plt.subplots(1, 2)
+    # axs[0].imshow(env.feature_maps[Features.light])
+    # img = np.zeros((71, 71), dtype=np.float)
+    # img[pts[:, 0], pts[:, 1]] = True
+    # axs[1].imshow(img)
+    # plt.show()
+
     enjoy()
