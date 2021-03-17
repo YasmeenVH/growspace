@@ -5,13 +5,13 @@ from enum import IntEnum
 from random import sample
 
 import cv2
-import geometer
-import growspace.plants.tree
 import gym
 import numpy as np
 import tqdm
 from numpy.linalg import norm
 from scipy.spatial import distance
+
+import growspace.plants.tree
 
 np.set_printoptions(threshold=sys.maxsize)
 # customizable variables by user
@@ -111,8 +111,8 @@ class GrowSpaceEnvSpotlightMnist(gym.Env):
                 closest_branch.grow_count += 1
                 branch_length = BRANCH_LENGTH / dist
                 photon = activated_photons[i]
-                g = (photon - closest_branch.p2) * branch_length
-                closest_branch.grow += g
+                g = (photon - closest_branch.tip_point) * branch_length
+                closest_branch.grow_direction += g
 
         for branch in branches_trimmed:
             if branch.grow_count > 0:
@@ -175,7 +175,7 @@ class GrowSpaceEnvSpotlightMnist(gym.Env):
         ]
         self.target = np.array([np.random.randint(0, self.width), ir(.8 * self.height)])
 
-        self.focus_point = np.array([random_start, FIRST_BRANCH_HEIGHT])
+        self.focus_point = np.array([random_start / self.width, FIRST_BRANCH_HEIGHT / self.height])
         self.focus_radius = 0.1
 
         x_scatter = np.random.randint(0, self.width, LIGHT_DIF)
@@ -239,13 +239,6 @@ class GrowSpaceEnvSpotlightMnist(gym.Env):
         self.steps += 1
         return observation, float(reward), done, misc
 
-    @property
-    def sun_position(self):
-        return geometer.Point(
-            np.around(self.sun_distance * np.cos(self.sun_angle), 5),
-            np.around(self.sun_distance * np.sin(self.sun_angle), 5),
-        )
-
     def draw_spotlight(self):
         self.feature_maps[Features.light].fill(False)
         cv2.circle(self.feature_maps[Features.light], tuple(self.to_image(self.focus_point)), int(self.focus_radius * self.height), True, thickness=-1)
@@ -262,24 +255,20 @@ def enjoy():
     gse = gym.make('GrowSpaceSpotlight-Mnist-v0')
 
     def key2action(key):
-        if key == ord('a'):
+        if key == ord('+'):
             return 0  # move left
-        elif key == ord('d'):
+        elif key == ord('-'):
             return 1  # move right
-        elif key == ord('w'):
+        elif key == ord('a'):
             return 2
-        elif key == ord('s'):
+        elif key == ord('d'):
             return 3
-        elif key == ord('x'):
+        elif key == ord('w'):
             return 4
-        elif key == ord('h'):
+        elif key == ord('s'):
             return 5
-        elif key == ord('l'):
+        elif key == ord('x'):
             return 6
-        elif key == ord('j'):
-            return 7
-        elif key == ord('k'):
-            return 8
         else:
             return None
 
@@ -323,4 +312,5 @@ def profile():
 
 
 if __name__ == '__main__':
-    profile()
+    # profile()
+    enjoy()
