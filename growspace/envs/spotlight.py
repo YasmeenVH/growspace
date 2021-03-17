@@ -35,7 +35,7 @@ def to_int(v):
 ir = to_int  # shortcut for function calld
 
 FIRST_BRANCH_HEIGHT = ir(0.24 * DEFAULT_RES)
-BRANCH_LENGTH = (1 / 9) * DEFAULT_RES
+BRANCH_LENGTH = (1 / 15) * DEFAULT_RES
 
 
 def unpack(w):
@@ -112,7 +112,7 @@ class GrowSpaceEnvSpotlightMnist(gym.Env):
             elif dist < maxdist:
                 closest_branch.grow_count += 1
                 branch_length = BRANCH_LENGTH / dist
-                photon = activated_photons[i]
+                photon = np.flip(activated_photons[i])
                 g = (photon - closest_branch.tip_point) * branch_length
                 closest_branch.grow_direction += np.round(g).astype(np.int)
 
