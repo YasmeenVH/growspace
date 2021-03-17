@@ -1,15 +1,15 @@
-
+import os
 import random
 import sys
-import os
 from enum import IntEnum
 from random import sample
 
 import cv2
 import geometer
+import growspace.plants.tree
 import gym
 import numpy as np
-import growspace.plants.tree
+import tqdm
 from numpy.linalg import norm
 from scipy.spatial import distance
 
@@ -149,7 +149,7 @@ class GrowSpaceEnvSpotlightMnist(gym.Env):
         img = np.zeros((self.height, self.width, 3), dtype=np.uint8)
 
         yellow = (0, 128, 128)  # RGB color (dark yellow)
-        blue = (255, 0, 0)
+
         img[self.feature_maps[Features.light].nonzero()] = yellow
         cv2.circle(img, tuple(self.to_image(self.focus_point)), int(self.focus_radius * self.height), (0, 255, 0), thickness=2)
 
@@ -197,16 +197,16 @@ class GrowSpaceEnvSpotlightMnist(gym.Env):
             self.focus_radius = max(0.05, self.focus_radius - 0.05)
 
         if action == 2:
-            self.focus_point[0] -= 0.1
+            self.focus_point[0] = min(0, self.focus_point[0] - 0.1)
 
         if action == 3:
-            self.focus_point[0] += 0.1
+            self.focus_point[0] = min(1, self.focus_point[0] + 0.1)
 
         if action == 4:
-            self.focus_point[1] += 0.1
+            self.focus_point[1] = min(1, self.focus_point[1] + 0.1)
 
         if action == 5:
-            self.focus_point[1] -= 0.1
+            self.focus_point[1] = max(0, self.focus_point[1] - 0.1)
 
         if action == 6:
             pass
@@ -235,10 +235,7 @@ class GrowSpaceEnvSpotlightMnist(gym.Env):
 
         misc['img'] = observation
         self.steps += 1
-        return observation, reward, done, misc
-
-
-
+        return observation, float(reward), done, misc
 
     @property
     def sun_position(self):
@@ -258,13 +255,9 @@ class GrowSpaceEnvSpotlightMnist(gym.Env):
             y, x = p
             return np.around((self.height * y, self.width * x)).astype(np.int32)
 
-    # def step(self, action):
-    #     return observation, reward, done, misc
 
-
-if __name__ == '__main__':
+def enjoy():
     gse = gym.make('GrowSpaceSpotlight-Mnist-v0')
-
 
     def key2action(key):
         if key == ord('a'):
@@ -288,15 +281,11 @@ if __name__ == '__main__':
         else:
             return None
 
-
     rewards = []
     print('what is this')
     while True:
         gse.reset()
         img = gse.get_observation(debug_show_scatter=False)
-        # image = img.astype(np.uint8)
-        # backtorgb = image * 255
-        # print(backtorgb)
         cv2.imshow("plant", img)
         cv2.waitKey(-1)
         rewards = []
@@ -314,3 +303,22 @@ if __name__ == '__main__':
         print("amount of rewards:", total)  # cv2.waitKey(1)  # this is necessary or the window closes immediately
         # else:
         # dreturn img
+
+
+def profile():
+    gse = gym.make('GrowSpaceSpotlight-Mnist-v0')
+    gse.reset()
+
+    def do_step():
+        a = gse.action_space.sample()
+        s, r, d, i = gse.step(a)
+        if d:
+            gse.reset()
+
+    for _ in tqdm.trange(100000):
+        do_step()
+    print("hi")
+
+
+if __name__ == '__main__':
+    profile()
