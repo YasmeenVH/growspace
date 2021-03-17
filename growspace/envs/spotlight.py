@@ -61,8 +61,8 @@ class GrowSpaceEnvSpotlightMnist(gym.Env):
 
         self.mnist_shape = cv2.imread(path)
 
-        self.focus_point = np.array([0.5, 0.5])
-        self.focus_radius = 0.1
+        self.focus_point = None
+        self.focus_radius = None
         self.draw_spotlight()
 
         self.branches = None
@@ -177,6 +177,8 @@ class GrowSpaceEnvSpotlightMnist(gym.Env):
         self.target = np.array([np.random.randint(0, self.width), ir(.8 * self.height)])
 
         self.focus_point = np.array([random_start, FIRST_BRANCH_HEIGHT])
+        self.focus_radius = 0.1
+
         x_scatter = np.random.randint(0, self.width, LIGHT_DIF)
         y_scatter = np.random.randint(0, self.height, LIGHT_DIF)
         self.feature_maps[Features.scatter].fill(False)
@@ -198,7 +200,7 @@ class GrowSpaceEnvSpotlightMnist(gym.Env):
             self.focus_radius = max(0.05, self.focus_radius - 0.05)
 
         if action == 2:
-            self.focus_point[0] = min(0, self.focus_point[0] - 0.1)
+            self.focus_point[0] = max(0, self.focus_point[0] - 0.1)
 
         if action == 3:
             self.focus_point[0] = min(1, self.focus_point[0] + 0.1)
