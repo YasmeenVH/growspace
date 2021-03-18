@@ -76,9 +76,9 @@ class GrowSpaceEnvSpotlightMnist(gym.Env):
                debug_show_scatter=False):  # or mode="rgb_array"
         img = self.get_observation(debug_show_scatter)
 
-        if self.obs_type == 'Binary':
-            image = img.astype(np.uint8)
-            img = image * 255
+        # if self.obs_type == 'Binary':
+        #     image = img.astype(np.uint8)
+        #     img = image * 255
 
         if mode == "human":
             cv2.imshow('plant', img)  # create opencv window to show plant
