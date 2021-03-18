@@ -140,3 +140,7 @@ dmypy.json
 # Cython debug symbols
 cython_debug/
 .idea/
+/runs/
+/wandb/
+/growspace/envs/geometer/
+/growspace/envs/MNIST/raw/
