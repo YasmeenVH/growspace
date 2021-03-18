@@ -10,6 +10,7 @@ import numpy as np
 import tqdm
 from numpy.linalg import norm
 from scipy.spatial import distance
+import random
 
 import growspace.plants.tree
 
@@ -25,7 +26,7 @@ LIGHT_DISPLACEMENT = 0.1
 LIGHT_W_INCREMENT = 0.1
 MIN_LIGHT_WIDTH = 0.1
 MAX_LIGHT_WIDTH = 0.5
-PATH = os.path.dirname(__file__) + "/../../scripts/png/mnist_data/mnist_1.png"
+PATH = os.path.dirname(__file__) + "/../../scripts/png/mnist_data"
 
 
 def to_int(v):
@@ -41,6 +42,13 @@ BRANCH_LENGTH = (1 / 9) * DEFAULT_RES
 def unpack(w):
     return map(list, zip(*enumerate(w)))
 
+def load_images(folder):
+    images = []
+    for filename in os.listdir(folder):
+        img = cv2.imread(os.path.join(folder,filename))
+        if img is not None:
+            images.append(img)
+    return images
 
 class Features(IntEnum):
     light = 0
@@ -57,9 +65,9 @@ class GrowSpaceEnvSpotlightMnist(gym.Env):
 
         self.observation_space = gym.spaces.Box(0, 255, shape=(self.height, self.width, 3), dtype=np.uint8)
 
-        assert os.path.isfile(path), "path to mnist image is not valid"
-
-        self.mnist_shape = cv2.imread(path)
+        #assert os.path.isfile(path), "path to mnist image is not valid"
+        self.shapes = path
+        #self.mnist_shape = cv2.imread(path)
 
         self.focus_point = None
         self.focus_radius = None
@@ -195,8 +203,10 @@ class GrowSpaceEnvSpotlightMnist(gym.Env):
                 img_height=self.height,
             )
         ]
-        self.target = np.array([np.random.randint(0, self.width), ir(0.8 * self.height)])
+        #self.target = np.array([np.random.randint(0, self.width), ir(0.8 * self.height)])
 
+        self.mnist_shape = random.choice(load_images(self.shapes))
+        #print(len(mnist_shapes))
         self.focus_point = np.array([random_start / self.width, FIRST_BRANCH_HEIGHT / self.height])
         self.focus_radius = 0.1
 
