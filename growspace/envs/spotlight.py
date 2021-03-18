@@ -200,6 +200,8 @@ class GrowSpaceEnvSpotlightMnist(gym.Env):
         ]
 
         self.draw_spotlight()
+        self.mnist_pixels = (self.get_observation()[:, :, 2] / 255)  # binary map of mnist shape
+        self.plant_original = (self.get_observation()[:, :, 1] / 255)
         return self.get_observation()
 
     def step(self, action):
@@ -228,12 +230,33 @@ class GrowSpaceEnvSpotlightMnist(gym.Env):
         pts = self.light_scatter()
         tips = self.tree_grow(pts, 0.01 * self.width, 0.15 * self.width)
 
-        if self.distance_target(tips) <= 0.1:
-            reward = 1 / 0.1 / 10
-        else:
-            reward = 1 / self.distance_target(tips) / 10
+        observation = self.get_observation()  #image
 
-        observation = self.get_observation()  # image
+        plant = (observation[:,:,1]/255) # binary map of plant
+        plant[plant>0.6] =1              # filter for green
+        plant = plant.astype(int)
+        true_plant = np.subtract(plant,self.plant_original)
+
+        mnist = (observation[:,:,2]/255)     # binary map of mnist
+        mnist[mnist>0.5] =1
+        mnist = mnist.astype(int)
+
+        check = np.sum((true_plant, mnist), axis=0)
+        intersection = np.sum(np.where(check < 2, 0, 1))
+
+        union = np.sum(np.where(check<2,check,1))
+
+        reward = intersection / union
+
+
+
+        #
+        # if self.distance_target(tips) <= 0.1:
+        #     reward = 1 / 0.1 / 10
+        # else:
+        #     reward = 1 / self.distance_target(tips) / 10
+
+
         done = False  # because we don't have a terminal condition
         misc = {"tips": tips, "target": self.target, "light": None}
 
