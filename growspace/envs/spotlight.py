@@ -71,8 +71,21 @@ class GrowSpaceEnvSpotlightMnist(gym.Env):
         self.tips_per_step = None
         self.tips = None
 
-    def render(self, mode="human"):
-        raise NotImplementedError
+
+    def render(self, mode='human',
+               debug_show_scatter=False):  # or mode="rgb_array"
+        img = self.get_observation(debug_show_scatter)
+
+        if self.obs_type == 'Binary':
+            image = img.astype(np.uint8)
+            img = image * 255
+
+        if mode == "human":
+            cv2.imshow('plant', img)  # create opencv window to show plant
+            cv2.waitKey(1)  # this is necessary or the window closes immediately
+        else:
+            return img
+
 
     def seed(self, seed=None):
         return [np.random.seed(seed)]
