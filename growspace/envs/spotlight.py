@@ -17,16 +17,16 @@ import growspace.plants.tree
 np.set_printoptions(threshold=sys.maxsize)
 # customizable variables by user
 
-BRANCH_THICCNESS = 0.015
+BRANCH_THICCNESS = 0.036
 MAX_BRANCHING = 10
-DEFAULT_RES = 71
+DEFAULT_RES = 28
 LIGHT_WIDTH = 0.25
 LIGHT_DIF = 250
 LIGHT_DISPLACEMENT = 0.1
 LIGHT_W_INCREMENT = 0.1
 MIN_LIGHT_WIDTH = 0.1
 MAX_LIGHT_WIDTH = 0.5
-PATH = os.path.dirname(__file__) + "/../../scripts/png/mnist_data"
+PATH = os.path.dirname(__file__) + "/../../scripts/png/mnist_data/"
 
 
 def to_int(v):
@@ -66,7 +66,16 @@ class GrowSpaceEnvSpotlightMnist(gym.Env):
         self.observation_space = gym.spaces.Box(0, 255, shape=(self.height, self.width, 3), dtype=np.uint8)
 
         #assert os.path.isfile(path), "path to mnist image is not valid"
-        self.shapes = path
+        self.shape_1 = path + str(1) +'/'
+        self.shape_2 = path + str(2) +'/'
+        self.shape_3 = path + str(3) +'/'
+        self.shape_4 = path + str(4) +'/'
+        self.shape_5 = path + str(5) +'/'
+        self.shape_6 = path + str(6) +'/'
+        self.shape_7 = path + str(7) +'/'
+        self.shape_8 = path + str(8) +'/'
+        self.shape_9 = path + str(9) +'/'
+        self.mix_1_7 = path + '1_7_mix/'
         #self.mnist_shape = cv2.imread(path)
 
         self.focus_point = None
@@ -173,7 +182,7 @@ class GrowSpaceEnvSpotlightMnist(gym.Env):
         yellow = (0, 128, 128)  # RGB color (dark yellow)
 
         img[self.feature_maps[Features.light].nonzero()] = yellow
-        cv2.circle(img, tuple(self.to_image(self.focus_point)), int(self.focus_radius * self.height), (0, 255, 0), thickness=2)
+        cv2.circle(img, tuple(self.to_image(self.focus_point)), int(self.focus_radius * self.height), (0, 128, 128), thickness=2)
 
         if debug_show_scatter:
             pts = self.light_scatter()
@@ -186,10 +195,11 @@ class GrowSpaceEnvSpotlightMnist(gym.Env):
             thiccness = ir(branch.width * BRANCH_THICCNESS * self.width)
             cv2.line(img, pt1=branch.p, pt2=branch.tip_point, color=(0, 255, 0), thickness=thiccness)
 
-        z = np.where(self.mnist_shape < 255, img, 255)
+        img = cv2.flip(img,0)
+        z = np.where(self.mnist_shape < 255, img, 150)
         # flip image, because plant grows from the bottom, not the top
-        img = cv2.flip(z, 0)
-        return img
+        #img = cv2.flip(z, 0)
+        return z #img
 
     def reset(self):
         random_start = random.randint(0, self.width - 1)
@@ -204,8 +214,11 @@ class GrowSpaceEnvSpotlightMnist(gym.Env):
             )
         ]
         #self.target = np.array([np.random.randint(0, self.width), ir(0.8 * self.height)])
+        #self.mix = load_images(self.shape_1) + load_images(self.shape_7)
 
-        self.mnist_shape = random.choice(load_images(self.shapes))
+        #flat_list = [item for sublist in self.mix for item in sublist]
+        self.shapes = load_images(self.mix_1_7)
+        self.mnist_shape = random.choice(self.shapes)
         #print(len(mnist_shapes))
         self.focus_point = np.array([random_start / self.width, FIRST_BRANCH_HEIGHT / self.height])
         self.focus_radius = 0.1
@@ -304,6 +317,7 @@ class GrowSpaceEnvSpotlightMnist(gym.Env):
             int(self.focus_radius * self.height),
             True,
             thickness=-1,
+
         )
 
     def to_image(self, p):
@@ -337,7 +351,7 @@ def enjoy():
 
     while True:
         gse.reset()
-        img = gse.get_observation(debug_show_scatter=True)
+        img = gse.get_observation(debug_show_scatter=False)
         cv2.imshow("plant", img)
         cv2.waitKey(-1)
         rewards = []
@@ -349,7 +363,7 @@ def enjoy():
             b, t, c, f = gse.step(action)
             print(f["new_branches"])
             rewards.append(t)
-            cv2.imshow("plant", gse.get_observation(debug_show_scatter=True))
+            cv2.imshow("plant", gse.get_observation(debug_show_scatter=False))
         total = sum(rewards)
 
         print("amount of rewards:", total)  # cv2.waitKey(1)  # this is necessary or the window closes immediately
