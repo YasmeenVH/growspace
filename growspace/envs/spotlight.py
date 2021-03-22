@@ -27,7 +27,10 @@ LIGHT_W_INCREMENT = 0.1
 MIN_LIGHT_WIDTH = 0.1
 MAX_LIGHT_WIDTH = 0.5
 PATH = os.path.dirname(__file__) + "/../../scripts/png/mnist_data/"
-
+"""digit is the mnist number we want to pass
+enter as a string. for mix combos enter as : 1_7_mix
+refer to directory names
+"""
 
 def to_int(v):
     return int(round(v))
@@ -56,7 +59,7 @@ class Features(IntEnum):
 
 
 class GrowSpaceEnvSpotlightMnist(gym.Env):
-    def __init__(self, width=DEFAULT_RES, height=DEFAULT_RES, path=PATH):
+    def __init__(self, width=DEFAULT_RES, height=DEFAULT_RES, path=PATH, digit = '1'):
         self.width = width
         self.height = height
         self.seed()
@@ -66,16 +69,8 @@ class GrowSpaceEnvSpotlightMnist(gym.Env):
         self.observation_space = gym.spaces.Box(0, 255, shape=(self.height, self.width, 3), dtype=np.uint8)
 
         #assert os.path.isfile(path), "path to mnist image is not valid"
-        self.shape_1 = path + str(1) +'/'
-        self.shape_2 = path + str(2) +'/'
-        self.shape_3 = path + str(3) +'/'
-        self.shape_4 = path + str(4) +'/'
-        self.shape_5 = path + str(5) +'/'
-        self.shape_6 = path + str(6) +'/'
-        self.shape_7 = path + str(7) +'/'
-        self.shape_8 = path + str(8) +'/'
-        self.shape_9 = path + str(9) +'/'
-        self.mix_1_7 = path + '1_7_mix/'
+        self.shape = path + digit +'/'
+
         #self.mnist_shape = cv2.imread(path)
 
         self.focus_point = None
@@ -217,7 +212,7 @@ class GrowSpaceEnvSpotlightMnist(gym.Env):
         #self.mix = load_images(self.shape_1) + load_images(self.shape_7)
 
         #flat_list = [item for sublist in self.mix for item in sublist]
-        self.shapes = load_images(self.mix_1_7)
+        self.shapes = load_images(self.shape)
         self.mnist_shape = random.choice(self.shapes)
         #print(len(mnist_shapes))
         self.focus_point = np.array([random_start / self.width, FIRST_BRANCH_HEIGHT / self.height])
@@ -329,7 +324,7 @@ class GrowSpaceEnvSpotlightMnist(gym.Env):
 
 
 def enjoy():
-    gse = gym.make("GrowSpaceSpotlight-Mnist-v0")
+    gse = gym.make("GrowSpaceSpotlight-Mnist1-v0")
 
     def key2action(key):
         if key == ord("+"):
@@ -372,7 +367,7 @@ def enjoy():
 
 
 def profile():
-    gse = gym.make("GrowSpaceSpotlight-Mnist-v0")
+    gse = gym.make("GrowSpaceSpotlight-Mnist1-v0")
     gse.reset()
 
     def do_step():
