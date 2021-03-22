@@ -273,7 +273,7 @@ class GrowSpaceEnvSpotlightMnist(gym.Env):
         plant = plant.astype(int)
         true_plant = np.subtract(plant,self.plant_original)
 
-        mnist = (observation[:,:,2]/255)     # binary map of mnist
+        mnist = (observation[:,:,2]/150)     # binary map of mnist
         mnist[mnist>0.5] =1
         mnist = mnist.astype(int)
 
