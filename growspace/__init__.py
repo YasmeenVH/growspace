@@ -163,16 +163,89 @@ register(
 )
 
 register(
-    id=f'GrowSpaceSpotlight-Mnist-v0',
+    id=f'GrowSpaceSpotlight-Mnist1-v0',
     entry_point='growspace.envs:GrowSpaceEnvSpotlightMnist',
     max_episode_steps=50,  # number of total steps in the environment
+    kwargs={'digit': '1',
+            },
 )
 
 register(
-    id=f'GrowSpaceEnv-Mnist-v1',
-    entry_point='growspace.envs:GrowSpaceEnv_Mnist',
-    kwargs={'obs_type': 'Binary', 'level': None,
-            # "observe_images": True
-            },
+    id=f'GrowSpaceSpotlight-Mnist2-v0',
+    entry_point='growspace.envs:GrowSpaceEnvSpotlightMnist',
     max_episode_steps=50,  # number of total steps in the environment
+    kwargs={'digit': '2',
+            },
 )
+
+register(
+    id=f'GrowSpaceSpotlight-Mnist3-v0',
+    entry_point='growspace.envs:GrowSpaceEnvSpotlightMnist',
+    max_episode_steps=50,  # number of total steps in the environment
+    kwargs={'digit': '3',
+            },
+)
+
+register(
+    id=f'GrowSpaceSpotlight-Mnist4-v0',
+    entry_point='growspace.envs:GrowSpaceEnvSpotlightMnist',
+    max_episode_steps=50,  # number of total steps in the environment
+    kwargs={'digit': '4',
+            },
+)
+
+register(
+    id=f'GrowSpaceSpotlight-Mnist5-v0',
+    entry_point='growspace.envs:GrowSpaceEnvSpotlightMnist',
+    max_episode_steps=50,  # number of total steps in the environment
+    kwargs={'digit': '5',
+            },
+)
+
+register(
+    id=f'GrowSpaceSpotlight-Mnist6-v0',
+    entry_point='growspace.envs:GrowSpaceEnvSpotlightMnist',
+    max_episode_steps=50,  # number of total steps in the environment
+    kwargs={'digit': '6',
+            },
+)
+
+register(
+    id=f'GrowSpaceSpotlight-Mnist7-v0',
+    entry_point='growspace.envs:GrowSpaceEnvSpotlightMnist',
+    max_episode_steps=50,  # number of total steps in the environment
+    kwargs={'digit': '7',
+            },
+)
+
+register(
+    id=f'GrowSpaceSpotlight-Mnist8-v0',
+    entry_point='growspace.envs:GrowSpaceEnvSpotlightMnist',
+    max_episode_steps=50,  # number of total steps in the environment
+    kwargs={'digit': '8',
+            },
+)
+
+register(
+    id=f'GrowSpaceSpotlight-Mnist9-v0',
+    entry_point='growspace.envs:GrowSpaceEnvSpotlightMnist',
+    max_episode_steps=50,  # number of total steps in the environment
+    kwargs={'digit': '9',
+            },
+)
+
+register(
+    id=f'GrowSpaceSpotlight-Mnist1and7-v0',
+    entry_point='growspace.envs:GrowSpaceEnvSpotlightMnist',
+    max_episode_steps=50,  # number of total steps in the environment
+    kwargs={'digit': '1_7_mix',
+            },
+)
+# register(
+#     id=f'GrowSpaceEnv-Mnist-v1',
+#     entry_point='growspace.envs:GrowSpaceEnv_Mnist',
+#     kwargs={'obs_type': 'Binary', 'level': None,
+#             # "observe_images": True
+#             },
+#     max_episode_steps=50,  # number of total steps in the environment
+# )
