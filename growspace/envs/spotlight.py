@@ -197,7 +197,7 @@ class GrowSpaceEnvSpotlightMnist(gym.Env):
         return z #img
 
     def reset(self):
-        random_start = random.randint(0, self.width - 1)
+        random_start = random.randint(self.width - (self.width*3/4), self.width - 1 - (self.width*1/4))
         self.branches = [
             growspace.plants.tree.PixelBranch(
                 x=random_start,
