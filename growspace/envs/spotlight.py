@@ -166,10 +166,10 @@ class GrowSpaceEnvSpotlightMnist(gym.Env):
         self.tips = branch_coords
         return branch_coords
 
-    def distance_target(self, coords):
-        dist = distance.cdist(coords, [self.target], "euclidean")
-        min_dist = min(dist)
-        return min_dist
+    # def distance_target(self, coords):
+    #     dist = distance.cdist(coords, [self.target], "euclidean")
+    #     min_dist = min(dist)
+    #     return min_dist
 
     def get_observation(self, debug_show_scatter=False):
         img = np.zeros((self.height, self.width, 3), dtype=np.uint8)
@@ -278,15 +278,6 @@ class GrowSpaceEnvSpotlightMnist(gym.Env):
         union = np.sum(np.where(check<2,check,1))
 
         reward = intersection / union
-
-
-
-        #
-        # if self.distance_target(tips) <= 0.1:
-        #     reward = 1 / 0.1 / 10
-        # else:
-        #     reward = 1 / self.distance_target(tips) / 10
-
 
         done = False  # because we don't have a terminal condition
         misc = {"tips": tips, "target": self.target, "light": None}
