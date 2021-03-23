@@ -241,6 +241,14 @@ register(
     kwargs={'digit': '1_7_mix',
             },
 )
+
+register(
+    id=f'GrowSpaceSpotlight-MnistMix-v0',
+    entry_point='growspace.envs:GrowSpaceEnvSpotlightMnist',
+    max_episode_steps=50,  # number of total steps in the environment
+    kwargs={'digit': 'partymix',
+            },
+)
 # register(
 #     id=f'GrowSpaceEnv-Mnist-v1',
 #     entry_point='growspace.envs:GrowSpaceEnv_Mnist',
