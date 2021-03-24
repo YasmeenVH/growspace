@@ -1,15 +1,9 @@
 mport gym
-import time
-import growspace
 import numpy as np
-import matplotlib.pyplot as plt
 from scipy.spatial import distance
-import os, sys
-import imageio
+import os
 import cv2
 #env = gym.make("GrowSpaceEnv-Images-v0")
-from scripts.random_solver import random_solver
-from array import *
 from itertools import chain
 from scripts.save_img_movie import save_file_movie_oracle, filter, natural_keys
 #from growspace.envs.growspaceenv import GrowSpaceEnv
