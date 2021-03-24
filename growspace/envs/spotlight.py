@@ -38,7 +38,7 @@ def to_int(v):
 
 ir = to_int  # shortcut for function calld
 
-FIRST_BRANCH_HEIGHT = ir(0.24 * DEFAULT_RES)
+FIRST_BRANCH_HEIGHT = ir(0.1 * DEFAULT_RES)
 BRANCH_LENGTH = (1 / 9) * DEFAULT_RES
 
 
@@ -231,8 +231,12 @@ class GrowSpaceEnvSpotlightMnist(gym.Env):
         ]
 
         self.draw_spotlight()
-        self.mnist_pixels = (self.get_observation()[:, :, 2] / 255)  # binary map of mnist shape
-        self.plant_original = (self.get_observation()[:, :, 1] / 255)
+        self.mnist_pixels = (self.get_observation()[:, :, 2] / 150)  # binary map of mnist shape
+        print("this is mnist pixel",self.mnist_pixels)
+        plant_stem = (self.get_observation()[:, :, 1] / 255)
+        plant_stem[plant_stem>0.6] =1              # filter for green
+        self.plant_original = plant_stem.astype(int)
+
         return self.get_observation()
 
     def step(self, action):
@@ -268,16 +272,21 @@ class GrowSpaceEnvSpotlightMnist(gym.Env):
         plant = plant.astype(int)
         true_plant = np.subtract(plant,self.plant_original)
 
+
         mnist = (observation[:,:,2]/150)     # binary map of mnist
+
         mnist[mnist>0.5] =1
         mnist = mnist.astype(int)
 
         check = np.sum((true_plant, mnist), axis=0)
+
         intersection = np.sum(np.where(check < 2, 0, 1))
+
 
         union = np.sum(np.where(check<2,check,1))
 
         reward = intersection / union
+
 
         done = False  # because we don't have a terminal condition
         misc = {"tips": tips, "target": self.target, "light": None}
