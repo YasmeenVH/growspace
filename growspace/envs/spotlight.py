@@ -10,23 +10,27 @@ import numpy as np
 import tqdm
 from numpy.linalg import norm
 from scipy.spatial import distance
+import random
 
 import growspace.plants.tree
 
 np.set_printoptions(threshold=sys.maxsize)
 # customizable variables by user
 
-BRANCH_THICCNESS = 0.015
+BRANCH_THICCNESS = 0.036
 MAX_BRANCHING = 10
-DEFAULT_RES = 71
+DEFAULT_RES = 28
 LIGHT_WIDTH = 0.25
 LIGHT_DIF = 250
 LIGHT_DISPLACEMENT = 0.1
 LIGHT_W_INCREMENT = 0.1
 MIN_LIGHT_WIDTH = 0.1
 MAX_LIGHT_WIDTH = 0.5
-PATH = os.path.dirname(__file__) + "/../../scripts/png/mnist_data/mnist_1.png"
-
+PATH = os.path.dirname(__file__) + "/../../scripts/png/mnist_data/"
+"""digit is the mnist number we want to pass
+enter as a string. for mix combos enter as : 1_7_mix
+refer to directory names
+"""
 
 def to_int(v):
     return int(round(v))
@@ -34,13 +38,20 @@ def to_int(v):
 
 ir = to_int  # shortcut for function calld
 
-FIRST_BRANCH_HEIGHT = ir(0.24 * DEFAULT_RES)
+FIRST_BRANCH_HEIGHT = ir(0.1 * DEFAULT_RES)
 BRANCH_LENGTH = (1 / 9) * DEFAULT_RES
 
 
 def unpack(w):
     return map(list, zip(*enumerate(w)))
 
+def load_images(folder):
+    images = []
+    for filename in os.listdir(folder):
+        img = cv2.imread(os.path.join(folder,filename))
+        if img is not None:
+            images.append(img)
+    return images
 
 class Features(IntEnum):
     light = 0
@@ -48,7 +59,7 @@ class Features(IntEnum):
 
 
 class GrowSpaceEnvSpotlightMnist(gym.Env):
-    def __init__(self, width=DEFAULT_RES, height=DEFAULT_RES, path=PATH):
+    def __init__(self, width=DEFAULT_RES, height=DEFAULT_RES, path=PATH, digit = '1'):
         self.width = width
         self.height = height
         self.seed()
@@ -57,9 +68,10 @@ class GrowSpaceEnvSpotlightMnist(gym.Env):
 
         self.observation_space = gym.spaces.Box(0, 255, shape=(self.height, self.width, 3), dtype=np.uint8)
 
-        assert os.path.isfile(path), "path to mnist image is not valid"
+        #assert os.path.isfile(path), "path to mnist image is not valid"
+        self.shape = path + digit +'/'
 
-        self.mnist_shape = cv2.imread(path)
+        #self.mnist_shape = cv2.imread(path)
 
         self.focus_point = None
         self.focus_radius = None
@@ -152,10 +164,10 @@ class GrowSpaceEnvSpotlightMnist(gym.Env):
         self.tips = branch_coords
         return branch_coords
 
-    def distance_target(self, coords):
-        dist = distance.cdist(coords, [self.target], "euclidean")
-        min_dist = min(dist)
-        return min_dist
+    # def distance_target(self, coords):
+    #     dist = distance.cdist(coords, [self.target], "euclidean")
+    #     min_dist = min(dist)
+    #     return min_dist
 
     def get_observation(self, debug_show_scatter=False):
         img = np.zeros((self.height, self.width, 3), dtype=np.uint8)
@@ -163,7 +175,7 @@ class GrowSpaceEnvSpotlightMnist(gym.Env):
         yellow = (0, 128, 128)  # RGB color (dark yellow)
 
         img[self.feature_maps[Features.light].nonzero()] = yellow
-        cv2.circle(img, tuple(self.to_image(self.focus_point)), int(self.focus_radius * self.height), (0, 255, 0), thickness=2)
+        cv2.circle(img, tuple(self.to_image(self.focus_point)), int(self.focus_radius * self.height), (0, 128, 128), thickness=2)
 
         if debug_show_scatter:
             pts = self.light_scatter()
@@ -176,13 +188,14 @@ class GrowSpaceEnvSpotlightMnist(gym.Env):
             thiccness = ir(branch.width * BRANCH_THICCNESS * self.width)
             cv2.line(img, pt1=branch.p, pt2=branch.tip_point, color=(0, 255, 0), thickness=thiccness)
 
-        z = np.where(self.mnist_shape < 255, img, 255)
+        img = cv2.flip(img,0)
+        z = np.where(self.mnist_shape < 255, img, 150)
         # flip image, because plant grows from the bottom, not the top
-        img = cv2.flip(z, 0)
-        return img
+        #img = cv2.flip(z, 0)
+        return z #img
 
     def reset(self):
-        random_start = random.randint(0, self.width - 1)
+        random_start = random.randint(self.width - (self.width*3/4), self.width - 1 - (self.width*1/4))
         self.branches = [
             growspace.plants.tree.PixelBranch(
                 x=random_start,
@@ -193,8 +206,13 @@ class GrowSpaceEnvSpotlightMnist(gym.Env):
                 img_height=self.height,
             )
         ]
-        self.target = np.array([np.random.randint(0, self.width), ir(0.8 * self.height)])
+        #self.target = np.array([np.random.randint(0, self.width), ir(0.8 * self.height)])
+        #self.mix = load_images(self.shape_1) + load_images(self.shape_7)
 
+        #flat_list = [item for sublist in self.mix for item in sublist]
+        self.shapes = load_images(self.shape)
+        self.mnist_shape = random.choice(self.shapes)
+        #print(len(mnist_shapes))
         self.focus_point = np.array([random_start / self.width, FIRST_BRANCH_HEIGHT / self.height])
         self.focus_radius = 0.1
 
@@ -206,11 +224,17 @@ class GrowSpaceEnvSpotlightMnist(gym.Env):
         self.steps = 0
         self.new_branches = 0
         self.tips_per_step = 0
-        self.tips = [self.branches[0].tip_point, ]
+        self.tips = [
+            self.branches[0].tip_point,
+        ]
 
         self.draw_spotlight()
-        self.mnist_pixels = (self.get_observation()[:, :, 2] / 255)  # binary map of mnist shape
-        self.plant_original = (self.get_observation()[:, :, 1] / 255)
+        self.mnist_pixels = (self.get_observation()[:, :, 2] / 150)  # binary map of mnist shape
+
+        plant_stem = (self.get_observation()[:, :, 1] / 255)
+        plant_stem[plant_stem>0.6] =1              # filter for green
+        self.plant_original = plant_stem.astype(int)
+
         return self.get_observation()
 
     def step(self, action):
@@ -251,19 +275,12 @@ class GrowSpaceEnvSpotlightMnist(gym.Env):
         mnist = mnist.astype(int)
 
         check = np.sum((true_plant, mnist), axis=0)
+
         intersection = np.sum(np.where(check < 2, 0, 1))
 
         union = np.sum(np.where(check<2,check,1))
 
         reward = intersection / union
-
-
-
-        #
-        # if self.distance_target(tips) <= 0.1:
-        #     reward = 1 / 0.1 / 10
-        # else:
-        #     reward = 1 / self.distance_target(tips) / 10
 
 
         done = False  # because we don't have a terminal condition
@@ -301,7 +318,7 @@ class GrowSpaceEnvSpotlightMnist(gym.Env):
 
 
 def enjoy():
-    gse = gym.make("GrowSpaceSpotlight-Mnist-v0")
+    gse = gym.make("GrowSpaceSpotlight-Mnist1-v0")
 
     def key2action(key):
         if key == ord("+"):
@@ -344,7 +361,7 @@ def enjoy():
 
 
 def profile():
-    gse = gym.make("GrowSpaceSpotlight-Mnist-v0")
+    gse = gym.make("GrowSpaceSpotlight-Mnist1-v0")
     gse.reset()
 
     def do_step():
