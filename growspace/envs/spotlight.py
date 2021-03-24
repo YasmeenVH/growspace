@@ -232,7 +232,7 @@ class GrowSpaceEnvSpotlightMnist(gym.Env):
 
         self.draw_spotlight()
         self.mnist_pixels = (self.get_observation()[:, :, 2] / 150)  # binary map of mnist shape
-        print("this is mnist pixel",self.mnist_pixels)
+        
         plant_stem = (self.get_observation()[:, :, 1] / 255)
         plant_stem[plant_stem>0.6] =1              # filter for green
         self.plant_original = plant_stem.astype(int)
