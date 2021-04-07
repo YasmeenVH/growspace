@@ -1,17 +1,13 @@
+from enum import Enum
+import random
 from random import sample
+
 import cv2
 import gym
 import numpy as np
-from numpy.linalg import norm
-import time
 from growspace.plants.tree import Branch
+from numpy.linalg import norm
 from scipy.spatial import distance
-import itertools
-from sklearn import preprocessing
-from numba import jit
-from functools import partial
-
-
 
 FIRST_BRANCH_HEIGHT = .24
 BRANCH_THICCNESS = .015
@@ -24,10 +20,20 @@ LIGHT_DISPLACEMENT = .1
 LIGHT_W_INCREMENT = .1
 MIN_LIGHT_WIDTH = .1
 MAX_LIGHT_WIDTH = .5
+MAX_STEPS = 50
+
+
+class Actions(Enum):
+    move_left = 0
+    move_right = 1
+    increase_beam = 2
+    decrease_beam = 3
+    noop = 4
 
 
 def to_int(v):
     return int(round(v))
+
 
 def unpack(w):
     return map(list, zip(*enumerate(w)))
@@ -37,13 +43,12 @@ ir = to_int  # shortcut for function call
 
 
 class GrowSpaceEnv_Fairness(gym.Env):
-
-    def __init__(self, width=DEFAULT_RES, height=DEFAULT_RES, light_dif=LIGHT_DIF, obs_type = None, level=None, setting = 'hard_above'):
+    def __init__(self, width=DEFAULT_RES, height=DEFAULT_RES, light_dif=LIGHT_DIF, obs_type=None, level=None, setting='hard_above'):
         self.width = width
         self.height = height
         self.seed()
         self.light_dif = light_dif
-        self.action_space = gym.spaces.Discrete(5)  # L, R, keep of light paddle
+        self.action_space = gym.spaces.Discrete(len(Actions))
         self.obs_type = obs_type
         if self.obs_type == None:
             self.observation_space = gym.spaces.Box(
@@ -53,9 +58,7 @@ class GrowSpaceEnv_Fairness(gym.Env):
                 0, 1, shape=(84, 84, 5), dtype=np.uint8)
         self.level = level
         self.setting = setting
-        # note: I moved the code for the first branch into the reset function,
-        # because when you start an environment for the first time,
-        # you're supposed to call "reset()" first before doing anything else
+        self.__initialized = False
 
     def seed(self, seed=None):
         return [np.random.seed(seed)]
@@ -73,7 +76,7 @@ class GrowSpaceEnv_Fairness(gym.Env):
         return xs, ys
 
     def light_move_R(self):
-        if np.around(self.x1_light + self.light_width,2) <= 1 - LIGHT_DISPLACEMENT:  # limit of coordinates
+        if np.around(self.x1_light + self.light_width, 2) <= 1 - LIGHT_DISPLACEMENT:  # limit of coordinates
             self.x1_light += LIGHT_DISPLACEMENT  # stay put
         else:
             self.x1_light = 1 - self.light_width
@@ -441,23 +444,26 @@ class GrowSpaceEnv_Fairness(gym.Env):
         self.b2 = 0 #branches from plant 2
         self.light_move = 0
 
+        self.__initialized = True
         return self.get_observation()
 
     def step(self, action):
+        if not self.__initialized:
+            raise RuntimeError("step() was called before reset()")
 
-        if action == 0:
+        if action == Actions.move_left:
             self.light_move_L()
 
-        if action == 1:
+        if action == Actions.move_right:
             self.light_move_R()
 
-        if action == 2:
+        if action == Actions.increase_beam:
             self.light_increase()
 
-        if action == 3:
+        if action == Actions.decrease_beam:
             self.light_decrease()
 
-        if action == 4:
+        if action == Actions.noop:
             # then we keep the light in place
             pass
 
@@ -505,7 +511,7 @@ class GrowSpaceEnv_Fairness(gym.Env):
         #print("these are tips:",tips)
         #print("length of tips:", len(tips))
 
-        done = False  # because we don't have a terminal condition
+        done = self.steps == MAX_STEPS
         misc = {"tips": tips, "target": self.target, "light": self.x1_light, "light_width": self.light_width, "step": self.steps, "success": success}
 
         if self.steps == 0:
@@ -538,6 +544,8 @@ class GrowSpaceEnv_Fairness(gym.Env):
         #print(misc)
         #self.number_of_branches = new_branches
         #print("how many new branches? ", misc['new_branches'])
+        if done:
+            self.__initialized = True
         return observation, reward, done, misc
 
     def render(self, mode='human',
@@ -558,17 +566,17 @@ if __name__ == '__main__':
 
     def key2action(key):
         if key == ord('a'):
-            return 0  # move left
+            return Actions.move_left
         elif key == ord('d'):
-            return 1  # move right
+            return Actions.move_right
         elif key == ord('s'):
-            return 4  # stay in place
+            return Actions.noop
         elif key == ord('w'):
-            return 2
+            return Actions.increase_beam
         elif key == ord('x'):
-            return 3
-        else:
-            return None
+            return Actions.decrease_beam
+
+
     rewards = []
     while True:
         gse.reset()

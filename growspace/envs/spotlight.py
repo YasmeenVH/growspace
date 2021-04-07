@@ -83,21 +83,19 @@ class GrowSpaceEnvSpotlightMnist(gym.Env):
         self.tips_per_step = None
         self.tips = None
 
+    def render(self, mode='human', debug_show_scatter=False):  # or mode="rgb_array"
+        """
+        @mode: ['mode', 'rgb_array']
 
-    def render(self, mode='human',
-               debug_show_scatter=False):  # or mode="rgb_array"
+        """
         img = self.get_observation(debug_show_scatter)
-
-        # if self.obs_type == 'Binary':
-        #     image = img.astype(np.uint8)
-        #     img = image * 255
+        img = img.astype(np.uint8)
 
         if mode == "human":
             cv2.imshow('plant', img)  # create opencv window to show plant
             cv2.waitKey(1)  # this is necessary or the window closes immediately
         else:
             return img
-
 
     def seed(self, seed=None):
         return [np.random.seed(seed)]
@@ -232,7 +230,7 @@ class GrowSpaceEnvSpotlightMnist(gym.Env):
 
         self.draw_spotlight()
         self.mnist_pixels = (self.get_observation()[:, :, 2] / 150)  # binary map of mnist shape
-        
+
         plant_stem = (self.get_observation()[:, :, 1] / 255)
         plant_stem[plant_stem>0.6] =1              # filter for green
         self.plant_original = plant_stem.astype(int)
@@ -272,16 +270,13 @@ class GrowSpaceEnvSpotlightMnist(gym.Env):
         plant = plant.astype(int)
         true_plant = np.subtract(plant,self.plant_original)
 
-
-        mnist = (observation[:,:,2]/150)     # binary map of mnist
-
+        mnist = (observation[:,:,2]/255)     # binary map of mnist
         mnist[mnist>0.5] =1
         mnist = mnist.astype(int)
 
         check = np.sum((true_plant, mnist), axis=0)
 
         intersection = np.sum(np.where(check < 2, 0, 1))
-
 
         union = np.sum(np.where(check<2,check,1))
 
@@ -312,7 +307,6 @@ class GrowSpaceEnvSpotlightMnist(gym.Env):
             int(self.focus_radius * self.height),
             True,
             thickness=-1,
-
         )
 
     def to_image(self, p):
@@ -346,7 +340,7 @@ def enjoy():
 
     while True:
         gse.reset()
-        img = gse.get_observation(debug_show_scatter=False)
+        img = gse.get_observation(debug_show_scatter=True)
         cv2.imshow("plant", img)
         cv2.waitKey(-1)
         rewards = []
@@ -358,7 +352,7 @@ def enjoy():
             b, t, c, f = gse.step(action)
             print(f["new_branches"])
             rewards.append(t)
-            cv2.imshow("plant", gse.get_observation(debug_show_scatter=False))
+            cv2.imshow("plant", gse.get_observation(debug_show_scatter=True))
         total = sum(rewards)
 
         print("amount of rewards:", total)  # cv2.waitKey(1)  # this is necessary or the window closes immediately
