@@ -263,4 +263,5 @@ register(
     entry_point='growspace.envs:GrowSpaceContinuous',
     max_episode_steps=50,
 )
-# TOOD(Manuel): Register water, continuous
+
+# TOOD(Manuel): Register water

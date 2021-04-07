@@ -3,13 +3,6 @@ import numpy as np
 GROWTH_MULTIPLIER = .02  # keep this below 1 to prevent exponential growth
 
 
-
-def valid_coord(x):
-    assert isinstance(x, int)
-    assert 0 <= x < 71
-    return True
-
-
 class Branch(object):
     def __init__(self, x, x2, y, y2, img_width, img_height):
         self.x = x

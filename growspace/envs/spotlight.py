@@ -83,7 +83,7 @@ class GrowSpaceEnvSpotlightMnist(gym.Env):
         self.tips_per_step = None
         self.tips = None
 
-    def render(self, mode='human', debug_show_scatter=False):  # or mode="rgb_array"
+    def render(self, mode='human', debug_show_scatter=False):
         """
         @mode: ['mode', 'rgb_array']
 
@@ -340,7 +340,7 @@ def enjoy():
 
     while True:
         gse.reset()
-        img = gse.get_observation(debug_show_scatter=True)
+        img = gse.get_observation(debug_show_scatter=False)
         cv2.imshow("plant", img)
         cv2.waitKey(-1)
         rewards = []
@@ -352,7 +352,7 @@ def enjoy():
             b, t, c, f = gse.step(action)
             print(f["new_branches"])
             rewards.append(t)
-            cv2.imshow("plant", gse.get_observation(debug_show_scatter=True))
+            cv2.imshow("plant", gse.get_observation(debug_show_scatter=False))
         total = sum(rewards)
 
         print("amount of rewards:", total)  # cv2.waitKey(1)  # this is necessary or the window closes immediately

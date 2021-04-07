@@ -1,5 +1,4 @@
 from random import sample
-import torch
 
 import cv2
 import gym
@@ -22,7 +21,6 @@ LIGHT_DISPLACEMENT = .1
 LIGHT_W_INCREMENT = .1
 MIN_LIGHT_WIDTH = .1
 MAX_LIGHT_WIDTH = .5
-MAX_STEPS = 25
 
 def to_int(v):
     return int(round(v))
@@ -153,8 +151,6 @@ class GrowSpaceEnv_Control(gym.Env):
             dist = 1
 
             if len(self.branches) > MAX_BRANCHING:
-                import random
-                random.seed(123)
                 branches_trimmed = sample(self.branches, MAX_BRANCHING)
             else:
                 branches_trimmed = self.branches
@@ -512,7 +508,7 @@ class GrowSpaceEnv_Control(gym.Env):
         #print("these are tips:",tips)
         #print("length of tips:", len(tips))
 
-        done = False # self.steps == MAX_STEPS
+        done = False  # because we don't have a terminal condition
         misc = {"tips": tips, "target": self.target, "light": self.x1_light, "light_width": self.light_width, "step": self.steps, "success": success }
 
         if self.steps == 0:
@@ -536,7 +532,7 @@ class GrowSpaceEnv_Control(gym.Env):
         #self.number_of_branches = new_branches
         #print("how many new branches? ", misc['new_branches'])
         #print("what type of data", type(misc['new_branches']))
-        return observation, float(reward), done, misc
+        return observation, reward, done, misc
 
     def render(self, mode='human',
                debug_show_scatter=False):  # or mode="rgb_array"
@@ -580,15 +576,15 @@ if __name__ == '__main__':
         #wwasssssssssssssssssssssssssssssssssssssssprint(backtorgb)
         cv2.imshow("plant", img)
         rewards = []
-        done = False
-        while not done:
+        for _ in range(50):
             action = key2action(cv2.waitKey(-1))
             if action is None:
                 quit()
 
-            b,t,done,f = gse.step(action)
+            b,t,c,f = gse.step(action)
             print(f["new_branches"])
             rewards.append(t)
             cv2.imshow("plant", gse.get_observation(debug_show_scatter=False))
         total = sum(rewards)
+
         print("amount of rewards:", total)

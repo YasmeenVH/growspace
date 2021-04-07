@@ -1,5 +1,4 @@
 from enum import Enum
-import random
 from random import sample
 
 import cv2
@@ -76,7 +75,7 @@ class GrowSpaceEnv_Fairness(gym.Env):
         return xs, ys
 
     def light_move_R(self):
-        if np.around(self.x1_light + self.light_width, 2) <= 1 - LIGHT_DISPLACEMENT:  # limit of coordinates
+        if np.around(self.x1_light + self.light_width,2) <= 1 - LIGHT_DISPLACEMENT:  # limit of coordinates
             self.x1_light += LIGHT_DISPLACEMENT  # stay put
         else:
             self.x1_light = 1 - self.light_width
@@ -511,7 +510,7 @@ class GrowSpaceEnv_Fairness(gym.Env):
         #print("these are tips:",tips)
         #print("length of tips:", len(tips))
 
-        done = self.steps == MAX_STEPS
+        done = False  # because we don't have a terminal condition
         misc = {"tips": tips, "target": self.target, "light": self.x1_light, "light_width": self.light_width, "step": self.steps, "success": success}
 
         if self.steps == 0:
