@@ -163,6 +163,14 @@ register(
 )
 
 register(
+    id=f'GrowSpaceSpotlight-Mnist0-v0',
+    entry_point='growspace.envs:GrowSpaceEnvSpotlightMnist',
+    max_episode_steps=50,  # number of total steps in the environment
+    kwargs={'digit': '0',
+            },
+)
+
+register(
     id=f'GrowSpaceSpotlight-Mnist1-v0',
     entry_point='growspace.envs:GrowSpaceEnvSpotlightMnist',
     max_episode_steps=50,  # number of total steps in the environment
