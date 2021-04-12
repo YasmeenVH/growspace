@@ -27,6 +27,7 @@ LIGHT_W_INCREMENT = 0.1
 MIN_LIGHT_WIDTH = 0.1
 MAX_LIGHT_WIDTH = 0.5
 PATH = os.path.dirname(__file__) + "/../../scripts/png/mnist_data/"
+
 """digit is the mnist number we want to pass
 enter as a string. for mix combos enter as : 1_7_mix
 refer to directory names
@@ -221,8 +222,10 @@ class GrowSpaceEnvSpotlightMnist(gym.Env):
         x_scatter = np.random.randint(0, self.width, LIGHT_DIF)
         y_scatter = np.random.randint(0, self.height, LIGHT_DIF)
         self.feature_maps[Features.scatter].fill(False)
-        self.feature_maps[Features.scatter][y_scatter, x_scatter] = True
+        #print('what is this',self.feature_maps)
 
+        self.feature_maps[Features.scatter][y_scatter, x_scatter] = True
+        #print('what is this again', self.feature_maps[0])
         self.steps = 0
         self.new_branches = 0
         self.tips_per_step = 0
@@ -231,8 +234,9 @@ class GrowSpaceEnvSpotlightMnist(gym.Env):
         ]
 
         self.draw_spotlight()
+        #print('showme this',self.feature_maps)
         self.mnist_pixels = (self.get_observation()[:, :, 2] / 150)  # binary map of mnist shape
-        
+
         plant_stem = (self.get_observation()[:, :, 1] / 255)
         plant_stem[plant_stem>0.6] =1              # filter for green
         self.plant_original = plant_stem.astype(int)
@@ -260,11 +264,11 @@ class GrowSpaceEnvSpotlightMnist(gym.Env):
 
         if action == 6:
             pass
-        self.draw_spotlight()
+        #self.draw_spotlight()
 
         pts = self.light_scatter()
         tips = self.tree_grow(pts, 0.01 * self.width, 0.15 * self.width)
-
+        self.draw_spotlight()
         observation = self.get_observation()  #image
 
         plant = (observation[:,:,1]/255) # binary map of plant
