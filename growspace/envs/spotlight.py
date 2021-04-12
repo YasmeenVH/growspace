@@ -60,7 +60,9 @@ class Features(IntEnum):
 
 
 class GrowSpaceEnvSpotlightMnist(gym.Env):
-    def __init__(self, width=DEFAULT_RES, height=DEFAULT_RES, path=PATH, digit = '1'):
+    metadata = {'render.modes': ['human', 'rgb_array']}  # Required, otherwise gym.Monitor disables itself.
+
+    def __init__(self, width=DEFAULT_RES, height=DEFAULT_RES, path=PATH, digit='1'):
         self.width = width
         self.height = height
         self.seed()
