@@ -26,7 +26,7 @@ LIGHT_DISPLACEMENT = 0.1
 LIGHT_W_INCREMENT = 0.1
 MIN_LIGHT_WIDTH = 0.1
 MAX_LIGHT_WIDTH = 0.5
-FIRST_BRANCH_HEIGHT = ir(0.1 * DEFAULT_RES)
+
 BRANCH_LENGTH = (1 / 9) * DEFAULT_RES
 PATH = os.path.dirname(__file__) + "/../../scripts/png/mnist_data/"
 
@@ -46,7 +46,7 @@ def to_int(v):
 
 ir = to_int  # shortcut for function calld
 
-
+FIRST_BRANCH_HEIGHT = ir(0.1 * DEFAULT_RES)
 
 
 def unpack(w):
