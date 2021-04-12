@@ -22,6 +22,13 @@ LIGHT_W_INCREMENT = .1
 MIN_LIGHT_WIDTH = .1
 MAX_LIGHT_WIDTH = .5
 
+import config
+for k in list(locals()):
+    if f"^" + k in config.tensorboard.run.config:
+        locals()[k] = config.tensorboard.run.config[f"^" + k]
+
+
+
 def to_int(v):
     return int(round(v))
 
@@ -39,7 +46,6 @@ def intersection_(coords, light_x):
 ir = to_int  # shortcut for function call
 
 class GrowSpaceEnv_Control(gym.Env):
-
     def __init__(self, width=DEFAULT_RES, height=DEFAULT_RES, light_dif=LIGHT_DIF, obs_type = None, level = 'second', setting = 'hard'):
         self.width = width  # do we keep?
         self.height = height  # do we keep?
