@@ -537,7 +537,7 @@ class GrowSpaceEnv_Fairness(gym.Env):
         #print(misc)
         #self.number_of_branches = new_branches
         #print("how many new branches? ", misc['new_branches'])
-        return observation, reward, done, misc
+        return observation, float(reward), done, misc
 
     def render(self, mode='human',
                debug_show_scatter=False):  # or mode="rgb_array"
