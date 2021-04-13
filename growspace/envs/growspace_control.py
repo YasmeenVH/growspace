@@ -10,23 +10,23 @@ from scipy.spatial import ConvexHull, convex_hull_plot_2d
 import sys
 np.set_printoptions(threshold=sys.maxsize)
 
-FIRST_BRANCH_HEIGHT = .24
+FIRST_BRANCH_HEIGHT = .2
 BRANCH_THICCNESS = .015
-BRANCH_LENGTH = 1/9
-MAX_BRANCHING = 10
+BRANCH_LENGTH = 1/10
+MAX_BRANCHING = 8
 DEFAULT_RES = 84
 LIGHT_WIDTH = .25
-LIGHT_DIF = 250
+LIGHT_DIF = 200
 LIGHT_DISPLACEMENT = .1
 LIGHT_W_INCREMENT = .1
 MIN_LIGHT_WIDTH = .1
 MAX_LIGHT_WIDTH = 1
-
+"""
 import config
 for k in list(locals()):
     if f"^" + k in config.tensorboard.run.config:
         locals()[k] = config.tensorboard.run.config[f"^" + k]
-
+"""
 
 
 def to_int(v):
@@ -324,7 +324,7 @@ class GrowSpaceEnv_Control(gym.Env):
         # Set env back to start - also necessary on first start
         # is in range [0,1]
         if self.setting == 'easy':
-            random_start = 0.5 #np.random.rand()
+            random_start = np.random.rand()
             random_start2 = random_start
             self.target = [random_start, .8]
 
@@ -377,7 +377,7 @@ class GrowSpaceEnv_Control(gym.Env):
         self.x2_light = self.x1_light + self.light_width
 
         self.x_scatter = np.random.uniform(0, 1, self.light_dif)
-        self.y_scatter = np.random.uniform(0.25, 1, self.light_dif)
+        self.y_scatter = np.random.uniform(FIRST_BRANCH_HEIGHT, 1, self.light_dif)
         self.steps = 0
         self.new_branches = 0
         self.tips_per_step = 0
@@ -582,7 +582,7 @@ if __name__ == '__main__':
         #wwasssssssssssssssssssssssssssssssssssssssprint(backtorgb)
         cv2.imshow("plant", img)
         rewards = []
-        for _ in range(50):
+        for _ in range(70):
             action = key2action(cv2.waitKey(-1))
             if action is None:
                 quit()
