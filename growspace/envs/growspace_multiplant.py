@@ -12,18 +12,17 @@ from numba import jit
 from functools import partial
 
 
-
-FIRST_BRANCH_HEIGHT = .24
+FIRST_BRANCH_HEIGHT = .2
 BRANCH_THICCNESS = .015
-BRANCH_LENGTH = 1/9
-MAX_BRANCHING = 10
+BRANCH_LENGTH = 1/10
+MAX_BRANCHING = 8
 DEFAULT_RES = 84
 LIGHT_WIDTH = .25
-LIGHT_DIF = 250
+LIGHT_DIF = 200
 LIGHT_DISPLACEMENT = .1
 LIGHT_W_INCREMENT = .1
 MIN_LIGHT_WIDTH = .1
-MAX_LIGHT_WIDTH = .5
+MAX_LIGHT_WIDTH = 1
 
 
 def to_int(v):
@@ -38,7 +37,7 @@ ir = to_int  # shortcut for function call
 
 class GrowSpaceEnv_Fairness(gym.Env):
 
-    def __init__(self, width=DEFAULT_RES, height=DEFAULT_RES, light_dif=LIGHT_DIF, obs_type = None, level=None, setting = 'hard_above'):
+    def __init__(self, width=DEFAULT_RES, height=DEFAULT_RES, light_dif=LIGHT_DIF, obs_type = None, level=None, setting = 'easy'):
         self.width = width
         self.height = height
         self.seed()
@@ -433,7 +432,7 @@ class GrowSpaceEnv_Fairness(gym.Env):
         self.x2_light = self.x1_light + self.light_width
 
         self.x_scatter = np.random.uniform(0, 1, self.light_dif)
-        self.y_scatter = np.random.uniform(0.25, 1, self.light_dif)
+        self.y_scatter = np.random.uniform(FIRST_BRANCH_HEIGHT, 1, self.light_dif)
         self.steps = 0
         self.new_branches = 0
         self.tips_per_step = 0
