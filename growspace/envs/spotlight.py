@@ -325,6 +325,7 @@ class GrowSpaceEnvSpotlightMnist(gym.Env):
             int(self.focus_radius * self.height),
             True,
             thickness=-1,
+
         )
 
     def to_image(self, p):
