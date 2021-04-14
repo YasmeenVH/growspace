@@ -109,6 +109,9 @@ class GrowSpaceEnv_Fairness(gym.Env):
     def tree_grow(self,x, y, mindist, maxdist):
 
         # apply filter to both idx and branches
+        if len(x) == 0:
+            branches_trimmed = 0
+            branches_trimmed2 = 0
         for i in range(len(x) - 1, 0, -1):  # number of possible scatters, check if they allow for branching with min_dist
             closest_branch = 0
             dist = 1
@@ -534,7 +537,7 @@ class GrowSpaceEnv_Fairness(gym.Env):
         # (optional) additional information about plant/episode/other stuff, leave empty for now
         #print("steps:", self.steps)    # sanity check
         self.steps += 1
-        #print(misc)
+        #print(misc)q
         #self.number_of_branches = new_branches
         #print("how many new branches? ", misc['new_branches'])
         return observation, float(reward), done, misc
