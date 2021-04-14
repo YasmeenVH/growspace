@@ -4,21 +4,28 @@ from random import sample
 import cv2
 import gym
 import numpy as np
+from numpy.linalg import norm
+import time
 from growspace.plants.tree import Branch
 from numpy.linalg import norm
 from scipy.spatial import distance
+import itertools
+from sklearn import preprocessing
+from numba import jit
+from functools import partial
 
-FIRST_BRANCH_HEIGHT = .24
+
+FIRST_BRANCH_HEIGHT = .2
 BRANCH_THICCNESS = .015
-BRANCH_LENGTH = 1/9
-MAX_BRANCHING = 10
+BRANCH_LENGTH = 1/10
+MAX_BRANCHING = 8
 DEFAULT_RES = 84
 LIGHT_WIDTH = .25
-LIGHT_DIF = 250
+LIGHT_DIF = 200
 LIGHT_DISPLACEMENT = .1
 LIGHT_W_INCREMENT = .1
 MIN_LIGHT_WIDTH = .1
-MAX_LIGHT_WIDTH = .5
+MAX_LIGHT_WIDTH = 1
 MAX_STEPS = 50
 
 
@@ -33,7 +40,6 @@ class Actions(Enum):
 def to_int(v):
     return int(round(v))
 
-
 def unpack(w):
     return map(list, zip(*enumerate(w)))
 
@@ -42,12 +48,13 @@ ir = to_int  # shortcut for function call
 
 
 class GrowSpaceEnv_Fairness(gym.Env):
-    def __init__(self, width=DEFAULT_RES, height=DEFAULT_RES, light_dif=LIGHT_DIF, obs_type=None, level=None, setting='hard_above'):
+
+    def __init__(self, width=DEFAULT_RES, height=DEFAULT_RES, light_dif=LIGHT_DIF, obs_type = None, level=None, setting = 'easy'):
         self.width = width
         self.height = height
         self.seed()
         self.light_dif = light_dif
-        self.action_space = gym.spaces.Discrete(len(Actions))
+        self.action_space = gym.spaces.Discrete(len(Actions)) # L, R, keep of light paddle
         self.obs_type = obs_type
         if self.obs_type == None:
             self.observation_space = gym.spaces.Box(
@@ -58,6 +65,9 @@ class GrowSpaceEnv_Fairness(gym.Env):
         self.level = level
         self.setting = setting
         self.__initialized = False
+        # note: I moved the code for the first branch into the reset function,
+        # because when you start an environment for the first time,
+        # you're supposed to call "reset()" first before doing anything else
 
     def seed(self, seed=None):
         return [np.random.seed(seed)]
@@ -112,6 +122,9 @@ class GrowSpaceEnv_Fairness(gym.Env):
     def tree_grow(self,x, y, mindist, maxdist):
 
         # apply filter to both idx and branches
+
+        branches_trimmed = self.branches
+        branches_trimmed2 = self.branches2
         for i in range(len(x) - 1, 0, -1):  # number of possible scatters, check if they allow for branching with min_dist
             closest_branch = 0
             dist = 1
@@ -435,7 +448,7 @@ class GrowSpaceEnv_Fairness(gym.Env):
         self.x2_light = self.x1_light + self.light_width
 
         self.x_scatter = np.random.uniform(0, 1, self.light_dif)
-        self.y_scatter = np.random.uniform(0.25, 1, self.light_dif)
+        self.y_scatter = np.random.uniform(FIRST_BRANCH_HEIGHT, 1, self.light_dif)
         self.steps = 0
         self.new_branches = 0
         self.tips_per_step = 0
@@ -545,7 +558,7 @@ class GrowSpaceEnv_Fairness(gym.Env):
         #print("how many new branches? ", misc['new_branches'])
         if done:
             self.__initialized = True
-        return observation, reward, done, misc
+        return observation, float(reward), done, misc
 
     def render(self, mode='human',
                debug_show_scatter=False):  # or mode="rgb_array"

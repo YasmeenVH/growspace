@@ -26,11 +26,19 @@ LIGHT_DISPLACEMENT = 0.1
 LIGHT_W_INCREMENT = 0.1
 MIN_LIGHT_WIDTH = 0.1
 MAX_LIGHT_WIDTH = 0.5
+
+BRANCH_LENGTH = (1 / 9) * DEFAULT_RES
 PATH = os.path.dirname(__file__) + "/../../scripts/png/mnist_data/"
+
 """digit is the mnist number we want to pass
 enter as a string. for mix combos enter as : 1_7_mix
 refer to directory names
 """
+
+import config
+for k in list(locals()):
+    if f"^" + k in config.tensorboard.run.config:
+        locals()[k] = config.tensorboard.run.config[f"^" + k]
 
 def to_int(v):
     return int(round(v))
@@ -39,7 +47,6 @@ def to_int(v):
 ir = to_int  # shortcut for function calld
 
 FIRST_BRANCH_HEIGHT = ir(0.1 * DEFAULT_RES)
-BRANCH_LENGTH = (1 / 9) * DEFAULT_RES
 
 
 def unpack(w):
@@ -59,7 +66,9 @@ class Features(IntEnum):
 
 
 class GrowSpaceEnvSpotlightMnist(gym.Env):
-    def __init__(self, width=DEFAULT_RES, height=DEFAULT_RES, path=PATH, digit = '1'):
+    metadata = {'render.modes': ['human', 'rgb_array']}  # Required, otherwise gym.Monitor disables itself.
+
+    def __init__(self, width=DEFAULT_RES, height=DEFAULT_RES, path=PATH, digit='1'):
         self.width = width
         self.height = height
         self.seed()
@@ -219,8 +228,10 @@ class GrowSpaceEnvSpotlightMnist(gym.Env):
         x_scatter = np.random.randint(0, self.width, LIGHT_DIF)
         y_scatter = np.random.randint(0, self.height, LIGHT_DIF)
         self.feature_maps[Features.scatter].fill(False)
-        self.feature_maps[Features.scatter][y_scatter, x_scatter] = True
+        #print('what is this',self.feature_maps)
 
+        self.feature_maps[Features.scatter][y_scatter, x_scatter] = True
+        #print('what is this again', self.feature_maps[0])
         self.steps = 0
         self.new_branches = 0
         self.tips_per_step = 0
@@ -229,6 +240,7 @@ class GrowSpaceEnvSpotlightMnist(gym.Env):
         ]
 
         self.draw_spotlight()
+        #print('showme this',self.feature_maps)
         self.mnist_pixels = (self.get_observation()[:, :, 2] / 150)  # binary map of mnist shape
 
         plant_stem = (self.get_observation()[:, :, 1] / 255)
@@ -258,11 +270,11 @@ class GrowSpaceEnvSpotlightMnist(gym.Env):
 
         if action == 6:
             pass
-        self.draw_spotlight()
+        #self.draw_spotlight()
 
         pts = self.light_scatter()
         tips = self.tree_grow(pts, 0.01 * self.width, 0.15 * self.width)
-
+        self.draw_spotlight()
         observation = self.get_observation()  #image
 
         plant = (observation[:,:,1]/255) # binary map of plant

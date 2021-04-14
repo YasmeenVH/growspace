@@ -120,7 +120,7 @@ register(
 register(
     id=f'GrowSpaceEnv-Fairness-v0',
     entry_point='growspace.envs:GrowSpaceEnv_Fairness',
-    kwargs={'obs_type': None, 'level': None,
+    kwargs={'obs_type': None, 'level': None, 'setting': None,
             # "observe_images": True
             },
     max_episode_steps=50,  # number of total steps in the environment
@@ -160,6 +160,14 @@ register(
             # "observe_images": True
             },
     max_episode_steps=50,  # number of total steps in the environment
+)
+
+register(
+    id=f'GrowSpaceSpotlight-Mnist0-v0',
+    entry_point='growspace.envs:GrowSpaceEnvSpotlightMnist',
+    max_episode_steps=50,  # number of total steps in the environment
+    kwargs={'digit': '0',
+            },
 )
 
 register(
