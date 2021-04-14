@@ -92,9 +92,11 @@ class GrowSpaceEnvSpotlightMnist(gym.Env):
         self.tips_per_step = None
         self.tips = None
 
+    def render(self, mode='human', debug_show_scatter=False):
+        """
+        @mode: ['mode', 'rgb_array']
 
-    def render(self, mode='human',
-               debug_show_scatter=False):  # or mode="rgb_array"
+        """
         img = self.get_observation(debug_show_scatter)
 
         # if self.obs_type == 'Binary':
@@ -293,7 +295,6 @@ class GrowSpaceEnvSpotlightMnist(gym.Env):
         check = np.sum((true_plant, mnist), axis=0)
 
         intersection = np.sum(np.where(check < 2, 0, 1))
-
 
         union = np.sum(np.where(check<2,check,1))
 

@@ -1,4 +1,6 @@
+import sys
 from random import sample
+
 import cv2
 import gym
 import numpy as np
@@ -10,10 +12,6 @@ from scipy.spatial import ConvexHull, convex_hull_plot_2d
 from scipy.stats import linregress
 import sys
 np.set_printoptions(threshold=sys.maxsize)
-
-
-#from numba import jit
-#from functools import partial
 
 # customizable variables by user
 
@@ -29,6 +27,8 @@ LIGHT_W_INCREMENT = .1
 MIN_LIGHT_WIDTH = .1
 MAX_LIGHT_WIDTH = .5
 PATH = '/home/y/Documents/finalprojectcomp767/growspace/scripts/png/mnist_data/mnist_1.png'
+MAX_STEPS = 50
+
 
 def to_int(v):
     return int(round(v))
