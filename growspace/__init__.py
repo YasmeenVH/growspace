@@ -120,7 +120,7 @@ register(
 register(
     id=f'GrowSpaceEnv-Fairness-v0',
     entry_point='growspace.envs:GrowSpaceEnv_Fairness',
-    kwargs={'obs_type': None, 'level': None,
+    kwargs={'obs_type': None, 'level': None, 'setting': None,
             # "observe_images": True
             },
     max_episode_steps=50,  # number of total steps in the environment
