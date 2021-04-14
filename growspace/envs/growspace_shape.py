@@ -4,11 +4,13 @@ from random import sample
 import cv2
 import gym
 import numpy as np
-from growspace.plants.tree import Branch
 from numpy.linalg import norm
-from scipy.spatial import ConvexHull
+import time
+from growspace.plants.tree import Branch
 from scipy.spatial import distance
-
+from scipy.spatial import ConvexHull, convex_hull_plot_2d
+from scipy.stats import linregress
+import sys
 np.set_printoptions(threshold=sys.maxsize)
 
 # customizable variables by user

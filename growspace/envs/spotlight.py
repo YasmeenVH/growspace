@@ -98,13 +98,17 @@ class GrowSpaceEnvSpotlightMnist(gym.Env):
 
         """
         img = self.get_observation(debug_show_scatter)
-        img = img.astype(np.uint8)
+
+        # if self.obs_type == 'Binary':
+        #     image = img.astype(np.uint8)
+        #     img = image * 255
 
         if mode == "human":
             cv2.imshow('plant', img)  # create opencv window to show plant
             cv2.waitKey(1)  # this is necessary or the window closes immediately
         else:
             return img
+
 
     def seed(self, seed=None):
         return [np.random.seed(seed)]
@@ -282,7 +286,9 @@ class GrowSpaceEnvSpotlightMnist(gym.Env):
         plant = plant.astype(int)
         true_plant = np.subtract(plant,self.plant_original)
 
-        mnist = (observation[:,:,2]/255)     # binary map of mnist
+
+        mnist = (observation[:,:,2]/150)     # binary map of mnist
+
         mnist[mnist>0.5] =1
         mnist = mnist.astype(int)
 
