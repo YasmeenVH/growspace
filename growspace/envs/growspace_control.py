@@ -5,9 +5,11 @@ import gym
 import numpy as np
 from numpy.linalg import norm
 from growspace.plants.tree import Branch
+from growspace.plants.tree import PixelBranch
 from scipy.spatial import distance
 from scipy.spatial import ConvexHull, convex_hull_plot_2d
 import sys
+from enum import IntEnum
 np.set_printoptions(threshold=sys.maxsize)
 
 FIRST_BRANCH_HEIGHT = .2
@@ -45,6 +47,10 @@ def intersection_(coords, light_x):
 
 ir = to_int  # shortcut for function call
 
+class Features(IntEnum):
+    light = 0
+    scatter = 1
+
 class GrowSpaceEnv_Control(gym.Env):
     def __init__(self, width=DEFAULT_RES, height=DEFAULT_RES, light_dif=LIGHT_DIF, obs_type = None, level = None, setting = 'easy'):
         self.width = width  # do we keep?
@@ -62,6 +68,15 @@ class GrowSpaceEnv_Control(gym.Env):
         self.level = level
         self.setting = setting
 
+        self.feature_maps = np.zeros((len(Features), self.height, self.width), dtype=np.uint8)
+
+        self.branches = None
+        self.target = None
+        self.steps = None
+        self.new_branches = None
+        self.tips_per_step = None
+        self.tips = None
+
     def seed(self, seed=None):
         return [np.random.seed(seed)]
 
@@ -69,14 +84,18 @@ class GrowSpaceEnv_Control(gym.Env):
         # select scattering with respect to position of the light
 
         # select the instances where the conditions is true (where the x coordinate is within the light)
-        filter = np.logical_and(self.x_scatter >= self.x1_light,
-                                self.x_scatter <= self.x2_light)
+        #filter = np.logical_and(self.x_scatter >= self.x1_light,
+        #                        self.x_scatter <= self.x2_light)
+
 
         # apply filter to both y and x coordinates through the power of Numpy magic :D
-        ys = self.y_scatter[filter]
-        xs = self.x_scatter[filter]
+        #ys = self.y_scatter[filter]
+        #xs = self.x_scatter[filter]
         #print("scatter:", xs, ys)
-        return xs, ys
+        #return xs, ys
+        filter_ = np.logical_and(self.feature_maps[Features.light], self.feature_maps[Features.scatter])
+        return np.argwhere(filter_)
+
 
     def light_move_R(self):
         if np.around(self.x1_light + self.light_width,2) <= 1 - LIGHT_DISPLACEMENT:  # limit of coordinates
@@ -113,7 +132,7 @@ class GrowSpaceEnv_Control(gym.Env):
     #@staticmethod
     #@jit(nopython=True)
     #@partial(jit, static_argnums=(0,))
-    def tree_grow(self,x, y, mindist, maxdist):
+    def tree_grow(self, activated_photons, mindist, maxdist):
 
         # apply filter to both idx and branches
         #print("what is value",len(x))
@@ -151,54 +170,83 @@ class GrowSpaceEnv_Control(gym.Env):
                 #branches_trimmed[closest_branch].grow_x += (x - branches_trimmed[closest_branch].x2) / (dist / BRANCH_LENGTH)
                 #branches_trimmed[closest_branch].grow_y += (y - branches_trimmed[closest_branch].y2) / (dist / BRANCH_LENGTH)
         #else:
-        global branches_trimmed
-        for i in range(len(x) - 1, 0, -1):  # number of possible scatters, check if they allow for branching with min_dist
+        #global branches_trimmed
+        # number of possible scatters, check if they allow for branching with min_dist
+        branches_trimmed = self.branches
+        for i in range(len(activated_photons) - 1, 0, -1):
             closest_branch = 0
-            dist = 1
+            dist = 1 * self.width
 
             if len(self.branches) > MAX_BRANCHING:
                 branches_trimmed = sample(self.branches, MAX_BRANCHING)
             else:
                 branches_trimmed = self.branches
-            branch_idx = [branch_idx for branch_idx, branch in enumerate(branches_trimmed)if self.x1_light <= branch.x2 <= self.x2_light]
-            temp_dist = [norm([x[i] - branches_trimmed[branch].x2, y[i] - branches_trimmed[branch].y2]) for branch in branch_idx]
 
-            for j in range(0, len(temp_dist)):
-                if temp_dist[j] < dist:
-                    dist = temp_dist[j]
-                    closest_branch = branch_idx[j]
+            for branch in branches_trimmed:
+                photon_ptx = np.flip(activated_photons[i])  # Flip for inverted coordinates
+                tip_to_scatter = norm(photon_ptx - np.array(branch.tip_point))
+
+                if tip_to_scatter < dist:
+                    dist = tip_to_scatter
+                    closest_branch = branch
+
+
+            # branch_idx = [branch_idx for branch_idx, branch in enumerate(branches_trimmed)if self.x1_light <= branch.x2 <= self.x2_light]
+            # temp_dist = [norm([x[i] - branches_trimmed[branch].x2, y[i] - branches_trimmed[branch].y2]) for branch in branch_idx]
+            #
+            # for j in range(0, len(temp_dist)):
+            #     if temp_dist[j] < dist:
+            #         dist = temp_dist[j]
+            #         closest_branch = branch_idx[j]
 
 
             # removes scatter points if reached
 
             if dist < mindist:
-                x = np.delete(x, i)
-                y = np.delete(y, i)
+                activated_photons = np.delete(activated_photons, i)
+                # x = np.delete(x, i)
+                # y = np.delete(y, i)
 
             # when distance is greater than max distance, branching occurs to find other points.
             elif dist < maxdist:
-                branches_trimmed[closest_branch].grow_count += 1
-                branches_trimmed[closest_branch].grow_x += (
-                    x[i] - branches_trimmed[closest_branch].x2) / (dist/BRANCH_LENGTH)
-                branches_trimmed[closest_branch].grow_y += (
-                    y[i] - branches_trimmed[closest_branch].y2) / (dist / BRANCH_LENGTH)
+                #branches_trimmed[closest_branch].grow_count += 1
+                closest_branch.grow_count += 1
+                branch_length = BRANCH_LENGTH / dist
+                photon = np.flip(activated_photons[i])
+                g = (photon - closest_branch.tip_point) * branch_length
+                closest_branch.grow_direction += np.round(g).astype(np.int)
+                # branches_trimmed[closest_branch].grow_x += (
+                #     x[i] - branches_trimmed[closest_branch].x2) / (dist/BRANCH_LENGTH)
+                # branches_trimmed[closest_branch].grow_y += (
+                #     y[i] - branches_trimmed[closest_branch].y2) / (dist / BRANCH_LENGTH)
 
         #print('branches trimmed', branches_trimmed)
         #if branches_trimmed == 0:
             #pass
-        for i in range(len(branches_trimmed)):
-            if branches_trimmed[i].grow_count > 0:
-                newBranch = Branch(
-                    branches_trimmed[i].x2, branches_trimmed[i].x2 +
-                    branches_trimmed[i].grow_x / branches_trimmed[i].grow_count,
-                    branches_trimmed[i].y2, branches_trimmed[i].y2 +
-                    branches_trimmed[i].grow_y / branches_trimmed[i].grow_count,
-                    self.width, self.height)
+
+        for branch in branches_trimmed:
+            if branch.grow_count > 0:
+                (x2, y2) = branch.tip_point + branch.grow_direction / branch.grow_count
+                x2 = np.clip(x2, 0, self.width-1)
+                y2 = np.clip(y2 ,0, self.height -1)
+                newBranch = PixelBranch(branch.x2, ir(x2), branch.y2, ir(y2), self.width, self.height)
                 self.branches.append(newBranch)
-                branches_trimmed[i].child.append(newBranch)
-                branches_trimmed[i].grow_count = 0
-                branches_trimmed[i].grow_x = 0
-                branches_trimmed[i].grow_y = 0
+                branch.child.append(newBranch)
+                branch.grow_count = 0
+                branch.grow_direction.fill(0)
+        # for i in range(len(branches_trimmed)):
+        #     if branches_trimmed[i].grow_count > 0:
+        #         newBranch = Branch(
+        #             branches_trimmed[i].x2, branches_trimmed[i].x2 +
+        #             branches_trimmed[i].grow_x / branches_trimmed[i].grow_count,
+        #             branches_trimmed[i].y2, branches_trimmed[i].y2 +
+        #             branches_trimmed[i].grow_y / branches_trimmed[i].grow_count,
+        #             self.width, self.height)
+        #         self.branches.append(newBranch)
+        #         branches_trimmed[i].child.append(newBranch)
+        #         branches_trimmed[i].grow_count = 0
+        #         branches_trimmed[i].grow_x = 0
+        #         branches_trimmed[i].grow_y = 0
 
         # increase thickness of first elements added to tree as they grow
         self.branches[0].update_width()
@@ -206,7 +254,8 @@ class GrowSpaceEnv_Control(gym.Env):
         #sending coordinates out
         for branch in self.branches:
             # x2 and y2 since they are the tips
-            branch_coords.append([branch.x2, branch.y2])
+            #branch_coords.append([branch.x2, branch.y2])
+            branch_coords.append(branch.tip_point)
         #print("branching has occured")
 
         self.tips = branch_coords
@@ -278,6 +327,11 @@ class GrowSpaceEnv_Control(gym.Env):
         if self.obs_type == None:
             # place light as rectangle
             yellow = (0, 128, 128)  # RGB color (dark yellow)
+
+            img[self.feature_maps[Features.light].nonzero()] = yellow
+            ## I am here now april 21
+            cv2.rectangle(
+                img, pt1=(x1, 0), pt2=(x2, self.height), color=yellow, thickness=-1)
             x1 = ir(self.x1_light * self.width)
             x2 = ir(self.x2_light * self.width)
             cv2.rectangle(
@@ -376,6 +430,7 @@ class GrowSpaceEnv_Control(gym.Env):
 
         self.x2_light = self.x1_light + self.light_width
 
+        self.ligt_coords = [self.x1_li]
         self.x_scatter = np.random.uniform(0, 1, self.light_dif)
         self.y_scatter = np.random.uniform(FIRST_BRANCH_HEIGHT, 1, self.light_dif)
         self.steps = 0
@@ -412,7 +467,8 @@ class GrowSpaceEnv_Control(gym.Env):
         # try:
         #     convex_tips = np.array(self.tips)
             #print('what is length:',len(convex_tips))
-        xs, ys = self.light_scatter()
+        #xs, ys = self.light_scatter()
+        pts= self.light_scatter()
         #     if len(convex_tips) >= 2:
         #         #print('check')
         #         hull = ConvexHull(convex_tips)
@@ -497,7 +553,9 @@ class GrowSpaceEnv_Control(gym.Env):
         #print("scattering x len:", len(xs))
         #print("this is lightx1 :", self.x1_light, "and light width:", self.light_width)
         # Branching step for light in this position
-        tips = self.tree_grow(xs, ys, .01, .15)
+        #tips = self.tree_grow(xs, ys, .01, .15)
+        tips = self.tree_grow(pts, .01 * self.width, .15 * self.height)
+        self.draw_beam()
         #print("tips:", tips)
         # Calculate distance to target
         if self.distance_target(tips) <= 0.1:
@@ -553,6 +611,18 @@ class GrowSpaceEnv_Control(gym.Env):
             cv2.waitKey(1)  # this is necessary or the window closes immediately
         else:
             return img
+
+    def draw_beam(self):
+        self.feature_maps[Features.light].fill(False)
+        cv2.rectangle(
+            self.feature_maps[Features.light], pt1=(self.x1_light * self.width, 0), pt2=(self.x2_light * self.height, self.height), True, thickness=-1)
+
+    def to_image(self, p):
+        if hasattr(p, "normalized_array"):
+            return np.around((self.height, self.width) * p.normalized_array[:-1]).astype(np.int32)
+        else:
+            y, x = p
+            return np.around((self.height * y, self.width * x)).astype(np.int32)
 
 
 if __name__ == '__main__':
