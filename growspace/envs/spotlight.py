@@ -35,10 +35,10 @@ enter as a string. for mix combos enter as : 1_7_mix
 refer to directory names
 """
 
-import config
-for k in list(locals()):
-    if f"^" + k in config.tensorboard.run.config:
-        locals()[k] = config.tensorboard.run.config[f"^" + k]
+# import config
+# for k in list(locals()):
+#     if f"^" + k in config.tensorboard.run.config:
+#         locals()[k] = config.tensorboard.run.config[f"^" + k]
 
 def to_int(v):
     return int(round(v))
