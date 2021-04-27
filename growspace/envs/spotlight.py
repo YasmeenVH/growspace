@@ -188,7 +188,7 @@ class GrowSpaceEnvSpotlightMnist(gym.Env):
         yellow = (0, 128, 128)  # RGB color (dark yellow)
 
         img[self.feature_maps[Features.light].nonzero()] = yellow
-        cv2.circle(img, tuple(self.to_image(self.focus_point)), int(self.focus_radius * self.height), (0, 128, 128), thickness=2)
+        cv2.circle(img, tuple(self.to_image(self.focus_point)), int(self.focus_radius * self.height), (0, 128, 128), thickness=2) # only contour
 
         if debug_show_scatter:
             pts = self.light_scatter()
