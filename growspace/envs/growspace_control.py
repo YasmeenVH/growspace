@@ -443,8 +443,8 @@ class GrowSpaceEnv_Control(gym.Env):
         self.x2_light = self.x1_light + self.light_width
 
         self.light_coords = [self.x1_light, self.x2_light]
-        x_scatter = np.random.randint(0,self.width, self.light_dif) #np.random.uniform(0, 1, self.light_dif)
-        y_scatter = np.random.randint(FIRST_BRANCH_HEIGHT, self.height, self.light_dif) #np.random.uniform(FIRST_BRANCH_HEIGHT, 1, self.light_dif)
+        y_scatter = np.random.randint(0,self.width, self.light_dif) #np.random.uniform(0, 1, self.light_dif)
+        x_scatter = np.random.randint(FIRST_BRANCH_HEIGHT, self.height, self.light_dif) #np.random.uniform(FIRST_BRANCH_HEIGHT, 1, self.light_dif)
         self.feature_maps[Features.scatter].fill(False)
         self.feature_maps[Features.scatter][x_scatter, y_scatter] = True
         self.steps = 0
@@ -453,6 +453,7 @@ class GrowSpaceEnv_Control(gym.Env):
         self.light_move = 0
         #self.tips = [self.branches[0].x2, self.branches[0].y2]
         self.tips = [self.branches[0].tip_point]
+        self.draw_beam()
 
         return self.get_observation()
 
