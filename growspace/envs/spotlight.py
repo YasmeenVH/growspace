@@ -282,6 +282,8 @@ class GrowSpaceEnvSpotlightMnist(gym.Env):
         observation = self.get_observation()  #image
 
         plant = (observation[:,:,1]/255) # binary map of plant
+        pixel_plant = np.sum(plant)
+    
         plant[plant>0.6] =1              # filter for green
         plant = plant.astype(int)
         true_plant = np.subtract(plant,self.plant_original)
@@ -314,6 +316,7 @@ class GrowSpaceEnvSpotlightMnist(gym.Env):
             self.new_branches = len(tips)  # reset for future step
 
         misc["img"] = observation
+        misc["plant_pixel"] = pixel_plant
         self.steps += 1
         return observation, float(reward), done, misc
 
