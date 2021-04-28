@@ -306,7 +306,7 @@ class GrowSpaceEnv_Control(gym.Env):
             random_start2 = ir(np.random.rand()*self.width)
             self.target = [random_start, .8*self.height]
 
-        print('random start', random_start2)
+        #print('random start', random_start2)
         self.branches = [
             PixelBranch(
                 x=random_start2,
