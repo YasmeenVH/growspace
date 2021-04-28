@@ -477,6 +477,8 @@ class GrowSpaceEnv_Control(gym.Env):
 
         # Render image of environment at current state
         observation = self.get_observation()  #image
+        plant = (observation[:,:,1]/255) # binary map of plant
+        pixel_plant = np.sum(plant)
 
         done = False  # because we don't have a terminal condition
         misc = {"tips": tips, "target": self.target, "light": self.x1_light, "light_width": self.light_width, "step": self.steps, "success": success }
@@ -494,6 +496,7 @@ class GrowSpaceEnv_Control(gym.Env):
             misc['light_move'] = self.light_move
 
         misc['img'] = observation
+        misc["plant_pixel"] = pixel_plant
 
         # (optional) additional information about plant/episode/other stuff, leave empty for now
 
