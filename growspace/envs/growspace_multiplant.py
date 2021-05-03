@@ -498,15 +498,15 @@ class GrowSpaceEnv_Fairness(gym.Env):
             self.target = [random_start+(self.light_width/2), 0.8*self.height]
 
         elif self.setting == 'hard_middle':
-            random_start = ir(np.random.uniform(low=0.05*self.width, high=0.2*self.width))
-            random_start2 = ir(np.random.uniform(low=0.8*self.width, high=0.95*self.width))
+            random_start = ir(np.random.uniform(low=0.05, high=0.2)*self.width)
+            random_start2 = ir(np.random.uniform(low=0.8, high=0.95)*self.width)
 
             self.target = [0.5*self.width, 0.8*self.height]
 
         elif self.setting == 'hard_above':
             coin_flip = np.random.randint(2, size=1)
-            random_start = ir(np.random.uniform(low=0.05*self.width, high=0.2*self.width))
-            random_start2 = ir(np.random.uniform(low=0.8*self.width, high=0.95*self.width))
+            random_start = ir(np.random.uniform(low=0.05, high=0.2)*self.width)
+            random_start2 = ir(np.random.uniform(low=0.8, high=0.95)*self.width)
             if coin_flip == 0:
                 self.target = [random_start, 0.8*self.height]
             if coin_flip == 1:
@@ -521,7 +521,7 @@ class GrowSpaceEnv_Fairness(gym.Env):
         if np.abs(random_start2-random_start) < self.light_width:
             random_start2 = random_start2 + self.light_width
         if random_start2 > 1*self.width:
-            random_start2 = 0.99*self.width
+            random_start2 = ir(0.99*self.width)
 
         self.branches = [
             PixelBranch(
