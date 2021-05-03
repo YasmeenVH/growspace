@@ -670,10 +670,10 @@ class GrowSpaceEnv_Fairness(gym.Env):
 
         else:
             new_branches = len(tips[0])+len(tips[1])-self.new_branches
-            new_b1 = len(tips[0]) - self.b1
-            new_b2 = len(tips[1]) - self.b2
-            misc['new_b1'] = new_b1
-            misc['new_b2'] = new_b2
+            self.b1 = len(tips[0]) - self.b1
+            self.b2 = len(tips[1]) - self.b2
+            misc['new_b1'] = self.b1
+            misc['new_b2'] = self.b2
             misc['new_branches'] = new_branches
             self.new_branches = len(tips[0]) + len(tips[1]) # reset for future step
             self.light_move = np.abs(self.light_move - self.x1_light)
