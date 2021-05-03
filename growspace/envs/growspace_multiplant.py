@@ -10,10 +10,12 @@ import time
 from growspace.plants.tree import PixelBranch
 from numpy.linalg import norm
 from scipy.spatial import distance
+import sys
 import itertools
 from sklearn import preprocessing
 from numba import jit
 from functools import partial
+np.set_printoptions(threshold=sys.maxsize)
 
 DEFAULT_RES = 84
 BRANCH_THICCNESS = .015
@@ -126,7 +128,7 @@ class GrowSpaceEnv_Fairness(gym.Env):
         branches_trimmed2 = self.branches2
         for i in range(len(activated_photons) - 1, 0, -1):  # number of possible scatters, check if they allow for branching with min_dist
             closest_branch = 0
-            dist = 1 *self.width
+            dist = 1 * self.width
 
             if len(self.branches) > MAX_BRANCHING:
                 branches_trimmed = sample(self.branches, MAX_BRANCHING)
@@ -266,9 +268,9 @@ class GrowSpaceEnv_Fairness(gym.Env):
                 (x2, y2) = branch.tip_point + branch.grow_direction / branch.grow_count
                 x2 = np.clip(x2, 0, self.width-1)
                 y2 = np.clip(y2 ,0, self.height -1)
-                newBranch = PixelBranch(branch.x2, ir(x2), branch.y2, ir(y2), self.width, self.height)
-                self.branches2.append(newBranch)
-                branch.child.append(newBranch)
+                newBranch2 = PixelBranch(branch.x2, ir(x2), branch.y2, ir(y2), self.width, self.height)
+                self.branches2.append(newBranch2)
+                branch.child.append(newBranch2)
                 branch.grow_count = 0
                 branch.grow_direction.fill(0)
 
@@ -488,7 +490,7 @@ class GrowSpaceEnv_Fairness(gym.Env):
             return img
 
     def reset(self):
-        self.light_width = LIGHT_WIDTH*self.width
+        self.light_width = ir(LIGHT_WIDTH*self.width)
 
         if self.setting == 'easy':
             random_start = ir(np.random.rand()*self.width)
@@ -496,15 +498,15 @@ class GrowSpaceEnv_Fairness(gym.Env):
             self.target = [random_start+(self.light_width/2), 0.8*self.height]
 
         elif self.setting == 'hard_middle':
-            random_start = np.random.uniform(low=0.05*self.width, high=0.2*self.width)
-            random_start2 = np.random.uniform(low=0.8*self.width, high=0.95*self.width)
+            random_start = ir(np.random.uniform(low=0.05*self.width, high=0.2*self.width))
+            random_start2 = ir(np.random.uniform(low=0.8*self.width, high=0.95*self.width))
 
             self.target = [0.5*self.width, 0.8*self.height]
 
         elif self.setting == 'hard_above':
             coin_flip = np.random.randint(2, size=1)
-            random_start = np.random.uniform(low=0.05*self.width, high=0.2*self.width)
-            random_start2 = np.random.uniform(low=0.8*self.width, high=0.95*self.width)
+            random_start = ir(np.random.uniform(low=0.05*self.width, high=0.2*self.width))
+            random_start2 = ir(np.random.uniform(low=0.8*self.width, high=0.95*self.width))
             if coin_flip == 0:
                 self.target = [random_start, 0.8*self.height]
             if coin_flip == 1:
