@@ -98,7 +98,8 @@ class GrowSpaceEnvSpotlightMnist(gym.Env):
 
         """
         img = self.get_observation(debug_show_scatter)
-
+        dsize = (84,84)
+        img = cv2.resize(img, dsize)
         # if self.obs_type == 'Binary':
         #     image = img.astype(np.uint8)
         #     img = image * 255
@@ -283,7 +284,7 @@ class GrowSpaceEnvSpotlightMnist(gym.Env):
 
         plant = (observation[:,:,1]/255) # binary map of plant
         pixel_plant = np.sum(plant)
-    
+
         plant[plant>0.6] =1              # filter for green
         plant = plant.astype(int)
         true_plant = np.subtract(plant,self.plant_original)
