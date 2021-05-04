@@ -180,8 +180,9 @@ class GrowSpaceEnv_Control(gym.Env):
     def distance_target(self, coords):
         # Calculate distance from each tip grown
         dist = distance.cdist(coords, [self.target],
-                              'euclidean')
-        min_dist = min(dist)
+                              'seuclidean')
+        min_dist = min(dist) #*self.width
+        #print('this is min_dist',min_dist)
 
         return min_dist
 
@@ -472,7 +473,7 @@ class GrowSpaceEnv_Control(gym.Env):
             success = 1
 
         else:
-            reward = 1 / self.distance_target(tips) /10
+            reward = 1 / self.distance_target(tips)/10
             success = 0
 
         # Render image of environment at current state
@@ -565,8 +566,9 @@ if __name__ == '__main__':
                 quit()
 
             b,t,c,f = gse.step(action)
-            print(f["new_branches"])
+            #print(f["new_branches"])
             rewards.append(t)
+            print(t)
             cv2.imshow("plant", gse.get_observation(debug_show_scatter=False))
         total = sum(rewards)
 
