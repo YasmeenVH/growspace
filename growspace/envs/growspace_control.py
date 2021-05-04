@@ -180,7 +180,7 @@ class GrowSpaceEnv_Control(gym.Env):
     def distance_target(self, coords):
         # Calculate distance from each tip grown
         dist = distance.cdist(coords, [self.target],
-                              'seuclidean')
+                              'euclidean')
         min_dist = min(dist) #*self.width
         #print('this is min_dist',min_dist)
 
