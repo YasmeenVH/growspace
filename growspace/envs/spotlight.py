@@ -68,7 +68,7 @@ class Features(IntEnum):
 class GrowSpaceEnvSpotlightMnist(gym.Env):
     metadata = {'render.modes': ['human', 'rgb_array']}  # Required, otherwise gym.Monitor disables itself.
 
-    def __init__(self, width=DEFAULT_RES, height=DEFAULT_RES, path=PATH, digit='1'):
+    def __init__(self, width=DEFAULT_RES, height=DEFAULT_RES, path=PATH, digit='curriculum'):
         self.width = width
         self.height = height
         self.seed()
@@ -76,9 +76,13 @@ class GrowSpaceEnvSpotlightMnist(gym.Env):
         self.feature_maps = np.zeros((len(Features), self.height, self.width), dtype=np.uint8)
 
         self.observation_space = gym.spaces.Box(0, 255, shape=(self.height, self.width, 3), dtype=np.uint8)
-
+        self.digit = digit
+        self.path = path
         #assert os.path.isfile(path), "path to mnist image is not valid"
-        self.shape = path + digit +'/'
+        if self.digit =='curriculum':
+            self.shape = None
+        else:
+            self.shape = path + digit +'/'
 
         #self.mnist_shape = cv2.imread(path)
 
@@ -91,6 +95,7 @@ class GrowSpaceEnvSpotlightMnist(gym.Env):
         self.new_branches = None
         self.tips_per_step = None
         self.tips = None
+        self.episode = -1
 
     def render(self, mode='human', debug_show_scatter=False):
         """
@@ -224,6 +229,33 @@ class GrowSpaceEnvSpotlightMnist(gym.Env):
         #self.mix = load_images(self.shape_1) + load_images(self.shape_7)
 
         #flat_list = [item for sublist in self.mix for item in sublist]
+        self.episode += 1
+        if self.digit == 'curriculum':
+            self.path = PATH
+
+            if self.episode <= 2000:
+                self.shape = self.path + '36' + '/'
+            if 2000 <= self.episode <=4000:
+                self.shape = self.path + '362' + '/'
+
+            if 4000 <= self.episode <= 6000:
+                self.shape = self.path + '3621' + '/'
+
+            if 6000 <= self.episode <= 8000:
+                self.shape = self.path + '36214' + '/'
+
+            if 8000 <= self.episode <= 10000:
+                self.shape = self.path + '362145' + '/'
+
+            if 10000 <= self.episode <= 12000:
+                self.shape = self.path + '3621457' + '/'
+
+            if 12000 <= self.episode <= 14000:
+                self.shape = self.path + '36214578' + '/'
+
+            if 14000 <= self.episode <= 20000:
+                self.shape = self.path + 'partymix' + '/'
+
         self.shapes = load_images(self.shape)
         self.mnist_shape = random.choice(self.shapes)
         #print(len(mnist_shapes))
@@ -251,6 +283,7 @@ class GrowSpaceEnvSpotlightMnist(gym.Env):
         plant_stem = (self.get_observation()[:, :, 1] / 255)
         plant_stem[plant_stem>0.6] =1              # filter for green
         self.plant_original = plant_stem.astype(int)
+
 
         return self.get_observation()
 
@@ -341,7 +374,8 @@ class GrowSpaceEnvSpotlightMnist(gym.Env):
 
 
 def enjoy():
-    gse = gym.make("GrowSpaceSpotlight-Mnist1-v0")
+    #gse = gym.make("GrowSpaceSpotlight-Mnist1-v0")
+    gse = GrowSpaceEnvSpotlightMnist()
 
     def key2action(key):
         if key == ord("+"):
@@ -384,7 +418,8 @@ def enjoy():
 
 
 def profile():
-    gse = gym.make("GrowSpaceSpotlight-Mnist1-v0")
+    #gse = gym.make("GrowSpaceSpotlight-Mnist1-v0")
+    gse = GrowSpaceEnvSpotlightMnist()
     gse.reset()
 
     def do_step():
