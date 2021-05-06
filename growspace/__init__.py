@@ -253,7 +253,7 @@ register(
 register(
     id=f'GrowSpaceSpotlight-MnistMix-v0',
     entry_point='growspace.envs:GrowSpaceEnvSpotlightMnist',
-    max_episode_steps=60, # number of total steps in the environment
+    max_episode_steps=70, # number of total steps in the environment
     kwargs={'digit': 'partymix',
             },
 )
@@ -261,7 +261,7 @@ register(
 register(
     id=f'GrowSpaceSpotlight-MnistCurriculum-v0',
     entry_point='growspace.envs:GrowSpaceEnvSpotlightMnist',
-    max_episode_steps=60, # number of total steps in the environment
+    max_episode_steps=70, # number of total steps in the environment
     kwargs={'digit': 'curriculum',
             },
 )
