@@ -233,28 +233,45 @@ class GrowSpaceEnvSpotlightMnist(gym.Env):
         if self.digit == 'curriculum':
             self.path = PATH
 
-            if self.episode <= 2000:
+            if self.episode < 500:
                 self.shape = self.path + '36' + '/'
-            if 2000 <= self.episode <=4000:
+                if self.episode == 1:
+                    print('check1')
+
+            if 500 <= self.episode < 1000:
                 self.shape = self.path + '362' + '/'
+                if self.episode == 500:
+                    print('check2')
 
-            if 4000 <= self.episode <= 6000:
+            if 1000 <= self.episode < 1500:
                 self.shape = self.path + '3621' + '/'
+                if self.episode == 1000:
+                    print('check3')
 
-            if 6000 <= self.episode <= 8000:
+            if 1500 <= self.episode < 2500:
                 self.shape = self.path + '36214' + '/'
+                if self.episode == 1500:
+                    print('check4')
 
-            if 8000 <= self.episode <= 10000:
+            if 2500 <= self.episode < 3500:
                 self.shape = self.path + '362145' + '/'
+                if self.episode == 2500:
+                    print('check5')
 
-            if 10000 <= self.episode <= 12000:
+            if 3500 <= self.episode < 5000:
                 self.shape = self.path + '3621457' + '/'
+                if self.episode == 3500:
+                    print('check6')
 
-            if 12000 <= self.episode <= 14000:
+            if 5000 <= self.episode < 6500:
                 self.shape = self.path + '36214578' + '/'
+                if self.episode == 5000:
+                    print('check7')
 
-            if 14000 <= self.episode <= 20000:
+            if 6500 <= self.episode < 10000:
                 self.shape = self.path + 'partymix' + '/'
+                if self.episode == 6500:
+                    print('check8')
 
         self.shapes = load_images(self.shape)
         self.mnist_shape = random.choice(self.shapes)
