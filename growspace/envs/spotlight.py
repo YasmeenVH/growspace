@@ -17,11 +17,11 @@ import growspace.plants.tree
 np.set_printoptions(threshold=sys.maxsize)
 # customizable variables by user
 
-BRANCH_THICCNESS = 0.036
+BRANCH_THICCNESS = .015 # before was 0.036 in 28 x 28
 MAX_BRANCHING = 10
-DEFAULT_RES = 28
+DEFAULT_RES = 84
 LIGHT_WIDTH = 0.25
-LIGHT_DIF = 250
+LIGHT_DIF = 200
 LIGHT_DISPLACEMENT = 0.1
 LIGHT_W_INCREMENT = 0.1
 MIN_LIGHT_WIDTH = 0.1
@@ -57,6 +57,8 @@ def load_images(folder):
     for filename in os.listdir(folder):
         img = cv2.imread(os.path.join(folder,filename))
         if img is not None:
+            dsize = (84,84) # try
+            img = cv2.resize(img, dsize) #try
             images.append(img)
     return images
 
@@ -68,7 +70,7 @@ class Features(IntEnum):
 class GrowSpaceEnvSpotlightMnist(gym.Env):
     metadata = {'render.modes': ['human', 'rgb_array']}  # Required, otherwise gym.Monitor disables itself.
 
-    def __init__(self, width=DEFAULT_RES, height=DEFAULT_RES, path=PATH, digit='curriculum'):
+    def __init__(self, width=DEFAULT_RES, height=DEFAULT_RES, path=PATH, digit='3'):
         self.width = width
         self.height = height
         self.seed()
@@ -273,6 +275,50 @@ class GrowSpaceEnvSpotlightMnist(gym.Env):
                 if self.episode == 6500:
                     print('check8')
 
+        if self.digit == 'curriculum2':
+            self.path = PATH
+
+            if self.episode < 500:
+                self.shape = self.path + '36' + '/'
+                if self.episode == 1:
+                    print('check1')
+
+            if 500 <= self.episode < 1000:
+                self.shape = self.path + '362' + '/'
+
+                if self.episode == 500:
+                    print('check2')
+
+            if 1000 <= self.episode < 1500:
+                self.shape = self.path + '3621' + '/'
+                if self.episode == 1000:
+                    print('check3')
+
+            if 1500 <= self.episode < 2500:
+                self.shape = self.path + '36214' + '/'
+                if self.episode == 1500:
+                    print('check4')
+
+            if 2500 <= self.episode < 3500:
+                self.shape = self.path + '362145' + '/'
+                if self.episode == 2500:
+                    print('check5')
+
+            if 3500 <= self.episode < 5000:
+                self.shape = self.path + '3621457' + '/'
+                if self.episode == 3500:
+                    print('check6')
+
+                if 5000 <= self.episode < 6500:
+                    self.shape = self.path + '36214578' + '/'
+                    if self.episode == 5000:
+                        print('check7')
+
+                if 6500 <= self.episode < 10000:
+                    self.shape = self.path + 'partymix' + '/'
+                    if self.episode == 6500:
+                        print('check8')
+
         self.shapes = load_images(self.shape)
         self.mnist_shape = random.choice(self.shapes)
         #print(len(mnist_shapes))
@@ -309,7 +355,7 @@ class GrowSpaceEnvSpotlightMnist(gym.Env):
             self.focus_radius = min(0.2, self.focus_radius + 0.05)
 
         if action == 1:
-            self.focus_radius = max(0.05, self.focus_radius - 0.05)
+            self.focus_radius = max(0.03, self.focus_radius - 0.05)
 
         if action == 2:
             self.focus_point[0] = max(0, self.focus_point[0] - 0.1)
@@ -346,8 +392,13 @@ class GrowSpaceEnvSpotlightMnist(gym.Env):
         mnist = mnist.astype(int)
 
         check = np.sum((true_plant, mnist), axis=0)
+        #print('this is check', check)
 
         intersection = np.sum(np.where(check < 2, 0, 1))
+
+        negative_reward = np.subtract(true_plant,mnist)
+        #punishment = np.where(negative_reward>0,)
+        #print("this is nega",negative_reward)
 
         union = np.sum(np.where(check<2,check,1))
 
