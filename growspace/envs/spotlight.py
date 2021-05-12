@@ -399,7 +399,7 @@ class GrowSpaceEnvSpotlightMnist(gym.Env):
         negative_reward = np.subtract(true_plant,mnist)
         punishment = np.where(negative_reward>0, negative_reward,0)
         #print('what is punishment', punishment)
-        bad_pixels = np.sum(punishment)*0.001
+        bad_pixels = np.sum(punishment)*0.0001
         #print('this is bad_pixels', bad_pixels)
         #print("this is nega",negative_reward)
 
