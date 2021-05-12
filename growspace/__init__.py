@@ -181,7 +181,7 @@ register(
 register(
     id=f'GrowSpaceSpotlight-Mnist2-v0',
     entry_point='growspace.envs:GrowSpaceEnvSpotlightMnist',
-    max_episode_steps=50,  # number of total steps in the environment
+    max_episode_steps=70,  # number of total steps in the environment
     kwargs={'digit': '2',
             },
 )
