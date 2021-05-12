@@ -397,13 +397,17 @@ class GrowSpaceEnvSpotlightMnist(gym.Env):
         intersection = np.sum(np.where(check < 2, 0, 1))
 
         negative_reward = np.subtract(true_plant,mnist)
-        #punishment = np.where(negative_reward>0,)
+        punishment = np.where(negative_reward>0, negative_reward,0)
+        #print('what is punishment', punishment)
+        bad_pixels = np.sum(punishment)*0.001
+        #print('this is bad_pixels', bad_pixels)
         #print("this is nega",negative_reward)
 
         union = np.sum(np.where(check<2,check,1))
 
         reward = intersection / union
-
+        #print('reqward',reward)
+        reward = reward-bad_pixels
 
         done = False  # because we don't have a terminal condition
         misc = {"tips": tips, "target": self.target, "light": None}
