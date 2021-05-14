@@ -402,10 +402,13 @@ class GrowSpaceEnvSpotlightMnist(gym.Env):
         bad_pixels = np.sum(punishment)*0.0001
         #print('this is bad_pixels', bad_pixels)
         #print("this is nega",negative_reward)
-        
+
         union = np.sum(np.where(check<2,check,1))
 
-        reward = np.log(intersection / union)
+        reward = intersection / union
+
+        reward = 1/(1+np.exp(-reward))
+
         #print('reqward',reward)
         #reward = reward-bad_pixels
 
