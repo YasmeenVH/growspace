@@ -408,7 +408,7 @@ class GrowSpaceEnvSpotlightMnist(gym.Env):
         reward = intersection / union
 
         #reward = 1/(1+np.exp(-reward))
-        reward = np.log10(reward) # this is equivalent to ln, np.log10
+        reward = np.log10(reward) *0.5# this is equivalent to ln, np.log10
 
         #print('reqward',reward)
         #reward = reward-bad_pixels
