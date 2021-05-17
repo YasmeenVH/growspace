@@ -468,12 +468,15 @@ class GrowSpaceEnv_Control(gym.Env):
         self.draw_beam()
 
         # Calculate distance to target
-        if self.distance_target(tips) <= 0.1:
-            reward = 1/0.1 /10
+        d = self.distance_target(tips)
+        #d = 1/d
+        #print('distance', d)
+        if self.distance_target(tips) <= 3.2: # before was 0.1
+            reward = 1/3.2#0.1 /10
             success = 1
 
         else:
-            reward = 1 / self.distance_target(tips)/10
+            reward = 1 / self.distance_target(tips) #/10
             success = 0
 
         # Render image of environment at current state
