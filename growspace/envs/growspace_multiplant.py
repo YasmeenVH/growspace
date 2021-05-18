@@ -53,7 +53,7 @@ class Features(IntEnum):
 
 class GrowSpaceEnv_Fairness(gym.Env):
 
-    def __init__(self, width=DEFAULT_RES, height=DEFAULT_RES, light_dif=LIGHT_DIF, obs_type = None, level=None, setting = 'easy'):
+    def __init__(self, width=DEFAULT_RES, height=DEFAULT_RES, light_dif=LIGHT_DIF, obs_type = None, level=None, setting = 'hard_above'):
         self.width = width
         self.height = height
         self.seed()
@@ -619,17 +619,17 @@ class GrowSpaceEnv_Fairness(gym.Env):
         d1 = self.distance_target(tips[0])
         d2 = self.distance_target(tips[1])
 
-        if d1 <= 0.1:
-            r1 = (1/0.1 /10) *.5
-            #reward = preprocessing.normalize(reward)
-        else:
-            r1 = (1 / d1 /10) *.5
+        if d1 <= 3.2:
+            r1 = 1/3.2
 
-        if d2 <= 0.1:
-            r2 = (1/0.1 /10) *.5
+        else:
+            r1 = 1/d1
+
+        if d2 <= 3.2:
+            r2 = 1/3.2
             #reward = preprocessing.normalize(reward)
         else:
-            r2 = (1 / d2 /10)*.5
+            r2 = 1/d2
 
         #reward = r1+r2
         if r1 < r2:
@@ -639,7 +639,7 @@ class GrowSpaceEnv_Fairness(gym.Env):
         else:
             reward = r2
 
-        if reward == 1:
+        if reward == 1/3.2:
             success = 1
         else:
             success = 0
@@ -738,7 +738,7 @@ if __name__ == '__main__':
         else:
             return None
 
-    rewards = []
+    rewards_mean = []
     while True:
         gse.reset()
         img = gse.get_observation(debug_show_scatter=False)
@@ -755,4 +755,8 @@ if __name__ == '__main__':
             cv2.imshow("plant", gse.get_observation(debug_show_scatter=False))
         total = sum(rewards)
 
+        rewards_mean.append(total)
+        av = np.mean(rewards_mean)
         print("amount of rewards:", total)
+        print('mean:', av)
+
