@@ -406,11 +406,15 @@ class GrowSpaceEnvSpotlightMnist(gym.Env):
         union = np.sum(np.where(check<2,check,1))
 
         reward = intersection / union
+        if reward > 0 :
+            reward = np.sqrt(reward)
+        else:
+            reward = 0
         #print('reward', reward)
         #reward = 1/(1+np.exp(-reward))
-        #reward = np.log10(reward) *0.5# this is equivalent to ln, np.log10
-        reward = np.tanh(reward)
-        #print('reqward',reward)
+        #reward = np.log(reward) + 1 #   this is equivalent to ln, np.log10
+        #reward = np.tanh(reward)
+        print('reqward',reward)
         #reward = reward-bad_pixels
 
         done = False  # because we don't have a terminal condition
