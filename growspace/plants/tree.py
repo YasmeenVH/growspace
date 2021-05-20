@@ -46,7 +46,7 @@ class Branch(object):
 class PixelBranch:
     def valid_coord(self, x):
         assert isinstance(x, int)
-        assert 0 <= x < self.img_side
+        assert 0 <= x <= self.img_side
         return True
 
     def __init__(self, x, x2, y, y2, img_width, img_height):
