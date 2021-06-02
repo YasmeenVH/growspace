@@ -11,15 +11,16 @@ import tqdm
 from numpy.linalg import norm
 from scipy.spatial import distance
 import random
+import torchvision
 from torchvision import datasets
 import growspace.plants.tree
 
 np.set_printoptions(threshold=sys.maxsize)
 # customizable variables by user
 
-BRANCH_THICCNESS = .015 # before was 0.036 in 28 x 28
+BRANCH_THICCNESS = .036 # before was 0.036 in 28 x 28 and .015 in 28 x 28
 MAX_BRANCHING = 10
-DEFAULT_RES = 84
+DEFAULT_RES = 28
 LIGHT_WIDTH = 0.25
 LIGHT_DIF = 200
 LIGHT_DISPLACEMENT = 0.1
@@ -62,6 +63,37 @@ def load_images(folder):
             images.append(img)
     return images
 
+def load_mnist(digit):
+    mnist_dataset = datasets.MNIST('./data', train=True, download=True)
+    if digit == 'partymix':
+        return mnist_dataset
+    if digit == 'curriculum':
+        return mnist_dataset
+    else:
+        idx = mnist_dataset.train_labels == int(digit)  # digit comes as string
+        mnist_digit= mnist_dataset.train_data[idx]
+
+        return mnist_digit
+
+# def get_all_digit(mnist_set, digit):
+#     idx = mnist_set.train_labels==int(digit) #digit comes as string
+#     mnist_growspace = mnist_set.train_data[idx]
+#     good = mnist_growspace.data.numpy()
+#     return good
+
+def sample_digit(digit_set):
+    digit_set = digit_set.data.numpy()
+    digit = np.random.randint(len(digit_set)-1)
+    im1 = np.zeros((28, 28), dtype=np.uint8)
+    im2 = np.zeros((28, 28), dtype=np.uint8)
+    im3 = np.zeros((28, 28, 3), dtype=np.uint8)
+    number = np.where(digit_set[digit] == 0, im2, 1 * 255)
+    img = np.dstack((im1,im2, number))
+    A = np.array((im3, img))
+    final_img = np.float32(np.sum(A, axis=0))
+
+    return final_img
+
 class Features(IntEnum):
     light = 0
     scatter = 1
@@ -70,7 +102,7 @@ class Features(IntEnum):
 class GrowSpaceEnvSpotlightMnist(gym.Env):
     metadata = {'render.modes': ['human', 'rgb_array']}  # Required, otherwise gym.Monitor disables itself.
 
-    def __init__(self, width=DEFAULT_RES, height=DEFAULT_RES, path=PATH, digit='3'):
+    def __init__(self, width=DEFAULT_RES, height=DEFAULT_RES, path=PATH, digit='partymix'):
         self.width = width
         self.height = height
         self.seed()
@@ -80,12 +112,17 @@ class GrowSpaceEnvSpotlightMnist(gym.Env):
         self.observation_space = gym.spaces.Box(0, 255, shape=(self.height, self.width, 3), dtype=np.uint8)
         self.digit = digit
         self.path = path
-        self.mnist_dataset = datasets.MNIST('./data', train=True, download=True)
+        self.mnist_digit = load_mnist(self.digit)
         #assert os.path.isfile(path), "path to mnist image is not valid"
-        if self.digit =='curriculum':
-            self.shape = None
-        else:
-            self.shape = path + digit +'/'
+        #
+        # if self.digit == 'partymix':
+        #     pass
+        # if self.digit =='curriculum':
+        #     self.shape = None
+        # else:
+        #     self.mnist_digit = get_all_digit(self.mnist_dataset,self.digit)
+
+            #self.shape = path + digit +'/'
 
         #self.mnist_shape = cv2.imread(path)
 
@@ -309,9 +346,9 @@ class GrowSpaceEnvSpotlightMnist(gym.Env):
                     self.shape = self.path + 'partymix' + '/'
                     if self.episode == 6500:
                         print('check8')
-
-        self.shapes = load_images(self.shape)
-        self.mnist_shape = random.choice(self.shapes)
+        self.mnist_shape = sample_digit(self.mnist_digit)
+        #self.shapes = load_images(self.shape)
+        #self.mnist_shape = random.choice(self.shapes)
         #print(len(mnist_shapes))
         self.focus_point = np.array([random_start / self.width, FIRST_BRANCH_HEIGHT / self.height])
         self.focus_radius = 0.1
