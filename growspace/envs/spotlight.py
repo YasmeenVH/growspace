@@ -11,7 +11,7 @@ import tqdm
 from numpy.linalg import norm
 from scipy.spatial import distance
 import random
-
+from torchvision import datasets
 import growspace.plants.tree
 
 np.set_printoptions(threshold=sys.maxsize)
@@ -80,6 +80,7 @@ class GrowSpaceEnvSpotlightMnist(gym.Env):
         self.observation_space = gym.spaces.Box(0, 255, shape=(self.height, self.width, 3), dtype=np.uint8)
         self.digit = digit
         self.path = path
+        self.mnist_dataset = datasets.MNIST('./data', train=True, download=True)
         #assert os.path.isfile(path), "path to mnist image is not valid"
         if self.digit =='curriculum':
             self.shape = None
@@ -138,7 +139,6 @@ class GrowSpaceEnvSpotlightMnist(gym.Env):
                 branches_trimmed = self.branches
 
             for branch in branches_trimmed:
-                # if self.feature_maps[Features.light][branch.tip_point[::-1]]: # this was alsready done in light scatter func
                 photon_ptx = np.flip(activated_photons[i])  # flip was necessary bc coordinate systems are inverted -
                 tip_to_scatter = norm(photon_ptx - np.array(branch.tip_point))  # one is np.array, one is tuple
                 if tip_to_scatter < dist:
@@ -185,11 +185,6 @@ class GrowSpaceEnvSpotlightMnist(gym.Env):
         self.tips = branch_coords
         return branch_coords
 
-    # def distance_target(self, coords):
-    #     dist = distance.cdist(coords, [self.target], "euclidean")
-    #     min_dist = min(dist)
-    #     return min_dist
-
     def get_observation(self, debug_show_scatter=False):
         img = np.zeros((self.height, self.width, 3), dtype=np.uint8)
 
@@ -211,9 +206,8 @@ class GrowSpaceEnvSpotlightMnist(gym.Env):
 
         img = cv2.flip(img,0)
         z = np.where(self.mnist_shape < 255, img, 150)
-        # flip image, because plant grows from the bottom, not the top
-        #img = cv2.flip(z, 0)
-        return z #img
+
+        return z
 
     def reset(self):
         random_start = random.randint(self.width - (self.width*3/4), self.width - 1 - (self.width*1/4))
@@ -227,10 +221,7 @@ class GrowSpaceEnvSpotlightMnist(gym.Env):
                 img_height=self.height,
             )
         ]
-        #self.target = np.array([np.random.randint(0, self.width), ir(0.8 * self.height)])
-        #self.mix = load_images(self.shape_1) + load_images(self.shape_7)
 
-        #flat_list = [item for sublist in self.mix for item in sublist]
         self.episode += 1
         if self.digit == 'curriculum':
             self.path = PATH
@@ -406,19 +397,11 @@ class GrowSpaceEnvSpotlightMnist(gym.Env):
         union = np.sum(np.where(check<2,check,1))
 
         reward = intersection / union
-        # if reward > 0 :
-        #     reward = np.sqrt(reward)
-        # else:
-        #     reward = 0
-        #
-        #
+
         reward = np.log(reward+0.5)
-        #print('reward', reward)
-        #reward = 1/(1+np.exp(-reward))
-        #reward = np.log(reward) + 1 #   this is equivalent to ln, np.log10
-        #reward = np.tanh(reward)
+
         print('reqward',reward)
-        #reward = reward-bad_pixels
+
 
         done = False  # because we don't have a terminal condition
         misc = {"tips": tips, "target": self.target, "light": None}
