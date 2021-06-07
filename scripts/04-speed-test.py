@@ -6,8 +6,12 @@ import growspace
 import gym
 import matplotlib.pyplot as plt
 import numpy as np
+from scripts.control_old import GrowSpaceEnv_Control
 
-env = gym.make("GrowSpaceEnv-Images-v0")
+env1 = gym.make("GrowSpaceEnv-Control-v0")
+env2 = GrowSpaceEnv_Control()
+
+#env = gym.make("GrowSpaceEnv-Images-v0")
 
 timings = {"steps": [], "rendering": [], "resets": []}
 
