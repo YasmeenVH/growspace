@@ -29,17 +29,6 @@ MIN_LIGHT_WIDTH = 0.1
 MAX_LIGHT_WIDTH = 0.5
 
 BRANCH_LENGTH = (1 / 9) * DEFAULT_RES
-PATH = os.path.dirname(__file__) + "/../../scripts/png/mnist_data/"
-
-"""digit is the mnist number we want to pass
-enter as a string. for mix combos enter as : 1_7_mix
-refer to directory names
-"""
-
-# import config
-# for k in list(locals()):
-#     if f"^" + k in config.tensorboard.run.config:
-#         locals()[k] = config.tensorboard.run.config[f"^" + k]
 
 def to_int(v):
     return int(round(v))
@@ -53,16 +42,6 @@ FIRST_BRANCH_HEIGHT = ir(0.1 * DEFAULT_RES)
 def unpack(w):
     return map(list, zip(*enumerate(w)))
 
-def load_images(folder):
-    images = []
-    for filename in os.listdir(folder):
-        img = cv2.imread(os.path.join(folder,filename))
-        if img is not None:
-            dsize = (84,84) # try
-            img = cv2.resize(img, dsize) #try
-            images.append(img)
-    return images
-
 def load_mnist(digit):
     mnist_dataset = datasets.MNIST('./data', train=True, download=True)
     if digit == 'partymix':
@@ -70,16 +49,13 @@ def load_mnist(digit):
     if digit == 'curriculum':
         return mnist_dataset
     else:
-        idx = mnist_dataset.train_labels == int(digit)  # digit comes as string
-        mnist_digit= mnist_dataset.train_data[idx]
+        return idx_digit(mnist_dataset,digit)
 
-        return mnist_digit
+def idx_digit(mnist_dataset, digit):
+    idx = mnist_dataset.train_labels == int(digit) #and mnist_dataset.train_labels  == 6  # digit comes as string
+    mnist_digit = mnist_dataset.train_data[idx]
 
-# def get_all_digit(mnist_set, digit):
-#     idx = mnist_set.train_labels==int(digit) #digit comes as string
-#     mnist_growspace = mnist_set.train_data[idx]
-#     good = mnist_growspace.data.numpy()
-#     return good
+    return mnist_digit
 
 def sample_digit(digit_set):
     digit_set = digit_set.data.numpy()
@@ -94,6 +70,104 @@ def sample_digit(digit_set):
 
     return final_img
 
+def stage_curriculum(episode, mnist_dataset):
+    _0 = idx_digit(mnist_dataset, 0)
+    _1 = idx_digit(mnist_dataset, 1)
+    _2 = idx_digit(mnist_dataset, 2)
+    _3 = idx_digit(mnist_dataset, 3)
+    _4 = idx_digit(mnist_dataset, 4)
+    _5 = idx_digit(mnist_dataset, 5)
+    _6 = idx_digit(mnist_dataset, 6)
+    _7 = idx_digit(mnist_dataset, 7)
+    _8 = idx_digit(mnist_dataset, 8)
+    _9 = idx_digit(mnist_dataset, 9)
+    curriculum = []
+    if episode < 500:
+        curriculum.append(_3)
+        curriculum.append(_6)
+
+        if episode == 1:
+            print('check1')
+
+    if 500 <= episode < 1000:
+        curriculum.append(_3)
+        curriculum.append(_6)
+        curriculum.append(_2)
+        if episode == 500:
+             print('check2')
+
+    if 1000 <= episode < 1500:
+        curriculum.append(_3)
+        curriculum.append(_6)
+        curriculum.append(_2)
+        curriculum.append(_1)
+
+        if episode == 1000:
+            print('check3')
+
+    if 1500 <= episode < 2500:
+        curriculum.append(_3)
+        curriculum.append(_6)
+        curriculum.append(_2)
+        curriculum.append(_1)
+        curriculum.append(_4)
+
+        if self.episode == 1500:
+            print('check4')
+
+    if 2500 <= episode < 3500:
+        curriculum.append(_3)
+        curriculum.append(_6)
+        curriculum.append(_2)
+        curriculum.append(_1)
+        curriculum.append(_4)
+        curriculum.append(_5)
+
+        if self.episode == 2500:
+            print('check5')
+
+    if 3500 <= episode < 5000:
+        curriculum.append(_3)
+        curriculum.append(_6)
+        curriculum.append(_2)
+        curriculum.append(_1)
+        curriculum.append(_4)
+        curriculum.append(_5)
+        curriculum.append(_7)
+
+        if self.episode == 3500:
+            print('check6')
+
+    if 5000 <= episode < 6500:
+        curriculum.append(_3)
+        curriculum.append(_6)
+        curriculum.append(_2)
+        curriculum.append(_1)
+        curriculum.append(_4)
+        curriculum.append(_5)
+        curriculum.append(_7)
+        curriculum.append(_8)
+
+        if episode == 5000:
+            print('check7')
+
+    if 6500 <= episode < 10000:
+        curriculum.append(_3)
+        curriculum.append(_6)
+        curriculum.append(_2)
+        curriculum.append(_1)
+        curriculum.append(_4)
+        curriculum.append(_5)
+        curriculum.append(_7)
+        curriculum.append(_8)
+        curriculum.append(_0)
+        curriculum.append(_9)
+
+    idx = len(curriculum)
+    id = np.random.randint(idx)
+    x = sample_digit(curriculum[id])
+    return x
+
 class Features(IntEnum):
     light = 0
     scatter = 1
@@ -102,7 +176,7 @@ class Features(IntEnum):
 class GrowSpaceEnvSpotlightMnist(gym.Env):
     metadata = {'render.modes': ['human', 'rgb_array']}  # Required, otherwise gym.Monitor disables itself.
 
-    def __init__(self, width=DEFAULT_RES, height=DEFAULT_RES, path=PATH, digit='partymix'):
+    def __init__(self, width=DEFAULT_RES, height=DEFAULT_RES, digit='curriculum'):
         self.width = width
         self.height = height
         self.seed()
@@ -111,20 +185,7 @@ class GrowSpaceEnvSpotlightMnist(gym.Env):
 
         self.observation_space = gym.spaces.Box(0, 255, shape=(self.height, self.width, 3), dtype=np.uint8)
         self.digit = digit
-        self.path = path
         self.mnist_digit = load_mnist(self.digit)
-        #assert os.path.isfile(path), "path to mnist image is not valid"
-        #
-        # if self.digit == 'partymix':
-        #     pass
-        # if self.digit =='curriculum':
-        #     self.shape = None
-        # else:
-        #     self.mnist_digit = get_all_digit(self.mnist_dataset,self.digit)
-
-            #self.shape = path + digit +'/'
-
-        #self.mnist_shape = cv2.imread(path)
 
         self.focus_point = None
         self.focus_radius = None
@@ -261,105 +322,20 @@ class GrowSpaceEnvSpotlightMnist(gym.Env):
 
         self.episode += 1
         if self.digit == 'curriculum':
-            self.path = PATH
+            self.mnist_shape = stage_curriculum(self.episode,self.mnist_digit)
 
-            if self.episode < 500:
-                self.shape = self.path + '36' + '/'
-                if self.episode == 1:
-                    print('check1')
+        else:
+            self.mnist_shape = sample_digit(self.mnist_digit)
 
-            if 500 <= self.episode < 1000:
-                self.shape = self.path + '362' + '/'
-                if self.episode == 500:
-                    print('check2')
-
-            if 1000 <= self.episode < 1500:
-                self.shape = self.path + '3621' + '/'
-                if self.episode == 1000:
-                    print('check3')
-
-            if 1500 <= self.episode < 2500:
-                self.shape = self.path + '36214' + '/'
-                if self.episode == 1500:
-                    print('check4')
-
-            if 2500 <= self.episode < 3500:
-                self.shape = self.path + '362145' + '/'
-                if self.episode == 2500:
-                    print('check5')
-
-            if 3500 <= self.episode < 5000:
-                self.shape = self.path + '3621457' + '/'
-                if self.episode == 3500:
-                    print('check6')
-
-            if 5000 <= self.episode < 6500:
-                self.shape = self.path + '36214578' + '/'
-                if self.episode == 5000:
-                    print('check7')
-
-            if 6500 <= self.episode < 10000:
-                self.shape = self.path + 'partymix' + '/'
-                if self.episode == 6500:
-                    print('check8')
-
-        if self.digit == 'curriculum2':
-            self.path = PATH
-
-            if self.episode < 500:
-                self.shape = self.path + '36' + '/'
-                if self.episode == 1:
-                    print('check1')
-
-            if 500 <= self.episode < 1000:
-                self.shape = self.path + '362' + '/'
-
-                if self.episode == 500:
-                    print('check2')
-
-            if 1000 <= self.episode < 1500:
-                self.shape = self.path + '3621' + '/'
-                if self.episode == 1000:
-                    print('check3')
-
-            if 1500 <= self.episode < 2500:
-                self.shape = self.path + '36214' + '/'
-                if self.episode == 1500:
-                    print('check4')
-
-            if 2500 <= self.episode < 3500:
-                self.shape = self.path + '362145' + '/'
-                if self.episode == 2500:
-                    print('check5')
-
-            if 3500 <= self.episode < 5000:
-                self.shape = self.path + '3621457' + '/'
-                if self.episode == 3500:
-                    print('check6')
-
-                if 5000 <= self.episode < 6500:
-                    self.shape = self.path + '36214578' + '/'
-                    if self.episode == 5000:
-                        print('check7')
-
-                if 6500 <= self.episode < 10000:
-                    self.shape = self.path + 'partymix' + '/'
-                    if self.episode == 6500:
-                        print('check8')
-        self.mnist_shape = sample_digit(self.mnist_digit)
-        #self.shapes = load_images(self.shape)
-        #self.mnist_shape = random.choice(self.shapes)
-        #print(len(mnist_shapes))
         self.focus_point = np.array([random_start / self.width, FIRST_BRANCH_HEIGHT / self.height])
         self.focus_radius = 0.1
 
         x_scatter = np.random.randint(0, self.width, LIGHT_DIF)
         y_scatter = np.random.randint(0, self.height, LIGHT_DIF)
         self.feature_maps[Features.scatter].fill(False)
-        #print('what is this',self.feature_maps)
 
         self.feature_maps[Features.scatter][y_scatter, x_scatter] = True
-        #print('what is this again', self.feature_maps[0])
+
         self.steps = 0
         self.new_branches = 0
         self.tips_per_step = 0
@@ -368,7 +344,7 @@ class GrowSpaceEnvSpotlightMnist(gym.Env):
         ]
 
         self.draw_spotlight()
-        #print('showme this',self.feature_maps)
+
         self.mnist_pixels = (self.get_observation()[:, :, 2] / 150)  # binary map of mnist shape
 
         plant_stem = (self.get_observation()[:, :, 1] / 255)
@@ -420,22 +396,11 @@ class GrowSpaceEnvSpotlightMnist(gym.Env):
         mnist = mnist.astype(int)
 
         check = np.sum((true_plant, mnist), axis=0)
-        #print('this is check', check)
-
         intersection = np.sum(np.where(check < 2, 0, 1))
-
-        negative_reward = np.subtract(true_plant,mnist)
-        punishment = np.where(negative_reward>0, negative_reward,0)
-        #print('what is punishment', punishment)
-        bad_pixels = np.sum(punishment)*0.0001
-        #print('this is bad_pixels', bad_pixels)
-        #print("this is nega",negative_reward)
 
         union = np.sum(np.where(check<2,check,1))
 
         reward = intersection / union
-
-        reward = np.log(reward+0.5)
 
         print('reqward',reward)
 
