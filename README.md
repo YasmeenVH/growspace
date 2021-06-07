@@ -101,12 +101,14 @@ Find both plants and grow them towards the target. The objective is to maintain 
 env = gym.make('GrowSpaceEnv-Fairness-v0')
 ```
 #### Multi-objective 
-Under Consruction
-
-
+```python
+env = gym.make('GrowSpaceSpotlight-MnistMix-v0')
+```
 
 ## Training
-Repository for testing PPO baseline is found [here](https://github.com/YasmeenVH/growspaceenv_baselines/tree/master/a2c_ppo_acktr)
+- Repository for testing PPO and A@C baselines is found [here](https://github.com/YasmeenVH/growspaceenv_baselines/tree/master/a2c_ppo_acktr)
+- Repository for testing Rainbow baseline is found [here](https://github.com/manuel-delverme/rainbow_growspace)
+
 ``` python
 # PyTorch
 conda install pytorch torchvision -c soumith
