@@ -218,7 +218,7 @@ class GrowSpaceEnv_Control(gym.Env):
         dist = distance.cdist(coords, [self.target],
                               'euclidean')
         min_dist = min(dist)
-
+        print('this is min_dist', min_dist)
         return min_dist
 
     def get_observation(self, debug_show_scatter=False):
@@ -588,7 +588,8 @@ if __name__ == '__main__':
                 quit()
 
             b,t,c,f = gse.step(action)
-            print(f["new_branches"])
+            #print(f["new_branches"])
+            print(t)
             rewards.append(t)
             cv2.imshow("plant", gse.get_observation(debug_show_scatter=False))
         total = sum(rewards)
