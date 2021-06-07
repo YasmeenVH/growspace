@@ -24,13 +24,6 @@ LIGHT_DISPLACEMENT = .1
 LIGHT_W_INCREMENT = .1
 MIN_LIGHT_WIDTH = .1
 MAX_LIGHT_WIDTH = 1
-"""
-import config
-for k in list(locals()):
-    if f"^" + k in config.tensorboard.run.config:
-        locals()[k] = config.tensorboard.run.config[f"^" + k]
-"""
-
 
 def to_int(v):
     return int(round(v))
@@ -53,12 +46,12 @@ class Features(IntEnum):
     scatter = 1
 
 class GrowSpaceEnv_Control(gym.Env):
-    def __init__(self, width=DEFAULT_RES, height=DEFAULT_RES, light_dif=LIGHT_DIF, obs_type = None, level = None, setting = 'easy'):
-        self.width = width  # do we keep?
-        self.height = height  # do we keep?
+    def __init__(self, width=DEFAULT_RES, height=DEFAULT_RES, light_dif=LIGHT_DIF, obs_type = None, level = 'second', setting = 'easy'):
+        self.width = width
+        self.height = height
         self.seed()
         self.light_dif = light_dif
-        self.action_space = gym.spaces.Discrete(5)  # L, R, keep of light paddle
+        self.action_space = gym.spaces.Discrete(5)
         self.obs_type = obs_type
         if self.obs_type == None:
             self.observation_space = gym.spaces.Box(
@@ -83,10 +76,8 @@ class GrowSpaceEnv_Control(gym.Env):
 
     def light_scatter(self):
         # select scattering with respect to position of the light
-
         filter_ = np.logical_and(self.feature_maps[Features.light], self.feature_maps[Features.scatter])
         return np.argwhere(filter_)
-
 
     def light_move_R(self):
         if np.around(self.x1_light + self.light_width,2) <= self.width - LIGHT_DISPLACEMENT*self.width:  # limit of coordinates
@@ -94,12 +85,11 @@ class GrowSpaceEnv_Control(gym.Env):
         else:
             self.x1_light = self.width - self.light_width
 
-
     def light_move_L(self):
         if np.around(self.x1_light,2) >= LIGHT_DISPLACEMENT*self.width:  # limit of coordinates
             self.x1_light -= LIGHT_DISPLACEMENT*self.width
         else:
-            self.x1_light = 0  # move by .1 leftdd
+            self.x1_light = 0  # move by .1
 
     def light_decrease(self):
         if np.around(self.light_width,1) <= MIN_LIGHT_WIDTH*self.width:
@@ -181,8 +171,7 @@ class GrowSpaceEnv_Control(gym.Env):
         # Calculate distance from each tip grown
         dist = distance.cdist(coords, [self.target],
                               'euclidean')
-        min_dist = min(dist) #*self.width
-        #print('this is min_dist',min_dist)
+        min_dist = min(dist)
 
         return min_dist
 
@@ -236,7 +225,7 @@ class GrowSpaceEnv_Control(gym.Env):
             light_target_binary = np.where(light_target< 2, light_target, 1)
             final_img = np.dstack((light, light_tree_binary, light_target_binary))
             final_img = cv2.flip(final_img, 0)
-            #print("dimensions of final shape", np.shape(final_img))
+
             return final_img
 
 
@@ -270,8 +259,8 @@ class GrowSpaceEnv_Control(gym.Env):
                 cv2.line(img, pt1=branch.p, pt2=branch.tip_point, color=(0, 255, 0), thickness=thiccness)
 
 
-            x = ir(self.target[0]) #* self.width)
-            y = ir(self.target[1]) #* self.height)
+            x = ir(self.target[0])
+            y = ir(self.target[1])
             cv2.circle(
                 img,
                 center=(x, y),
@@ -281,7 +270,6 @@ class GrowSpaceEnv_Control(gym.Env):
 
             img = cv2.flip(img, 0)
 
-            #print("dimensions of final shape", np.shape(img))
             return img
 
     def reset(self):
@@ -307,7 +295,6 @@ class GrowSpaceEnv_Control(gym.Env):
             random_start2 = ir(np.random.rand()*self.width)
             self.target = [random_start, .8*self.height]
 
-        #print('random start', random_start2)
         self.branches = [
             PixelBranch(
                 x=random_start2,
@@ -331,22 +318,22 @@ class GrowSpaceEnv_Control(gym.Env):
             else:
                 start_light = ir(np.random.rand()*self.width)
 
-        if start_light > ir(self.width - self.light_width/2): #.87:
-            #self.x1_light = .75
+        if start_light > ir(self.width - self.light_width/2):
             start_light = ir(self.width - self.light_width /2)
             self.x1_light = start_light - (self.light_width / 2)
+
         elif start_light < ir(self.light_width):
-            #self.x1_light = 0
             start_light = ir(self.light_width/2)
             self.x1_light = start_light - (self.light_width / 2)
+
         else:
             self.x1_light = start_light - (self.light_width / 2)
 
         self.x2_light = self.x1_light + self.light_width
 
         self.light_coords = [self.x1_light, self.x2_light]
-        y_scatter = np.random.randint(0,self.width, self.light_dif) #np.random.uniform(0, 1, self.light_dif)
-        x_scatter = np.random.randint(FIRST_BRANCH_HEIGHT, self.height, self.light_dif) #np.random.uniform(FIRST_BRANCH_HEIGHT, 1, self.light_dif)
+        y_scatter = np.random.randint(0,self.width, self.light_dif)
+        x_scatter = np.random.randint(FIRST_BRANCH_HEIGHT, self.height, self.light_dif)
         self.feature_maps[Features.scatter].fill(False)
         self.feature_maps[Features.scatter][x_scatter, y_scatter] = True
         self.steps = 0
@@ -382,101 +369,18 @@ class GrowSpaceEnv_Control(gym.Env):
 
 
         pts = self.light_scatter()
-        #     if len(convex_tips) >= 2:
-        #         #print('check')
-        #         hull = ConvexHull(convex_tips)
-        #         #print('check2')
-        #         #print('what is this:',convex_tips[hull.vertices,0])
-        #        # print('what is this8:', convex_tips[hull.vertices, 1])
-        #         xxs = convex_tips[hull.vertices, 0]  # x coords for convex hull around tips
-        #         yys = convex_tips[hull.vertices, 1]  # y coords for convex hull around tips
-        #         x_max_idx = np.where(xxs == np.amax(xxs))  # idx where most right tip is
-        #         x_min_idx = np.where(xxs == np.amin(xxs))  # idx where most left tip is
-        #         y_max_idx = np.where(yys == np.amax(yys))  # idx highest tip
-        #         #print(x_max_idx[0], 'this is the idx')
-        #         #x_min_idx = np.where(min(xxs))
-        #         y_max = xxs[y_max_idx]
-        #         #print(xs,'this is xs')
-        #
-        #         if self.x1_light < xxs[x_min_idx] < self.x2_light:  # if within the horizontal beam
-        #
-        #             if self.x1_light < xxs[x_max_idx] < self.x2_light:
-        #
-        #                 # full convex is in within the beam
-        #                 if yys[x_min_idx] < yys[x_max_idx]:
-        #                     if xxs[x_min_idx] < xxs[x_max_idx]:
-        #                         filter1 = np.logical_and(xs >= xxs[x_min_idx], xs <= xxs[x_max_idx])
-        #                         filter2 = np.logical_and(ys >= 0, ys <= yys[x_min_idx])
-        #                     else:
-        #                         filter1 = np.logical_and(xs >= xxs[x_max_idx], xs <= xxs[x_min_idx])
-        #                         filter2 = np.logical_and(ys >= 0, ys <= yys[x_max_idx])
-        #
-        #             # convex is on right side and in between beam
-        #             filter1 = np.logical_and(xs >= xxs[x_min_idx], xs <= self.x2_light)
-        #             filter2 = np.logical_and(ys <= yys[x_min_idx], ys >= 0)
-        #
-        #             # Filtering for values that are not shaded
-        #             idx = [i for i in range(len(filter1)) if (filter1[i] == False) and (filter2[i] == False)]
-        #             xs = [xs[i] for i in idx]
-        #             ys = [ys[i] for i in idx]
-        #
-        #         elif self.x1_light < xxs[x_max_idx] < self.x2_light:
-        #
-        #             # convex is on left side and in between beam
-        #             filter1 = np.logical_and(xs <= xxs[x_max_idx], xs >= self.x1_light)
-        #             filter2 = np.logical_and(ys >= 0,ys <= yys[x_max_idx])
-        #
-        #             # Filtering for values that are not shaded
-        #             idx = [i for i in range(len(filter1)) if (filter1[i] == False) and (filter2[i] == False)]
-        #             xs = [xs[i] for i in idx]
-        #             ys = [ys[i] for i in idx]
-        #
-        #         elif xxs[x_min_idx] < self.x1_light < self.x2_light < xxs[x_max_idx]:
-        #             # width of light is covering convex with no exposed edges
-        #             intersection_1 = []
-        #             intersection_2 = []
-        #
-        #             for i in range(len(xxs)):
-        #                 # find intersecting vertex with convex
-        #                 if xxs[i+1]< self.x1_light < xxs[i]:
-        #                     intersection_1.append(xxs[i], xxs[i+1])
-        #                     intersection_1.append(yys[i], yys[i+1])
-        #
-        #                 if xxs[i+1] < self.x2_light < xxs[i]:
-        #                     intersection_2.append(xxs[i], xxs[i+1])
-        #                     intersection_2.append(yys[i], yys[i+1])
-        #                     #print('what is intersection2',intersection_2)
-        #             y1 = intersection_(intersection_1,self.x1_light)
-        #             y2 = intersection_(intersection_2,self.x2_light)
-        #             y_limit = min(y1,y2)
-        #             filter1 = np.logical_and(xs <= self.x1_light, xs >= self.x2_light)
-        #             filter2 = np.logical_and(ys >= 0, ys <= y_limit)
-        #
-        #             idx = [i for i in range(len(filter1)) if (filter1[i] == False) and (filter2[i] == False)]
-        #             #print("what is idx", idx)
-        #             xs = [xs[i] for i in idx]
-        #             ys = [ys[i] for i in idx]
-        #
-        #         else:
-        #             pass #this  is when beam is not covering plants
-        # except:
-        #     pass
-
-
 
         tips = self.tree_grow(pts, .01 * self.width, .15 * self.height)
         self.draw_beam()
 
         # Calculate distance to target
-        d = self.distance_target(tips)
-        #d = 1/d
-        #print('distance', d)
+
         if self.distance_target(tips) <= 3.2: # before was 0.1
-            reward = 1/3.2#0.1 /10
+            reward = 1/3.2 #0.1 /10
             success = 1
 
         else:
-            reward = 1 / self.distance_target(tips) #/10
+            reward = 1 / self.distance_target(tips) #adsss/10
             success = 0
 
         # Render image of environment at current state
@@ -557,6 +461,7 @@ if __name__ == '__main__':
         else:
             return None
     rewards = []
+    rewards_mean = []
     while True:
         gse.reset()
         img = gse.get_observation(debug_show_scatter=False)
@@ -571,8 +476,12 @@ if __name__ == '__main__':
             b,t,c,f = gse.step(action)
             #print(f["new_branches"])
             rewards.append(t)
-            print(t)
+            #print(t)
             cv2.imshow("plant", gse.get_observation(debug_show_scatter=False))
         total = sum(rewards)
 
+        rewards_mean.append(total)
+        av = np.mean(rewards_mean)
+        print("amount of rewards:", total)
+        print('mean:', av)
         print("amount of rewards:", total)

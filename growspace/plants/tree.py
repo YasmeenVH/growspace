@@ -37,12 +37,6 @@ class Branch(object):
 
         return (x1, y1), (x2, y2)
 
-    # def draw_branch(self):
-    #     plt.ylim(0, 100)
-    #     plt.xlim(0, 100)
-    #     plt.plot([self.x,self.x2],[self.y,self.y2], linewidth=np.sqrt(self.width), color='green')
-
-
 class PixelBranch:
     def valid_coord(self, x):
         assert isinstance(x, int)
