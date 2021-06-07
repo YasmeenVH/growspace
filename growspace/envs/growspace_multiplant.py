@@ -69,9 +69,7 @@ class GrowSpaceEnv_Fairness(gym.Env):
         self.setting = setting
         self.__initialized = False
         self.feature_maps = np.zeros((len(Features), self.height, self.width), dtype=np.uint8)
-        # note: I moved the code for the first branch into the reset function,
-        # because when you start an environment for the first time,
-        # you're supposed to call "reset()" first before doing anything else
+
 
     def seed(self, seed=None):
         return [np.random.seed(seed)]
@@ -231,7 +229,7 @@ class GrowSpaceEnv_Fairness(gym.Env):
         # Calculate distance from each tip grown
         dist = distance.cdist(coords, [self.target],
                               'euclidean')
-        #dist = norm([coords, self.target])
+
         # Get smallest distance to target
         min_dist = min(dist)
         #print(min_dist)
@@ -562,7 +560,7 @@ if __name__ == '__main__':
                 quit()
 
             b,t,c,f = gse.step(action)
-    
+
             rewards.append(t)
             cv2.imshow("plant", gse.get_observation(debug_show_scatter=False))
         total = sum(rewards)
