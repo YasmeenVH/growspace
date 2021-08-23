@@ -1,4 +1,4 @@
-# Grow Space
+# GrowSpace
 The goal of this project is to model plant branching with respect to light. The project presents an environment with a light source, a target and a plant growing.The environment allows for the light to move on highest edge of the environment along the x-axis in order to maximize plant growth and guide the plant towards the desired target.
 
 ![alt text](https://github.com/YasmeenVH/growspace/blob/master/scripts/GrowSpaceEnv-HierarchyHard-v0-210218-163806.gif)
