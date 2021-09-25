@@ -1,3 +1,5 @@
+"""Growing plant with 1D ray in a control scenario."""
+
 from random import sample
 import cv2
 import gym

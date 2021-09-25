@@ -1,8 +1,10 @@
+"""Growing plant with 2D spotlight in a control scenario."""
+
 import cv2
 
-from growspace.envs import GrowSpaceEnv_Control
+from growspace.envs import GrowSpaceEnv
 
-gse = GrowSpaceEnv_Control()
+gse = GrowSpaceEnv()
 
 
 def key2action(key):
