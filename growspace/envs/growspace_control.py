@@ -1,14 +1,15 @@
+import sys
+from enum import IntEnum
 from random import sample
 
 import cv2
 import gym
 import numpy as np
 from numpy.linalg import norm
-from growspace.plants.tree import PixelBranch
 from scipy.spatial import distance
-from scipy.spatial import ConvexHull, convex_hull_plot_2d
-import sys
-from enum import IntEnum
+
+from growspace.plants.tree import PixelBranch
+
 np.set_printoptions(threshold=sys.maxsize)
 
 
@@ -443,7 +444,6 @@ class GrowSpaceEnv_Control(gym.Env):
 
 
 if __name__ == '__main__':
-    import time
 
     gse = GrowSpaceEnv_Control()
 

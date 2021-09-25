@@ -1,8 +1,8 @@
 import cv2
 
-from growspace.envs import GrowSpaceEnv
+from growspace.envs import GrowSpaceEnv_Control
 
-gse = GrowSpaceEnv()
+gse = GrowSpaceEnv_Control()
 
 
 def key2action(key):

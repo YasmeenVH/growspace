@@ -1,3 +1,4 @@
+import sys
 from enum import Enum
 from enum import IntEnum
 from random import sample
@@ -6,15 +7,10 @@ import cv2
 import gym
 import numpy as np
 from numpy.linalg import norm
-import time
-from growspace.plants.tree import PixelBranch
-from numpy.linalg import norm
 from scipy.spatial import distance
-import sys
-import itertools
-from sklearn import preprocessing
-from numba import jit
-from functools import partial
+
+from growspace.plants.tree import PixelBranch
+
 np.set_printoptions(threshold=sys.maxsize)
 
 DEFAULT_RES = 84
@@ -529,7 +525,6 @@ class GrowSpaceEnv_Fairness(gym.Env):
             thickness=-1)
 
 if __name__ == '__main__':
-    import time
 
     gse = GrowSpaceEnv_Fairness()
 

@@ -16,9 +16,9 @@ from torchvision import datasets
 import growspace.plants.tree
 
 np.set_printoptions(threshold=sys.maxsize)
-# customizable variables by user
 
-BRANCH_THICCNESS = .036 # before was 0.036 in 28 x 28 and .015 in 28 x 28
+# customizable variables by user
+BRANCH_THICCNESS = 0.036  # before was 0.036 in 28 x 28 and .015 in 28 x 28
 MAX_BRANCHING = 10
 DEFAULT_RES = 28
 LIGHT_WIDTH = 0.25
