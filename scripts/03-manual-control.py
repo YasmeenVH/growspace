@@ -20,7 +20,7 @@ def key2action(key):
 
 while True:
     gse.reset()
-    img = gse.get_observation(debug_show_scatter=True)
+    img = gse.get_observation(debug_show_scatter=False)
     cv2.imshow("plant", img)
 
     for _ in range(10):
