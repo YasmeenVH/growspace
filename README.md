@@ -1,4 +1,4 @@
-# Grow Space
+# GrowSpace
 The goal of this project is to model plant branching with respect to light. The project presents an environment with a light source, a target and a plant growing.The environment allows for the light to move on highest edge of the environment along the x-axis in order to maximize plant growth and guide the plant towards the desired target.
 
 ![alt text](https://github.com/YasmeenVH/growspace/blob/master/scripts/GrowSpaceEnv-HierarchyHard-v0-210218-163806.gif)
@@ -101,12 +101,14 @@ Find both plants and grow them towards the target. The objective is to maintain 
 env = gym.make('GrowSpaceEnv-Fairness-v0')
 ```
 #### Multi-objective 
-Under Consruction
-
-
+```python
+env = gym.make('GrowSpaceSpotlight-MnistMix-v0')
+```
 
 ## Training
-Repository for testing PPO baseline is found [here](https://github.com/YasmeenVH/growspaceenv_baselines/tree/master/a2c_ppo_acktr)
+- Repository for testing PPO and A@C baselines is found [here](https://github.com/YasmeenVH/growspaceenv_baselines/tree/master/a2c_ppo_acktr)
+- Repository for testing Rainbow baseline is found [here](https://github.com/manuel-delverme/rainbow_growspace)
+
 ``` python
 # PyTorch
 conda install pytorch torchvision -c soumith
