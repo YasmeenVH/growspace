@@ -348,7 +348,7 @@ class GrowSpaceEnv_Control(gym.Env):
 
 
         self.light_width = LIGHT_WIDTH *self.width# ir(.25*self.width)
-        print(self.light_width)
+        #print(self.light_width)
         if self.level == None:
             start_light = random_start2
             #self.x1_light = random_start - (self.light_width/2)
