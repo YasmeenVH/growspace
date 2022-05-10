@@ -1,0 +1,7 @@
+numba
+gym
+opencv
+tqdm
+torchvision
+scipy
+scikit-learn
