@@ -1,4 +1,28 @@
-# GrowSpace
+Table of Contents
+=================
+
+<!--ts-->
+* [Growspace](#growspace)
+  * [Installation](#installation)
+  * [Plant Branching](#plant-branching)
+    * [Growth Algorithm Pseudocode](#growth-algorithm-pseudocode)
+  * [Environment](#environment)
+    * [Observations &  States](#observations----states)
+    * [Actions](#actions)
+      * [Light Movement](#light-movement)
+      * [Light Focus](#light-focus)
+    * [Rewards](#rewards)
+    * [Challenges](#challenges)
+      * [Control](#control)
+      * [Hierarchical Learning](#hierarchical-learning)
+      * [Fairness](#fairness)
+      * [Multi-objective](#multi-objective)
+  * [Training](#training)
+<!--te-->
+
+Growspace
+============
+
 The goal of this project is to model plant branching with respect to light. The project presents an environment with a light source, a target and a plant growing.The environment allows for the light to move on highest edge of the environment along the x-axis in order to maximize plant growth and guide the plant towards the desired target.
 
 ![alt text](https://github.com/YasmeenVH/growspace/blob/master/scripts/GrowSpaceEnv-HierarchyHard-v0-210218-163806.gif)
@@ -6,15 +30,32 @@ The goal of this project is to model plant branching with respect to light. The 
 
 ## Installation
 ``` python
-# create conda environment with dependencies, file is in ./scripts/conda
-conda env create --name envname --file=growspace.yml
+# create conda environment with dependencies
+conda env create --name envname -f ./scripts/conda/growspace.yml -y
+conda activate conda_growspace
+```
 
+```
+# for using jupyter-lab with conda env
+conda install ipykernel
+ipython kernel install --user --name=conda_growspace
+```
+
+```
 git clone https://github.com/YasmeenVH/growspace
 cd growspace
 pip install -e .
 cd ..
+```
 
 ```
+# if you prefer virtualenv over conda...
+python -m pip install virtualenv
+python -m virtualenv PATH_TO_VENV
+source PATH_TO_VENV/bin/acitvate
+pip install -r requirements.txt
+```
+
 
 ## Plant Branching
 The growth of the plant follows [Space Colonization Algorithm ](http://algorithmicbotany.org/papers/colonization.egwnp2007.large.pdf) which have been used for rending realistic trees in games. This algorithm is based on a cloud of points which have been inspired by the grown of tree in order to provide a certain attraction to the growing branches. 
