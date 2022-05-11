@@ -2,8 +2,7 @@ Growspace
 =================
 
 <!--ts-->
-* [Growspace](#growspace)
-  * [Installation](#installation)
+ * [Installation](#installation)
   * [Plant Branching](#plant-branching)
     * [Growth Algorithm Pseudocode](#growth-algorithm-pseudocode)
   * [Environment](#environment)
@@ -18,6 +17,7 @@ Growspace
       * [Fairness](#fairness)
       * [Multi-objective](#multi-objective)
   * [Training](#training)
+    * [Example of training with stable_baselines3 PPO](#ppo)
 <!--te-->
 
 The goal of this project is to model plant branching with respect to light. The project presents an environment with a light source, a target and a plant growing.The environment allows for the light to move on highest edge of the environment along the x-axis in order to maximize plant growth and guide the plant towards the desired target.
@@ -28,26 +28,26 @@ The goal of this project is to model plant branching with respect to light. The 
 ## Installation
 ``` python
 # create conda environment with dependencies
-conda env create --name envname -f ./scripts/conda/growspace.yml 
+conda env create --name envname -f growspace/environmet.yml 
 conda activate conda_growspace
 ```
 
 ```
-
-```
 # if you prefer virtualenv over conda...
-python -m pip install virtualenv
 python -m virtualenv PATH_TO_VENV
-source PATH_TO_VENV/bin/acitvate
-pip install -r requirements.txt
+source PATH_TO_VENV/bin/activate
+pip install -r growspace/requirements.txt # clone it first to run this git clone https://github.com/YasmeenVH/growspace
 ```
 
 ```
+# install growspace with pip from the repo
 git clone https://github.com/YasmeenVH/growspace
 cd growspace
 pip install -e .
 cd ..
 ```
+
+The demo notebook `demo_growsapce_control.ipynb` shows some features of GrowSpace and how to run it with stable_baselines3 agents.
 
 ## Plant Branching
 The growth of the plant follows [Space Colonization Algorithm ](http://algorithmicbotany.org/papers/colonization.egwnp2007.large.pdf) which have been used for rending realistic trees in games. This algorithm is based on a cloud of points which have been inspired by the grown of tree in order to provide a certain attraction to the growing branches. 
@@ -125,7 +125,7 @@ env = gym.make('GrowSpaceEnv-Control-v0')
 #### Hierarchical Learning 
 Find the plant with the light beam to initiliaze growth and grow the plant to target with the light beam.
 ```python
-env = gym.make('GrowSpaceEnv-Hierarchical-v0')
+env = gym.make('GrowSpaceEnv-Hierarchy-v0')
 ```
 
 #### Fairness
@@ -142,21 +142,25 @@ env = gym.make('GrowSpaceSpotlight-MnistMix-v0')
 - Repository for testing PPO and A@C baselines is found [here](https://github.com/YasmeenVH/growspaceenv_baselines/tree/master/a2c_ppo_acktr)
 - Repository for testing Rainbow baseline is found [here](https://github.com/manuel-delverme/rainbow_growspace)
 
-``` python
-# PyTorch
-conda install pytorch torchvision -c soumith
-
-# Download Baselines
-git clone https://github.com/openai/baselines.git
-cd baselines
-pip install -e .
-
-# Other requirements
-pip install -r requirements.txt
-
-# Run Code
-python main.py --env-name "GrowSpaceEnv-ControlEasy-v0" --custom-gym growspace --algo ppo --use-gae --lr 2.5e-4 --clip-param 0.1 --value-loss-coef 0.5 --num-processes 1 --num-steps 2500 --num-mini-batch 32 --log-interval 1 --use-linear-lr-decay --entropy-coef 0.01 --ppo-epoch 4
+### Example of training with stable_baselines3 PPO
 
 ```
+# example code below
 
+from stable_baselines3 import PPO
 
+env = gym.make('GrowSpaceEnv-Control-v0')
+
+model = PPO("MlpPolicy", env, verbose=1)
+model.learn(total_timesteps=5)
+
+obs = env.reset()
+for i in range(1000):
+    action, _states = model.predict(obs, deterministic=True)
+    obs, reward, done, info = env.step(action)
+    env.render()
+    if done:
+      obs = env.reset()
+
+env.close()
+```
