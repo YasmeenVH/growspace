@@ -1,7 +1,7 @@
 numba
-numpy
+numpy==1.21
 matplotlib
-gym==0.23.1
+gym==0.21
 opencv-python
 tqdm
 torchvision
