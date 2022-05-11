@@ -1,7 +1,10 @@
 numba
-gym
-opencv
+numpy
+matplotlib
+gym==0.23.1
+opencv-python
 tqdm
 torchvision
 scipy
 scikit-learn
+stable_baselines3

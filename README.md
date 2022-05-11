@@ -1,4 +1,4 @@
-Growspace
+GrowSpace
 =================
 
 <!--ts-->
@@ -6,18 +6,11 @@ Growspace
   * [Plant Branching](#plant-branching)
     * [Growth Algorithm Pseudocode](#growth-algorithm-pseudocode)
   * [Environment](#environment)
-    * [Observations &  States](#observations----states)
+    * [Observations & States](#observations----states)
     * [Actions](#actions)
-      * [Light Movement](#light-movement)
-      * [Light Focus](#light-focus)
     * [Rewards](#rewards)
     * [Challenges](#challenges)
-      * [Control](#control)
-      * [Hierarchical Learning](#hierarchical-learning)
-      * [Fairness](#fairness)
-      * [Multi-objective](#multi-objective)
   * [Training](#training)
-    * [Example of training with stable_baselines3 PPO](#ppo)
 <!--te-->
 
 The goal of this project is to model plant branching with respect to light. The project presents an environment with a light source, a target and a plant growing.The environment allows for the light to move on highest edge of the environment along the x-axis in order to maximize plant growth and guide the plant towards the desired target.
@@ -28,23 +21,35 @@ The goal of this project is to model plant branching with respect to light. The 
 ## Installation
 ``` python
 # create conda environment with dependencies
-conda env create --name envname -f growspace/environmet.yml 
+conda env create -f growspace/environment.yml 
 conda activate conda_growspace
 ```
 
-```
+``` python
 # if you prefer virtualenv over conda...
-python -m virtualenv PATH_TO_VENV
-source PATH_TO_VENV/bin/activate
+python -m virtualenv PATH_TO_VIRTUALENV
+source PATH_TO_VIRTUALENV/bin/activate
 pip install -r growspace/requirements.txt # clone it first to run this git clone https://github.com/YasmeenVH/growspace
 ```
 
-```
+Install GrowSpace:
+``` python
 # install growspace with pip from the repo
 git clone https://github.com/YasmeenVH/growspace
 cd growspace
 pip install -e .
 cd ..
+```
+
+How to add conda/virtualenv to Jupyter:
+``` python
+# to add conda env to Jupyter
+conda install ipykernel
+ipython kernel install --name=conda_growspace
+
+# to add python virtualenv to jupyter
+pip install ipykernel
+python -m ipykernel install --name=PATH_TO_VENV
 ```
 
 The demo notebook `demo_growsapce_control.ipynb` shows some features of GrowSpace and how to run it with stable_baselines3 agents.
@@ -88,7 +93,7 @@ def step():
 
 ## Environment
 The environment is a 84x84x3 pixel space where the light makes scattering points available. The target is located in the top third area of the environment and the plant always starts at a random location. The plant will only be attracted to current scattering under the light. The environment was made within the OpenAI Gym Environment framework.
-### Observations &  States
+### Observations & States
 Current position of branches and light position. Two types of observations are available: RGB images or stacked binary matrices representing the growing plant, the light and, the target.
 
 ### Actions
@@ -142,9 +147,9 @@ env = gym.make('GrowSpaceSpotlight-MnistMix-v0')
 - Repository for testing PPO and A@C baselines is found [here](https://github.com/YasmeenVH/growspaceenv_baselines/tree/master/a2c_ppo_acktr)
 - Repository for testing Rainbow baseline is found [here](https://github.com/manuel-delverme/rainbow_growspace)
 
-### Example of training with stable_baselines3 PPO
+#### Example of training with stable_baselines3 PPO
 
-```
+``` python
 # example code below
 
 from stable_baselines3 import PPO
