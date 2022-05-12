@@ -1,0 +1,10 @@
+numba
+numpy==1.21
+matplotlib
+gym==0.21
+opencv-python
+tqdm
+torchvision
+scipy
+scikit-learn
+stable_baselines3

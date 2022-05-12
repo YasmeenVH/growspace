@@ -486,7 +486,7 @@ class GrowSpaceEnv_Control(gym.Env):
 
 
 if __name__ == '__main__':
-    import time
+    print("Watch out for the pop-up window. If you have full screen, exit and check the other screens.")
 
     gse = GrowSpaceEnv_Control()
 
@@ -512,7 +512,7 @@ if __name__ == '__main__':
         cv2.imshow("plant", img)
         rewards = []
         for _ in range(50):
-            action = key2action(cv2.waitKey(-1))
+            action = key2action(cv2.waitKey(-1)) # here the window pops up!
             if action is None:
                 quit()
 
