@@ -1,7 +1,7 @@
 GrowSpace
 =================
 
-The goal of this project is to model plant branching with respect to light. The project presents an environment with a light source, a target and a plant growing.The environment allows for the light to move on highest edge of the environment along the x-axis in order to maximize plant growth and guide the plant towards the desired target.
+The goal of this project is to model plant branching with respect to light. The project presents an environment with a light source, a target and a plant growing. The environment allows for the light to move along the top edge of the environment (along the x-axis) in order to maximize plant growth and guide the plant towards the desired target.
 
 ![alt text](https://github.com/YasmeenVH/growspace/blob/master/scripts/GrowSpaceEnv-HierarchyHard-v0-210218-163806.gif)
 
@@ -58,7 +58,7 @@ python -m ipykernel install --name=PATH_TO_VENV
 The demo notebook `demo_growsapce_control.ipynb` shows some features of GrowSpace and how to run it with stable_baselines3 agents.
 
 ## Plant Branching
-The growth of the plant follows [Space Colonization Algorithm ](http://algorithmicbotany.org/papers/colonization.egwnp2007.large.pdf) which have been used for rending realistic trees in games. This algorithm is based on a cloud of points which have been inspired by the grown of tree in order to provide a certain attraction to the growing branches. 
+The algorithm used was the [Space Colonization Algorithm ](http://algorithmicbotany.org/papers/colonization.egwnp2007.large.pdf) which is based on leaf venation and has been used for rending realistic trees in games. 
 
 ![alt text](https://github.com/YasmeenVH/growspace/blob/master/scripts/beam.png)
 
@@ -95,9 +95,10 @@ def step():
 ```
 
 ## Environment
-The environment is a 84x84x3 pixel space where the light makes scattering points available. The target is located in the top third area of the environment and the plant always starts at a random location. The plant will only be attracted to current scattering under the light. The environment was made within the OpenAI Gym Environment framework.
+The environment is a 84x84x3 pixel space where the light makes scattering points available for branching. The target is located in the top third area of the environment and the plant always starts at a random location. The plant will only be attracted to scattering points under the light. The environment was built following the OpenAI Gym Environment framework.
+
 ### Observations & States
-Current position of branches and light position. Two types of observations are available: RGB images or stacked binary matrices representing the growing plant, the light and, the target.
+The agent has access to two types of observations; stacked binary matrices or RGB pictures. are in picture format. All resulsts with stable baselines has been done with RGB observations. The stacked binary matrices represent the light position, the plant position and the target position. 
 
 ### Actions
 #### Light Movement
