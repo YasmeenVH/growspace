@@ -1,5 +1,5 @@
 numba
-numpy==1.21
+numpy==1.22.0
 matplotlib
 gym==0.21
 opencv-python
